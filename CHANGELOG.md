@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.0](https://github.com/xy36/topflop/compare/v0.1.0...v0.2.0) (2026-04-04)
+
+
+### Features
+
+* add adaptive launcher icons and background color ([d164f39](https://github.com/xy36/topflop/commit/d164f398851df5c40b5733c25160c321f5413baa))
+* update theming and improve Snackbar styling in HomeScreen ([839b64d](https://github.com/xy36/topflop/commit/839b64d963437fa9d73ed291c765b654ae9f4508))
+* update theming and improve Snackbar styling in HomeScreen ([eaddfd2](https://github.com/xy36/topflop/commit/eaddfd23a7567451d14a21baba76735242d0332c))
+
 ## 1.0.0 (2026-04-04)
 
 
