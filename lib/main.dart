@@ -16,7 +16,7 @@ void main() async {
 
 ThemeData _buildTheme(Brightness brightness) {
   final colorScheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFFFF6D00),
+    seedColor: Colors.amber,
     brightness: brightness,
   );
   return ThemeData(
@@ -35,6 +35,7 @@ ThemeData _buildTheme(Brightness brightness) {
         letterSpacing: -0.3,
       ),
     ),
+
     // cardTheme: CardTheme(
     //   elevation: 0,
     //   color: colorScheme.surfaceContainerLow,
