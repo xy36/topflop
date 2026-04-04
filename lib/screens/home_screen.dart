@@ -72,15 +72,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: const Text('Backup exportieren'),
                   subtitle: const Text('ZIP-Datei speichern oder teilen'),
                   onTap: () async {
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                    final colorScheme = Theme.of(context).colorScheme;
                     Navigator.pop(context);
                     try {
                       await BackupService().exportBackup();
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        scaffoldMessenger.showSnackBar(
                           SnackBar(
-                            content: Text('Fehler: $e'),
-                            backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                            content: Text(
+                              'Fehler: $e',
+                              style: TextStyle(
+                                color: colorScheme.onErrorContainer,
+                              ),
+                            ),
+                            backgroundColor: colorScheme.errorContainer,
                           ),
                         );
                       }
@@ -102,23 +109,36 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: const Text('Backup importieren'),
                   subtitle: const Text('ZIP-Datei wiederherstellen'),
                   onTap: () async {
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                    final colorScheme = Theme.of(context).colorScheme;
+                    final foodProvider = context.read<FoodProvider>();
                     Navigator.pop(context);
                     try {
                       final count = await BackupService().importBackup();
                       if (count == null || !mounted) return;
-                      context.read<FoodProvider>().loadFoodItems();
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      foodProvider.loadFoodItems();
+                      scaffoldMessenger.showSnackBar(
                         SnackBar(
-                          content: Text('$count Produkte wiederhergestellt'),
-                          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                          content: Text(
+                            '$count Produkte wiederhergestellt',
+                            style: TextStyle(
+                              color: colorScheme.onSecondaryContainer,
+                            ),
+                          ),
+                          backgroundColor: colorScheme.secondaryContainer,
                         ),
                       );
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                        scaffoldMessenger.showSnackBar(
                           SnackBar(
-                            content: Text('Fehler: $e'),
-                            backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                            content: Text(
+                              'Fehler: $e',
+                              style: TextStyle(
+                                color: colorScheme.onErrorContainer,
+                              ),
+                            ),
+                            backgroundColor: colorScheme.errorContainer,
                           ),
                         );
                       }
@@ -557,30 +577,33 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Suchen...',
-                  border: InputBorder.none,
-                  filled: false,
-                ),
-                style: Theme.of(context).textTheme.titleMedium,
-                onChanged: (value) =>
-                    context.read<FoodProvider>().setSearchQuery(value),
-              )
-            : const Text('Meine Produkte'),
-        leading: _isSearching
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  _searchController.clear();
-                  context.read<FoodProvider>().setSearchQuery('');
-                  setState(() => _isSearching = false);
-                },
-              )
-            : null,
+        title:
+            _isSearching
+                ? TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Suchen...',
+                    border: InputBorder.none,
+                    filled: false,
+                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
+                  onChanged:
+                      (value) =>
+                          context.read<FoodProvider>().setSearchQuery(value),
+                )
+                : const Text('Meine Produkte'),
+        leading:
+            _isSearching
+                ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    _searchController.clear();
+                    context.read<FoodProvider>().setSearchQuery('');
+                    setState(() => _isSearching = false);
+                  },
+                )
+                : null,
         actions: [
           if (!_isSearching)
             IconButton(
@@ -617,7 +640,9 @@ class _HomeScreenState extends State<HomeScreen> {
           return Column(
             children: [
               // Statistik-Row
-              if (!_isSearching && !_showFilters && foodProvider.allItems.isNotEmpty)
+              if (!_isSearching &&
+                  !_showFilters &&
+                  foodProvider.allItems.isNotEmpty)
                 _buildStatsRow(foodProvider),
 
               // Filter Chips
@@ -662,19 +687,30 @@ class _HomeScreenState extends State<HomeScreen> {
                               dismissThresholds: const {
                                 DismissDirection.endToStart: 0.5,
                               },
-                              movementDuration: const Duration(milliseconds: 300),
+                              movementDuration: const Duration(
+                                milliseconds: 300,
+                              ),
                               background: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 5,
+                                ),
                                 child: Container(
                                   alignment: Alignment.centerRight,
                                   padding: const EdgeInsets.only(right: 24),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.errorContainer,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.errorContainer,
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Icon(
                                     Icons.delete_outline,
-                                    color: Theme.of(context).colorScheme.onErrorContainer,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.onErrorContainer,
                                   ),
                                 ),
                               ),
@@ -719,9 +755,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildStatsRow(FoodProvider foodProvider) {
     final items = foodProvider.allItems;
-    final avgRating = items.isEmpty
-        ? 0.0
-        : items.map((i) => i.rating).reduce((a, b) => a + b) / items.length;
+    final avgRating =
+        items.isEmpty
+            ? 0.0
+            : items.map((i) => i.rating).reduce((a, b) => a + b) / items.length;
 
     // Häufigster Store
     final storeCounts = <String, int>{};
@@ -730,17 +767,21 @@ class _HomeScreenState extends State<HomeScreen> {
         storeCounts[item.store!] = (storeCounts[item.store!] ?? 0) + 1;
       }
     }
-    final topStore = storeCounts.isNotEmpty
-        ? (storeCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value))).first.key
-        : null;
+    final topStore =
+        storeCounts.isNotEmpty
+            ? (storeCounts.entries.toList()
+                  ..sort((a, b) => b.value.compareTo(a.value)))
+                .first
+                .key
+            : null;
 
     final scheme = Theme.of(context).colorScheme;
     final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: scheme.onSurface.withValues(alpha: 0.5),
-        );
-    final valueStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-        );
+      color: scheme.onSurface.withValues(alpha: 0.5),
+    );
+    final valueStyle = Theme.of(
+      context,
+    ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -748,17 +789,29 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           _statItem('Produkte', '${items.length}', labelStyle!, valueStyle!),
           _statDivider(scheme),
-          _statItem('Ø Bewertung', avgRating.toStringAsFixed(1), labelStyle, valueStyle),
+          _statItem(
+            'Ø Bewertung',
+            avgRating.toStringAsFixed(1),
+            labelStyle,
+            valueStyle,
+          ),
           if (topStore != null) ...[
             _statDivider(scheme),
-            Expanded(child: _statItem('Top Store', topStore, labelStyle, valueStyle)),
+            Expanded(
+              child: _statItem('Top Store', topStore, labelStyle, valueStyle),
+            ),
           ],
         ],
       ),
     );
   }
 
-  Widget _statItem(String label, String value, TextStyle labelStyle, TextStyle valueStyle) {
+  Widget _statItem(
+    String label,
+    String value,
+    TextStyle labelStyle,
+    TextStyle valueStyle,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -772,11 +825,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _statDivider(ColorScheme scheme) {
-    return Container(
-      height: 24,
-      width: 1,
-      color: scheme.outlineVariant,
-    );
+    return Container(height: 24, width: 1, color: scheme.outlineVariant);
   }
 
   Widget _buildEmptyState() {
@@ -800,9 +849,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              hasFilters
-                  ? 'Keine Ergebnisse gefunden'
-                  : 'Noch keine Produkte',
+              hasFilters ? 'Keine Ergebnisse gefunden' : 'Noch keine Produkte',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
