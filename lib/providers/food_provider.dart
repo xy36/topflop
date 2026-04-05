@@ -34,6 +34,14 @@ class FoodProvider extends ChangeNotifier {
   ProductType? get filterProductType => _filterProductType;
   SortOption get sortOption => _sortOption;
   bool get isLoading => _isLoading;
+  bool get hasFilters {
+    return _searchQuery.isNotEmpty ||
+        _filterMinRating != null ||
+        _filterMaxRating != null ||
+        _filterStore != null ||
+        _filterBrand != null ||
+        _filterProductType != null;
+  }
 
   List<String> get uniqueStores => _db.getUniqueStores();
   List<String> get uniqueBrands => _db.getUniqueBrands();
@@ -124,13 +132,14 @@ class FoodProvider extends ChangeNotifier {
 
     if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
-      result = result.where((item) {
-        return item.name.toLowerCase().contains(q) ||
-            (item.brand?.toLowerCase().contains(q) ?? false) ||
-            (item.store?.toLowerCase().contains(q) ?? false) ||
-            (item.category?.toLowerCase().contains(q) ?? false) ||
-            item.barcode.contains(q);
-      }).toList();
+      result =
+          result.where((item) {
+            return item.name.toLowerCase().contains(q) ||
+                (item.brand?.toLowerCase().contains(q) ?? false) ||
+                (item.store?.toLowerCase().contains(q) ?? false) ||
+                (item.category?.toLowerCase().contains(q) ?? false) ||
+                item.barcode.contains(q);
+          }).toList();
     }
 
     if (_filterMinRating != null || _filterMaxRating != null) {
@@ -140,17 +149,21 @@ class FoodProvider extends ChangeNotifier {
     }
 
     if (_filterStore != null) {
-      result = result
-          .where((i) =>
-              i.store?.toLowerCase() == _filterStore!.toLowerCase())
-          .toList();
+      result =
+          result
+              .where(
+                (i) => i.store?.toLowerCase() == _filterStore!.toLowerCase(),
+              )
+              .toList();
     }
 
     if (_filterBrand != null) {
-      result = result
-          .where((i) =>
-              i.brand?.toLowerCase() == _filterBrand!.toLowerCase())
-          .toList();
+      result =
+          result
+              .where(
+                (i) => i.brand?.toLowerCase() == _filterBrand!.toLowerCase(),
+              )
+              .toList();
     }
 
     if (_filterProductType != null) {
@@ -160,9 +173,13 @@ class FoodProvider extends ChangeNotifier {
 
     switch (_sortOption) {
       case SortOption.nameAsc:
-        result.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        result.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
       case SortOption.nameDesc:
-        result.sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+        result.sort(
+          (a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()),
+        );
       case SortOption.ratingAsc:
         result.sort((a, b) => a.rating.compareTo(b.rating));
       case SortOption.ratingDesc:
