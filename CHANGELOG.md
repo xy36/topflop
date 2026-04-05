@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/xy36/topflop/compare/v0.2.0...v0.3.0) (2026-04-05)
+
+
+### Features
+
+* add ios platform and rename bundle to com.xy36.topflop ([ebb5fd9](https://github.com/xy36/topflop/commit/ebb5fd9482e3083c3baa965f76ae3cc58a20b44b))
+* add ios platform and rename bundle to com.xy36.topflop ([e4fcbec](https://github.com/xy36/topflop/commit/e4fcbec7fff387171660a5aeafe4619305eee665))
+* enhance filtering options and improve UI for product type selec… ([693dea4](https://github.com/xy36/topflop/commit/693dea4ccd59e6271d83239e78ad449a6e4f8f0a))
+* enhance filtering options and improve UI for product type selection ([1d16e4b](https://github.com/xy36/topflop/commit/1d16e4bfd1b0feb2706dfa8f40ae6e88f88ccfb9))
+
 ## [0.2.0](https://github.com/xy36/topflop/compare/v0.1.0...v0.2.0) (2026-04-04)
 
 
