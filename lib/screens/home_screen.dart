@@ -388,29 +388,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           const SizedBox(width: 8),
           // Produkttyp Filter
-          ...ProductType.values.map(
-            (type) => Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: FilterChip(
-                label: Text('${type.icon} ${type.label}'),
-                selected: foodProvider.filterProductType == type,
-                onSelected:
-                    (_) => foodProvider.setProductTypeFilter(
-                      foodProvider.filterProductType == type ? null : type,
-                    ),
-              ),
+          FilterChip(
+            label: Text(
+              foodProvider.filterProductType != null
+                  ? '${foodProvider.filterProductType!.icon} ${foodProvider.filterProductType!.label}'
+                  : 'Kategorie',
             ),
+            selected: foodProvider.filterProductType != null,
+            onSelected: (_) => _showProductTypeFilterDialog(),
           ),
-          // Clear Filters
-          if (foodProvider.filterMinRating != null ||
-              foodProvider.filterStore != null ||
-              foodProvider.filterBrand != null ||
-              foodProvider.filterProductType != null)
-            ActionChip(
-              avatar: const Icon(Icons.clear, size: 18),
-              label: const Text('Filter löschen'),
-              onPressed: () => foodProvider.clearFilters(),
-            ),
         ],
       ),
     );
@@ -573,260 +559,238 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title:
-            _isSearching
-                ? TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Suchen...',
-                    border: InputBorder.none,
-                    filled: false,
-                  ),
-                  style: Theme.of(context).textTheme.titleMedium,
-                  onChanged:
-                      (value) =>
-                          context.read<FoodProvider>().setSearchQuery(value),
-                )
-                : const Text('Meine Produkte'),
-        leading:
-            _isSearching
-                ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    _searchController.clear();
-                    context.read<FoodProvider>().setSearchQuery('');
-                    setState(() => _isSearching = false);
-                  },
-                )
-                : null,
-        actions: [
-          if (!_isSearching)
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () => setState(() => _isSearching = true),
-              tooltip: 'Suchen',
-            ),
-          IconButton(
-            icon: Icon(
-              _showFilters ? Icons.filter_list_off : Icons.filter_list,
-            ),
-            onPressed: () {
-              if (_showFilters) {
-                context.read<FoodProvider>().clearFilters();
-              }
-              setState(() => _showFilters = !_showFilters);
-            },
-            tooltip: 'Filter anzeigen',
-          ),
-          IconButton(
-            icon: const Icon(Icons.sort),
-            onPressed: _showSortDialog,
-            tooltip: 'Sortieren',
-          ),
-          IconButton(
-            icon: const Icon(Icons.backup_outlined),
-            onPressed: _showBackupDialog,
-            tooltip: 'Backup',
-          ),
-        ],
-      ),
-      body: Consumer<FoodProvider>(
-        builder: (context, foodProvider, child) {
-          return Column(
-            children: [
-              // Statistik-Row
-              if (!_isSearching &&
-                  !_showFilters &&
-                  foodProvider.allItems.isNotEmpty)
-                _buildStatsRow(foodProvider),
+  void _showProductTypeFilterDialog() {
+    final foodProvider = context.read<FoodProvider>();
 
-              // Filter Chips
-              if (_showFilters) ...[
-                _buildFilterChips(foodProvider),
-                const SizedBox(height: 8),
-              ],
-
-              // Ergebnis-Info
-              if (foodProvider.searchQuery.isNotEmpty ||
-                  foodProvider.filterMinRating != null ||
-                  foodProvider.filterStore != null ||
-                  foodProvider.filterBrand != null)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Text(
-                        '${foodProvider.foodItems.length} Ergebnis${foodProvider.foodItems.length != 1 ? 'se' : ''}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'Kategorie auswählen',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
+                if (foodProvider.filterProductType != null)
+                  ListTile(
+                    leading: const Icon(Icons.clear),
+                    title: const Text('Filter entfernen'),
+                    onTap: () {
+                      foodProvider.setProductTypeFilter(null);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ...ProductType.values.map(
+                  (type) => ListTile(
+                    leading: Text(
+                      type.icon,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                    title: Text(type.label),
+                    trailing:
+                        foodProvider.filterProductType == type
+                            ? const Icon(Icons.check, color: Colors.green)
+                            : null,
+                    onTap: () {
+                      foodProvider.setProductTypeFilter(type);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+    );
+  }
 
-              // Liste
-              Expanded(
-                child:
-                    foodProvider.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : foodProvider.foodItems.isEmpty
-                        ? _buildEmptyState()
-                        : ListView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.only(bottom: 80),
-                          itemCount: foodProvider.foodItems.length,
-                          itemBuilder: (context, index) {
-                            final item = foodProvider.foodItems[index];
-                            return Dismissible(
-                              key: ValueKey(item.id),
-                              direction: DismissDirection.endToStart,
-                              dismissThresholds: const {
-                                DismissDirection.endToStart: 0.5,
-                              },
-                              movementDuration: const Duration(
-                                milliseconds: 300,
-                              ),
-                              background: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 5,
-                                ),
-                                child: Container(
-                                  alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.only(right: 24),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.errorContainer,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Icon(
-                                    Icons.delete_outline,
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onErrorContainer,
-                                  ),
-                                ),
-                              ),
-                              confirmDismiss: (_) async {
-                                HapticFeedback.mediumImpact();
-                                await foodProvider.deleteFoodItem(item.id);
-                                if (!context.mounted) return false;
-                                ScaffoldMessenger.of(context).clearSnackBars();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('„${item.name}" gelöscht'),
-                                    action: SnackBarAction(
-                                      label: 'Rückgängig',
-                                      onPressed: () async {
-                                        await foodProvider.addFoodItem(item);
-                                      },
-                                    ),
-                                  ),
-                                );
-                                return false; // Liste wird durch Provider-Update aktualisiert
-                              },
-                              child: _FoodItemCard(
-                                item: item,
-                                onTap: () => _openFoodDetail(item),
-                              ),
-                            );
-                          },
-                        ),
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<FoodProvider>(
+      builder: (context, foodProvider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Meine Produkte'),
+
+            actions: [
+              if (foodProvider.hasFilters)
+                IconButton(
+                  icon: Icon(Icons.filter_list_off),
+                  onPressed: () {
+                    foodProvider.clearFilters();
+                  },
+                  tooltip: 'Filter anzeigen',
+                ),
+              IconButton(
+                icon: const Icon(Icons.sort),
+                onPressed: _showSortDialog,
+                tooltip: 'Sortieren',
+              ),
+              IconButton(
+                icon: const Icon(Icons.backup_outlined),
+                onPressed: _showBackupDialog,
+                tooltip: 'Backup',
               ),
             ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'add',
-        onPressed: _showAddOptions,
-        tooltip: 'Produkt hinzufügen',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  Widget _buildStatsRow(FoodProvider foodProvider) {
-    final items = foodProvider.allItems;
-    final avgRating =
-        items.isEmpty
-            ? 0.0
-            : items.map((i) => i.rating).reduce((a, b) => a + b) / items.length;
-
-    // Häufigster Store
-    final storeCounts = <String, int>{};
-    for (final item in items) {
-      if (item.store != null) {
-        storeCounts[item.store!] = (storeCounts[item.store!] ?? 0) + 1;
-      }
-    }
-    final topStore =
-        storeCounts.isNotEmpty
-            ? (storeCounts.entries.toList()
-                  ..sort((a, b) => b.value.compareTo(a.value)))
-                .first
-                .key
-            : null;
-
-    final scheme = Theme.of(context).colorScheme;
-    final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-      color: scheme.onSurface.withValues(alpha: 0.5),
-    );
-    final valueStyle = Theme.of(
-      context,
-    ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Row(
-        children: [
-          _statItem('Produkte', '${items.length}', labelStyle!, valueStyle!),
-          _statDivider(scheme),
-          _statItem(
-            'Ø Bewertung',
-            avgRating.toStringAsFixed(1),
-            labelStyle,
-            valueStyle,
           ),
-          if (topStore != null) ...[
-            _statDivider(scheme),
-            Expanded(
-              child: _statItem('Top Store', topStore, labelStyle, valueStyle),
-            ),
-          ],
-        ],
-      ),
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  // Filter Chips
+                  _buildFilterChips(foodProvider),
+                  const SizedBox(height: 8),
+
+                  // Ergebnis-Info
+                  if (foodProvider.searchQuery.isNotEmpty ||
+                      foodProvider.filterMinRating != null ||
+                      foodProvider.filterStore != null ||
+                      foodProvider.filterBrand != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Text(
+                            '${foodProvider.foodItems.length} Ergebnis${foodProvider.foodItems.length != 1 ? 'se' : ''}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Liste
+                  Expanded(
+                    child:
+                        foodProvider.isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : foodProvider.foodItems.isEmpty
+                            ? _buildEmptyState()
+                            : ListView.builder(
+                              physics: const BouncingScrollPhysics(),
+                              padding: const EdgeInsets.only(bottom: 80),
+                              itemCount: foodProvider.foodItems.length,
+                              itemBuilder: (context, index) {
+                                final item = foodProvider.foodItems[index];
+                                return Dismissible(
+                                  key: ValueKey(item.id),
+                                  direction: DismissDirection.endToStart,
+                                  dismissThresholds: const {
+                                    DismissDirection.endToStart: 0.5,
+                                  },
+                                  movementDuration: const Duration(
+                                    milliseconds: 300,
+                                  ),
+                                  background: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 5,
+                                    ),
+                                    child: Container(
+                                      alignment: Alignment.centerRight,
+                                      padding: const EdgeInsets.only(right: 24),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.errorContainer,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Icon(
+                                        Icons.delete_outline,
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onErrorContainer,
+                                      ),
+                                    ),
+                                  ),
+                                  confirmDismiss: (_) async {
+                                    HapticFeedback.mediumImpact();
+                                    await foodProvider.deleteFoodItem(item.id);
+                                    if (!context.mounted) return false;
+                                    ScaffoldMessenger.of(
+                                      context,
+                                    ).clearSnackBars();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '„${item.name}" gelöscht',
+                                        ),
+                                        action: SnackBarAction(
+                                          label: 'Rückgängig',
+                                          onPressed: () async {
+                                            await foodProvider.addFoodItem(
+                                              item,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                    return false; // Liste wird durch Provider-Update aktualisiert
+                                  },
+                                  child: _FoodItemCard(
+                                    item: item,
+                                    onTap: () => _openFoodDetail(item),
+                                  ),
+                                );
+                              },
+                            ),
+                  ),
+                ],
+              ),
+              Positioned(
+                bottom: 10,
+                left: 16,
+                right: 16,
+                child: Row(
+                  spacing: 12,
+                  children: [
+                    Expanded(
+                      child: SearchAnchor(
+                        builder:
+                            (context, controller) => SearchBar(
+                              controller: controller,
+                              hintText: 'Suchen...',
+                              onTapOutside:
+                                  (_) => FocusScope.of(context).unfocus(),
+                            ),
+                        suggestionsBuilder: (context, controller) => [],
+                      ),
+                      // child: TextField(
+                      //   controller: _searchController,
+                      //   autofocus: true,
+                      //   decoration: const InputDecoration(
+                      //     hintText: 'Suchen...',
+                      //     border: InputBorder.none,
+                      //     filled: false,
+                      //   ),
+                      //   style: Theme.of(context).textTheme.titleMedium,
+                      //   onChanged:
+                      //       (value) =>
+                      //           context.read<FoodProvider>().setSearchQuery(value),
+                      // ),
+                    ),
+                    FloatingActionButton(
+                      heroTag: 'add',
+                      onPressed: _showAddOptions,
+                      tooltip: 'Produkt hinzufügen',
+                      child: const Icon(Icons.add),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _statItem(
-    String label,
-    String value,
-    TextStyle labelStyle,
-    TextStyle valueStyle,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Column(
-        children: [
-          Text(value, style: valueStyle),
-          const SizedBox(height: 2),
-          Text(label, style: labelStyle),
-        ],
-      ),
-    );
-  }
-
-  Widget _statDivider(ColorScheme scheme) {
-    return Container(height: 24, width: 1, color: scheme.outlineVariant);
-  }
 
   Widget _buildEmptyState() {
     final foodProvider = context.read<FoodProvider>();
