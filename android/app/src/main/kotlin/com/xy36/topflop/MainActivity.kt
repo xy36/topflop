@@ -1,4 +1,4 @@
-package com.example.topflop
+package com.xy36.topflop
 
 import io.flutter.embedding.android.FlutterActivity
 
