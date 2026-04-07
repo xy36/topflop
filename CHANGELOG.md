@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/xy36/topflop/compare/v0.3.0...v0.4.0) (2026-04-07)
+
+
+### Features
+
+* add release signing configuration and update SDK versions ([9006e45](https://github.com/xy36/topflop/commit/9006e4520f309b3844ae2448f559565ce05bcd21))
+* add release signing configuration and update SDK versions ([2edc226](https://github.com/xy36/topflop/commit/2edc226f048900b42312bec88f53b07881037ad7))
+
 ## [0.3.0](https://github.com/xy36/topflop/compare/v0.2.0...v0.3.0) (2026-04-05)
 
 
