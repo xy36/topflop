@@ -18,40 +18,65 @@ class AppShell extends StatelessWidget {
 
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.borderSoft)),
-        ),
-        padding: EdgeInsets.fromLTRB(28, 0, 28, bottomInset + 10),
-        child: SizedBox(
-          height: 74,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.format_list_bulleted_rounded,
-                  label: l10n.navOverview,
-                  selected: navigationShell.currentIndex == 0,
-                  onTap: () => navigationShell.goBranch(0, initialLocation: navigationShell.currentIndex == 0),
+      // Der Scan-Knopf ragt über die Leiste hinaus. Damit er vollständig
+      // antippbar bleibt, liegt er innerhalb der (höheren) Navigationsfläche
+      // und nur die weiße Leiste darunter ist niedriger.
+      bottomNavigationBar: SizedBox(
+        height: _barHeight + _scanRaise + bottomInset,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: _barHeight + bottomInset,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border(top: BorderSide(color: AppColors.borderSoft)),
                 ),
               ),
-              Expanded(child: _ScanButton(label: l10n.navScan, onTap: () => context.push('/scan'))),
-              Expanded(
-                child: _NavItem(
-                  icon: Icons.storefront_outlined,
-                  label: l10n.navStores,
-                  selected: navigationShell.currentIndex == 1,
-                  onTap: () => navigationShell.goBranch(1, initialLocation: navigationShell.currentIndex == 1),
+            ),
+            Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(28, 0, 28, bottomInset + 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.format_list_bulleted_rounded,
+                        label: l10n.navOverview,
+                        selected: navigationShell.currentIndex == 0,
+                        onTap: () => navigationShell.goBranch(0, initialLocation: navigationShell.currentIndex == 0),
+                      ),
+                    ),
+                    Expanded(
+                      child: _ScanButton(label: l10n.navScan, onTap: () => context.push('/scan')),
+                    ),
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.storefront_outlined,
+                        label: l10n.navStores,
+                        selected: navigationShell.currentIndex == 1,
+                        onTap: () => navigationShell.goBranch(1, initialLocation: navigationShell.currentIndex == 1),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  /// Höhe der weißen Leiste (ohne System-Inset).
+  static const _barHeight = 84.0;
+
+  /// So weit ragt der Bereich für den Scan-Knopf über die Leiste.
+  static const _scanRaise = 22.0;
 }
 
 class _NavItem extends StatelessWidget {
@@ -78,7 +103,10 @@ class _NavItem extends StatelessWidget {
             children: [
               Icon(icon, color: color, size: 24),
               const SizedBox(height: 4),
-              Text(label, style: AppText.body(12, weight: selected ? FontWeight.w700 : FontWeight.w600, color: color)),
+              Text(
+                label,
+                style: AppText.body(12, weight: selected ? FontWeight.w700 : FontWeight.w600, color: color),
+              ),
             ],
           ),
         ),
@@ -101,12 +129,14 @@ class _ScanButton extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Transform.translate(
-              offset: const Offset(0, -6),
-              child: Container(
+        // Schrumpft bei sehr großer Systemschrift, statt überzulaufen.
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.bottomCenter,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
@@ -114,15 +144,20 @@ class _ScanButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(color: AppColors.background, width: 5, strokeAlign: BorderSide.strokeAlignOutside),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withValues(alpha: 0.32), blurRadius: 20, offset: const Offset(0, 8)),
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.32),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
                   ],
                 ),
                 child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 30),
               ),
-            ),
-            Text(label, style: AppText.body(12, weight: FontWeight.w600)),
-            const SizedBox(height: 6),
-          ],
+              const SizedBox(height: 6),
+              Text(label, style: AppText.body(12, weight: FontWeight.w600)),
+              const SizedBox(height: 4),
+            ],
+          ),
         ),
       ),
     );
