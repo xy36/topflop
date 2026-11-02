@@ -8,6 +8,7 @@ import '../../core/domain/score.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/common.dart';
+import '../../core/widgets/tab_header.dart';
 import '../../data/location/location_service.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/models.dart';
@@ -39,33 +40,18 @@ class StoresScreen extends ConsumerWidget {
           await ref.read(nearbySuggestionsProvider.future);
         },
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.appName.toUpperCase(),
-                        style: AppText.overline().copyWith(fontSize: 12, letterSpacing: 1.4),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(l10n.storesTitle, style: AppText.display(32)),
-                    ],
-                  ),
-                ),
-                SquareIconButton(
-                  icon: Icons.add_rounded,
-                  tooltip: l10n.storesAdd,
-                  background: AppColors.ink,
-                  foreground: AppColors.lime,
-                  bordered: false,
-                  onPressed: () => showStoreForm(context, latitude: position?.latitude, longitude: position?.longitude),
-                ),
-              ],
+            TabHeader(
+              title: l10n.storesTitle,
+              action: SquareIconButton(
+                icon: Icons.add_rounded,
+                tooltip: l10n.storesAdd,
+                background: AppColors.ink,
+                foreground: AppColors.lime,
+                bordered: false,
+                onPressed: () => showStoreForm(context, latitude: position?.latitude, longitude: position?.longitude),
+              ),
             ),
             const SizedBox(height: 16),
             _StoreMap(

@@ -6,6 +6,7 @@ import '../../core/domain/score.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/common.dart';
+import '../../core/widgets/tab_header.dart';
 import '../../core/widgets/product_card.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/models.dart';
@@ -66,31 +67,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.appName.toUpperCase(),
-                            style: AppText.overline().copyWith(fontSize: 12, letterSpacing: 1.4),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(l10n.homeTitle, style: AppText.display(32)),
-                        ],
-                      ),
-                    ),
-                    _FilterButton(
-                      activeCount: filter.activeCount,
-                      tooltip: l10n.filterTitle,
-                      onPressed: () => showFilterSheet(context),
-                    ),
-                  ],
+                TabHeader(
+                  title: l10n.homeTitle,
+                  action: _FilterButton(
+                    activeCount: filter.activeCount,
+                    tooltip: l10n.filterTitle,
+                    onPressed: () => showFilterSheet(context),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 _SearchField(

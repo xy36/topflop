@@ -459,9 +459,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupShareText => 'TopFlop backup';
 
   @override
-  String get navSettings => 'Settings';
-
-  @override
   String get homeAllProducts => 'All products';
 
   @override

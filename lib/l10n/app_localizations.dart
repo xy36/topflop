@@ -920,12 +920,6 @@ abstract class AppLocalizations {
   /// **'TopFlop-Datensicherung'**
   String get backupShareText;
 
-  /// No description provided for @navSettings.
-  ///
-  /// In de, this message translates to:
-  /// **'Einstellungen'**
-  String get navSettings;
-
   /// No description provided for @homeAllProducts.
   ///
   /// In de, this message translates to:

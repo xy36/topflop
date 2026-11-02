@@ -86,64 +86,79 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final lastExport = info?.$1;
     final size = info?.$2 ?? 0;
 
-    return SafeArea(
-      bottom: false,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        children: [
-          Text(l10n.appName.toUpperCase(), style: AppText.overline().copyWith(fontSize: 12, letterSpacing: 1.4)),
-          const SizedBox(height: 4),
-          Text(l10n.settings, style: AppText.display(32)),
-          const SizedBox(height: 24),
-          SectionHeader(l10n.settingsBackup),
-          const SizedBox(height: 10),
-          AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          children: [
+            Row(
               children: [
-                Text(l10n.settingsBackupInfo, style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45)),
-                const SizedBox(height: 14),
-                Text(
-                  lastExport == null
-                      ? l10n.settingsNeverExported
-                      : l10n.settingsLastExport(DateFormat.yMMMMd(locale).format(lastExport)),
-                  style: AppText.body(13, weight: FontWeight.w600, color: AppColors.muted),
-                ),
-                const SizedBox(height: 2),
-                Text(l10n.settingsDbSize(_formatBytes(size, locale)), style: AppText.body(13, color: AppColors.muted)),
-                if (size >= BackupService.sizeWarningBytes) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: AppColors.scoreLow, borderRadius: BorderRadius.circular(14)),
-                    child: Text(l10n.settingsSizeWarning, style: AppText.body(13, weight: FontWeight.w600)),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: _busy ? null : _export,
-                  icon: const Icon(Icons.ios_share_rounded),
-                  label: Text(l10n.settingsExport),
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  onPressed: _busy ? null : _import,
-                  icon: const Icon(Icons.download_rounded),
-                  label: Text(l10n.settingsImport),
+                SquareIconButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  tooltip: l10n.back,
+                  onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 24),
-          SectionHeader(l10n.settingsAbout),
-          const SizedBox(height: 10),
-          AppCard(
-            child: Text(
-              l10n.settingsAboutBody,
-              style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45),
+            const SizedBox(height: 20),
+            Text(l10n.settings, style: AppText.display(32)),
+            const SizedBox(height: 24),
+            SectionHeader(l10n.settingsBackup),
+            const SizedBox(height: 10),
+            AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.settingsBackupInfo,
+                    style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    lastExport == null
+                        ? l10n.settingsNeverExported
+                        : l10n.settingsLastExport(DateFormat.yMMMMd(locale).format(lastExport)),
+                    style: AppText.body(13, weight: FontWeight.w600, color: AppColors.muted),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.settingsDbSize(_formatBytes(size, locale)),
+                    style: AppText.body(13, color: AppColors.muted),
+                  ),
+                  if (size >= BackupService.sizeWarningBytes) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: AppColors.scoreLow, borderRadius: BorderRadius.circular(14)),
+                      child: Text(l10n.settingsSizeWarning, style: AppText.body(13, weight: FontWeight.w600)),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _busy ? null : _export,
+                    icon: const Icon(Icons.ios_share_rounded),
+                    label: Text(l10n.settingsExport),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: _busy ? null : _import,
+                    icon: const Icon(Icons.download_rounded),
+                    label: Text(l10n.settingsImport),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            SectionHeader(l10n.settingsAbout),
+            const SizedBox(height: 10),
+            AppCard(
+              child: Text(
+                l10n.settingsAboutBody,
+                style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

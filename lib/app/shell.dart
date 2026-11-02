@@ -5,7 +5,8 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 
-/// Grundgerüst mit unterer Navigation: Übersicht · Läden · Scannen · Einstellungen.
+/// Grundgerüst mit unterer Navigation: Übersicht · Scannen · Läden.
+/// Die Einstellungen erreicht man über das Zahnrad in der Kopfzeile ([TabHeader]).
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
 
@@ -40,25 +41,14 @@ class AppShell extends StatelessWidget {
             Positioned.fill(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(28, 0, 28, bottomInset + 10),
-                // Links zwei Tabs, rechts einer: beide Hälften sind gleich breit,
-                // damit der Scan-Knopf genau in der Mitte bleibt.
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    Expanded(child: _tab(0, Icons.format_list_bulleted_rounded, l10n.navOverview)),
                     Expanded(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(child: _tab(0, Icons.format_list_bulleted_rounded, l10n.navOverview)),
-                          Expanded(child: _tab(1, Icons.storefront_outlined, l10n.navStores)),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: 88,
                       child: _ScanButton(label: l10n.navScan, onTap: () => context.push('/scan')),
                     ),
-                    Expanded(child: _tab(2, Icons.settings_outlined, l10n.navSettings)),
+                    Expanded(child: _tab(1, Icons.storefront_outlined, l10n.navStores)),
                   ],
                 ),
               ),
