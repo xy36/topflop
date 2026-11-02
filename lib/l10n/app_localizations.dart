@@ -977,13 +977,13 @@ abstract class AppLocalizations {
   /// No description provided for @sortBest.
   ///
   /// In de, this message translates to:
-  /// **'Beste zuerst'**
+  /// **'Tops zuerst'**
   String get sortBest;
 
   /// No description provided for @sortWorst.
   ///
   /// In de, this message translates to:
-  /// **'Schlechteste zuerst'**
+  /// **'Flops zuerst'**
   String get sortWorst;
 
   /// No description provided for @sortName.

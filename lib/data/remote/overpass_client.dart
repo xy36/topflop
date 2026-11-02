@@ -21,7 +21,8 @@ class OverpassClient {
   static const _shopTypes = 'supermarket|convenience|butcher|bakery|greengrocer|deli|chemist|organic|cheese|beverages';
 
   Future<List<NearbyShop>> shopsAround(double lat, double lon, {int radiusMeters = 1500}) async {
-    final query = '[out:json][timeout:10];'
+    final query =
+        '[out:json][timeout:10];'
         'nwr(around:$radiusMeters,$lat,$lon)["shop"~"^($_shopTypes)\$"]["name"];'
         'out center 40;';
     final response = await _http

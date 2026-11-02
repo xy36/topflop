@@ -81,18 +81,21 @@ class ProductRepository {
     String? quantity,
     String? barcode,
     required ProductCategory category,
-  }) =>
-      _db.into(_db.products).insert(ProductsCompanion.insert(
-            name: name,
-            brand: Value(brand),
-            quantity: Value(quantity),
-            barcode: Value(barcode),
-            category: Value(category.name),
-          ));
+  }) => _db
+      .into(_db.products)
+      .insert(
+        ProductsCompanion.insert(
+          name: name,
+          brand: Value(brand),
+          quantity: Value(quantity),
+          barcode: Value(barcode),
+          category: Value(category.name),
+        ),
+      );
 
-  Future<void> setFavorite(int productId, bool favorite) =>
-      (_db.update(_db.products)..where((p) => p.id.equals(productId)))
-          .write(ProductsCompanion(isFavorite: Value(favorite)));
+  Future<void> setFavorite(int productId, bool favorite) => (_db.update(
+    _db.products,
+  )..where((p) => p.id.equals(productId))).write(ProductsCompanion(isFavorite: Value(favorite)));
 
   Future<void> deleteProduct(int productId) => (_db.delete(_db.products)..where((p) => p.id.equals(productId))).go();
 
@@ -105,17 +108,20 @@ class ProductRepository {
     String? note,
     double? latitude,
     double? longitude,
-  }) =>
-      _db.into(_db.ratings).insert(RatingsCompanion.insert(
-            productId: productId,
-            score: score,
-            wouldBuyAgain: wouldBuyAgain,
-            storeId: Value(storeId),
-            priceCents: Value(priceCents),
-            note: Value(note),
-            latitude: Value(latitude),
-            longitude: Value(longitude),
-          ));
+  }) => _db
+      .into(_db.ratings)
+      .insert(
+        RatingsCompanion.insert(
+          productId: productId,
+          score: score,
+          wouldBuyAgain: wouldBuyAgain,
+          storeId: Value(storeId),
+          priceCents: Value(priceCents),
+          note: Value(note),
+          latitude: Value(latitude),
+          longitude: Value(longitude),
+        ),
+      );
 
   Future<void> deleteRating(int ratingId) => (_db.delete(_db.ratings)..where((r) => r.id.equals(ratingId))).go();
 
@@ -126,15 +132,16 @@ class ProductRepository {
     String? brand,
     String? quantity,
     required ProductCategory category,
-  }) =>
-      (_db.update(_db.products)..where((p) => p.id.equals(productId))).write(ProductsCompanion(
-        name: Value(name),
-        brand: Value(brand),
-        quantity: Value(quantity),
-        category: Value(category.name),
-      ));
+  }) => (_db.update(_db.products)..where((p) => p.id.equals(productId))).write(
+    ProductsCompanion(
+      name: Value(name),
+      brand: Value(brand),
+      quantity: Value(quantity),
+      category: Value(category.name),
+    ),
+  );
 
-  Future<void> setCategory(int productId, ProductCategory category) =>
-      (_db.update(_db.products)..where((p) => p.id.equals(productId)))
-          .write(ProductsCompanion(category: Value(category.name)));
+  Future<void> setCategory(int productId, ProductCategory category) => (_db.update(
+    _db.products,
+  )..where((p) => p.id.equals(productId))).write(ProductsCompanion(category: Value(category.name)));
 }

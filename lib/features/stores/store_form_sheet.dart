@@ -16,6 +16,7 @@ Future<int?> showStoreForm(
 }) {
   return showModalBottomSheet<int>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     builder: (context) =>
         _StoreForm(initialName: initialName, initialAddress: initialAddress, latitude: latitude, longitude: longitude),

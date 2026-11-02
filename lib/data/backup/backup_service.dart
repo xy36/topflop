@@ -38,7 +38,9 @@ class BackupService {
     return file;
   }
 
-  Future<void> markExported() => _db.into(_db.settings).insertOnConflictUpdate(
+  Future<void> markExported() => _db
+      .into(_db.settings)
+      .insertOnConflictUpdate(
         SettingsCompanion.insert(key: _lastExportKey, value: DateTime.now().toUtc().toIso8601String()),
       );
 
@@ -59,7 +61,8 @@ class BackupService {
       throw FormatException('Nicht unterstützte Version: $version');
     }
 
-    List<Map<String, dynamic>> list(String key) => ((decoded as Map)[key] as List? ?? const []).cast<Map<String, dynamic>>();
+    List<Map<String, dynamic>> list(String key) =>
+        ((decoded as Map)[key] as List? ?? const []).cast<Map<String, dynamic>>();
 
     final products = list('products').map(Product.fromJson).toList();
     final stores = list('stores').map(Store.fromJson).toList();

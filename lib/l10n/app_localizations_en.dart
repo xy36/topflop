@@ -495,10 +495,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortRecent => 'Recently rated';
 
   @override
-  String get sortBest => 'Best first';
+  String get sortBest => 'Tops first';
 
   @override
-  String get sortWorst => 'Worst first';
+  String get sortWorst => 'Flops first';
 
   @override
   String get sortName => 'Name A–Z';

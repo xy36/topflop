@@ -41,13 +41,16 @@ class StoreRepository {
 
   Future<List<Store>> allStores() => _db.select(_db.stores).get();
 
-  Future<int> addStore({required String name, String? address, double? latitude, double? longitude}) =>
-      _db.into(_db.stores).insert(StoresCompanion.insert(
-            name: name,
-            address: Value(address),
-            latitude: Value(latitude),
-            longitude: Value(longitude),
-          ));
+  Future<int> addStore({required String name, String? address, double? latitude, double? longitude}) => _db
+      .into(_db.stores)
+      .insert(
+        StoresCompanion.insert(
+          name: name,
+          address: Value(address),
+          latitude: Value(latitude),
+          longitude: Value(longitude),
+        ),
+      );
 
   Future<void> deleteStore(int id) => (_db.delete(_db.stores)..where((s) => s.id.equals(id))).go();
 }

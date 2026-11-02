@@ -15,12 +15,8 @@ abstract final class AppText {
       );
 
   /// Abschnittsüberschriften in Versalien.
-  static TextStyle overline({Color color = AppColors.muted}) => GoogleFonts.figtree(
-        fontSize: 13,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.8,
-        color: color,
-      );
+  static TextStyle overline({Color color = AppColors.muted}) =>
+      GoogleFonts.figtree(fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: color);
 
   static TextStyle body(double size, {FontWeight weight = FontWeight.w400, Color color = AppColors.ink}) =>
       GoogleFonts.figtree(fontSize: size, fontWeight: weight, color: color);
@@ -80,9 +76,7 @@ abstract final class AppTheme {
           textStyle: AppText.body(15, weight: FontWeight.w600),
         ),
       ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(foregroundColor: AppColors.primary),
-      ),
+      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: AppColors.primary)),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -91,6 +85,18 @@ abstract final class AppTheme {
         backgroundColor: AppColors.surface,
         showDragHandle: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: const WidgetStatePropertyAll(Colors.white),
+        trackColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected) ? AppColors.primary : AppColors.chipBorder,
+        ),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+        thumbIcon: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? const Icon(Icons.check_rounded, size: 16, color: AppColors.primary)
+              : null,
+        ),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

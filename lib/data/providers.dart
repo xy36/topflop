@@ -16,23 +16,26 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 });
 
 final productRepositoryProvider = Provider((ref) => ProductRepository(ref.watch(databaseProvider)));
-final storeRepositoryProvider =
-    Provider((ref) => StoreRepository(ref.watch(databaseProvider), ref.watch(productRepositoryProvider)));
+final storeRepositoryProvider = Provider(
+  (ref) => StoreRepository(ref.watch(databaseProvider), ref.watch(productRepositoryProvider)),
+);
 final backupServiceProvider = Provider((ref) => BackupService(ref.watch(databaseProvider)));
 
 final openFoodFactsProvider = Provider((ref) => OpenFoodFactsClient());
 final overpassProvider = Provider((ref) => OverpassClient());
 final locationServiceProvider = Provider((ref) => LocationService());
 
-final productSummariesProvider =
-    StreamProvider<List<ProductSummary>>((ref) => ref.watch(productRepositoryProvider).watchSummaries());
+final productSummariesProvider = StreamProvider<List<ProductSummary>>(
+  (ref) => ref.watch(productRepositoryProvider).watchSummaries(),
+);
 
 final productProvider = StreamProvider.family<ProductSummary?, int>(
   (ref, id) => ref.watch(productRepositoryProvider).watchProduct(id),
 );
 
-final storeSummariesProvider =
-    StreamProvider<List<StoreSummary>>((ref) => ref.watch(storeRepositoryProvider).watchSummaries());
+final storeSummariesProvider = StreamProvider<List<StoreSummary>>(
+  (ref) => ref.watch(storeRepositoryProvider).watchSummaries(),
+);
 
 /// Aktueller Standort; wird bei Bedarf über `ref.invalidate` neu ermittelt.
 final currentPositionProvider = FutureProvider<LatLon?>((ref) => ref.watch(locationServiceProvider).currentPosition());

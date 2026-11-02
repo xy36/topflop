@@ -46,7 +46,8 @@ class OpenFoodFactsClient {
     ('world.openproductsfacts.org', ProductCategory.household),
   ];
 
-  static const _fields = 'product_name,generic_name,brands,quantity,image_front_url,image_url,'
+  static const _fields =
+      'product_name,generic_name,brands,quantity,image_front_url,image_url,'
       'nutriscore_grade,categories_tags';
 
   /// OFF bittet um einen aussagekräftigen User-Agent.

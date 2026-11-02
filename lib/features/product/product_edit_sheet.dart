@@ -13,6 +13,7 @@ import '../../l10n/app_localizations.dart';
 /// einen unbrauchbaren Namen liefert.
 Future<void> showProductEditSheet(BuildContext context, Product product) => showModalBottomSheet<void>(
   context: context,
+  useRootNavigator: true,
   isScrollControlled: true,
   useSafeArea: true,
   builder: (_) => _ProductEditSheet(product: product),

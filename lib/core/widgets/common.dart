@@ -137,24 +137,30 @@ class PillChip extends StatelessWidget {
         child: InkWell(
           customBorder: const StadiumBorder(),
           onTap: onTap,
+          // Kein `alignment` am Container: das würde den Chip in einem Wrap
+          // auf volle Breite ziehen. Höhe und Zentrierung kommen vom Row.
           child: Container(
             height: dark ? 36 : 40,
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            alignment: Alignment.center,
-            child: Text.rich(
-              TextSpan(
-                children: [
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text.rich(
                   TextSpan(
-                    text: label,
-                    style: AppText.body(14, weight: selected ? FontWeight.w700 : FontWeight.w600, color: fg),
+                    children: [
+                      TextSpan(
+                        text: label,
+                        style: AppText.body(14, weight: selected ? FontWeight.w700 : FontWeight.w600, color: fg),
+                      ),
+                      if (trailing != null)
+                        TextSpan(
+                          text: dark ? '  $trailing' : ' · $trailing',
+                          style: AppText.body(dark ? 12 : 14, color: trailingColor),
+                        ),
+                    ],
                   ),
-                  if (trailing != null)
-                    TextSpan(
-                      text: dark ? '  $trailing' : ' · $trailing',
-                      style: AppText.body(dark ? 12 : 14, color: trailingColor),
-                    ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

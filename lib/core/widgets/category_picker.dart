@@ -23,6 +23,7 @@ class CategoryGrid extends StatelessWidget {
       mainAxisSpacing: 10,
       crossAxisSpacing: 10,
       childAspectRatio: 0.95,
+      padding: EdgeInsets.zero,
       children: [
         for (final c in ProductCategory.values)
           _CategoryOption(category: c, label: c.label(l10n), selected: c == selected, onTap: () => onSelected(c)),
@@ -35,6 +36,7 @@ class CategoryGrid extends StatelessWidget {
 Future<ProductCategory?> showCategoryPicker(BuildContext context, ProductCategory current) {
   return showModalBottomSheet<ProductCategory>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     builder: (context) => SingleChildScrollView(

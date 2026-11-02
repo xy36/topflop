@@ -7,14 +7,16 @@ enum ProductCategory {
   meat(
     tile: Color(0xFFF5DCD4),
     ink: Color(0xFF7A2E1C),
-    icon: '<circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r="1.2"/><circle cx="14.5" cy="9" r="1"/>'
+    icon:
+        '<circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r="1.2"/><circle cx="14.5" cy="9" r="1"/>'
         '<circle cx="13.5" cy="14.5" r="1.3"/><circle cx="8.8" cy="14.6" r="0.9"/>',
     offTags: ['meats', 'sausages', 'salamis', 'hams', 'meat', 'poultry', 'fishes', 'seafood'],
   ),
   cheese(
     tile: Color(0xFFF6EBBE),
     ink: Color(0xFF6B4E07),
-    icon: '<path d="M3 17.5 21 9.5v8H3z"/><path d="M21 9.5 13.5 5 3 17.5"/>'
+    icon:
+        '<path d="M3 17.5 21 9.5v8H3z"/><path d="M21 9.5 13.5 5 3 17.5"/>'
         '<circle cx="15" cy="14" r="1.2"/><circle cx="10" cy="15.3" r="0.9"/>',
     offTags: ['cheeses'],
   ),
@@ -77,16 +79,16 @@ enum ProductCategory {
       'stroke-width="$strokeWidth" stroke-linecap="round" stroke-linejoin="round">$icon</svg>';
 
   String label(AppLocalizations l10n) => switch (this) {
-        meat => l10n.categoryMeat,
-        cheese => l10n.categoryCheese,
-        drink => l10n.categoryDrink,
-        dairy => l10n.categoryDairy,
-        bakery => l10n.categoryBakery,
-        sweets => l10n.categorySweets,
-        produce => l10n.categoryProduce,
-        household => l10n.categoryHousehold,
-        other => l10n.categoryOther,
-      };
+    meat => l10n.categoryMeat,
+    cheese => l10n.categoryCheese,
+    drink => l10n.categoryDrink,
+    dairy => l10n.categoryDairy,
+    bakery => l10n.categoryBakery,
+    sweets => l10n.categorySweets,
+    produce => l10n.categoryProduce,
+    household => l10n.categoryHousehold,
+    other => l10n.categoryOther,
+  };
 
   static ProductCategory fromName(String? name) =>
       ProductCategory.values.firstWhere((c) => c.name == name, orElse: () => other);
