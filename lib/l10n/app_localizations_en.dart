@@ -10,7 +10,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Nochmal';
+  String get appName => 'TopFlop';
 
   @override
   String get navOverview => 'Overview';
@@ -456,5 +456,5 @@ class AppLocalizationsEn extends AppLocalizations {
       'Product data and images come from Open Food Facts (ODbL), map data from OpenStreetMap.';
 
   @override
-  String get backupShareText => 'Nochmal backup';
+  String get backupShareText => 'TopFlop backup';
 }

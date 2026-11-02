@@ -5,14 +5,14 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:nochmal/core/domain/product_category.dart';
-import 'package:nochmal/core/domain/score.dart';
-import 'package:nochmal/core/widgets/common.dart';
-import 'package:nochmal/data/backup/backup_service.dart';
-import 'package:nochmal/data/db/database.dart';
-import 'package:nochmal/data/remote/open_food_facts_client.dart';
-import 'package:nochmal/data/repositories/product_repository.dart';
-import 'package:nochmal/data/repositories/store_repository.dart';
+import 'package:topflop/core/domain/product_category.dart';
+import 'package:topflop/core/domain/score.dart';
+import 'package:topflop/core/widgets/common.dart';
+import 'package:topflop/data/backup/backup_service.dart';
+import 'package:topflop/data/db/database.dart';
+import 'package:topflop/data/remote/open_food_facts_client.dart';
+import 'package:topflop/data/repositories/product_repository.dart';
+import 'package:topflop/data/repositories/store_repository.dart';
 
 void main() {
   // Der Backup-Test öffnet absichtlich zwei In-Memory-Datenbanken.
@@ -45,7 +45,7 @@ void main() {
       final client = OpenFoodFactsClient(
         httpClient: MockClient((request) async {
           expect(request.url.host, 'world.openfoodfacts.org');
-          expect(request.headers['User-Agent'], contains('Nochmal'));
+          expect(request.headers['User-Agent'], contains('TopFlop'));
           return http.Response.bytes(
             utf8.encode(jsonEncode({
               'status': 1,
@@ -152,7 +152,7 @@ void main() {
       await products.addRating(productId: id, score: 9, wouldBuyAgain: true, storeId: store, note: 'Schön mild');
 
       final json = jsonEncode({
-        'app': 'nochmal',
+        'app': 'topflop',
         'version': BackupService.formatVersion,
         'products': [for (final p in await db.select(db.products).get()) p.toJson()],
         'stores': [for (final s in await db.select(db.stores).get()) s.toJson()],

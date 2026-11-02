@@ -56,7 +56,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Dateiname ohne Endung; liegt im App-Dokumentenordner und wird so vom
   /// System-Backup (Android Auto Backup / iCloud) erfasst.
-  static const fileName = 'nochmal';
+  static const fileName = 'topflop';
 
   @override
   int get schemaVersion => 1;

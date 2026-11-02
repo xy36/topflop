@@ -1,4 +1,4 @@
-# Nochmal
+# TopFlop
 
 Persönliche Produktbewertungen für den Einkauf. Du scannst den Barcode, bewertest das Produkt mit 1–10 (Emoji-Skala) und hältst fest, ob du es wieder kaufen würdest und in welchem Laden es das gab. Vor dem Regal findest du so sofort wieder, was dir geschmeckt hat.
 

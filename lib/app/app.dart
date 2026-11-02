@@ -4,8 +4,8 @@ import '../core/theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 import 'router.dart';
 
-class NochmalApp extends StatelessWidget {
-  const NochmalApp({super.key});
+class TopFlopApp extends StatelessWidget {
+  const TopFlopApp({super.key});
 
   @override
   Widget build(BuildContext context) {

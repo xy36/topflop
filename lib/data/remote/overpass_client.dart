@@ -25,7 +25,7 @@ class OverpassClient {
         'nwr(around:$radiusMeters,$lat,$lon)["shop"~"^($_shopTypes)\$"]["name"];'
         'out center 40;';
     final response = await _http
-        .post(_endpoint, body: {'data': query}, headers: {'User-Agent': 'Nochmal/1.0 (Flutter)'})
+        .post(_endpoint, body: {'data': query}, headers: {'User-Agent': 'TopFlop/1.0 (Flutter)'})
         .timeout(const Duration(seconds: 12));
     if (response.statusCode != 200) return const [];
 

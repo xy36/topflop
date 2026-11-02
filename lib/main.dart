@@ -5,5 +5,5 @@ import 'app/app.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: NochmalApp()));
+  runApp(const ProviderScope(child: TopFlopApp()));
 }

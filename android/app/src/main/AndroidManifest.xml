@@ -11,7 +11,7 @@
     <!-- allowBackup: Android Auto Backup sichert die Datenbank ins Google-Konto
          (max. 25 MB). Der Bild-Cache liegt im cacheDir und wird automatisch ausgelassen. -->
     <application
-        android:label="Nochmal"
+        android:label="TopFlop"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true">

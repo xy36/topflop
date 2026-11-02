@@ -50,7 +50,7 @@ class OpenFoodFactsClient {
       'nutriscore_grade,categories_tags';
 
   /// OFF bittet um einen aussagekräftigen User-Agent.
-  static const _userAgent = 'Nochmal/1.0 (Flutter; personal product ratings)';
+  static const _userAgent = 'TopFlop/1.0 (Flutter; personal product ratings)';
 
   /// Liefert `null`, wenn der Barcode nirgends bekannt ist.
   /// Wirft [OffLookupException] bei Netzwerkfehlern.

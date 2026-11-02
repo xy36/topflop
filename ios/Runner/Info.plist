@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Nochmal</string>
+	<string>TopFlop</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>nochmal</string>
+	<string>topflop</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -50,9 +50,9 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Nochmal nutzt die Kamera, um Barcodes von Produkten zu scannen.</string>
+	<string>TopFlop nutzt die Kamera, um Barcodes von Produkten zu scannen.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Nochmal nutzt deinen Standort, um den Laden, in dem du gerade bist, automatisch auszuwählen.</string>
+	<string>TopFlop nutzt deinen Standort, um den Laden, in dem du gerade bist, automatisch auszuwählen.</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>de</string>

@@ -23,7 +23,7 @@ class BackupService {
   /// Schreibt die Sicherung in eine temporäre Datei und gibt deren Pfad zurück.
   Future<File> exportToFile() async {
     final data = {
-      'app': 'nochmal',
+      'app': 'topflop',
       'version': formatVersion,
       'exportedAt': DateTime.now().toUtc().toIso8601String(),
       'products': [for (final p in await _db.select(_db.products).get()) p.toJson()],
@@ -33,7 +33,7 @@ class BackupService {
 
     final dir = await getTemporaryDirectory();
     final date = DateTime.now().toIso8601String().substring(0, 10);
-    final file = File('${dir.path}/nochmal-backup-$date.json');
+    final file = File('${dir.path}/topflop-backup-$date.json');
     await file.writeAsString(const JsonEncoder.withIndent('  ').convert(data));
     return file;
   }
@@ -51,8 +51,8 @@ class BackupService {
   /// Wirft [FormatException], wenn die Datei keine gültige Sicherung ist.
   Future<void> importJson(String content) async {
     final decoded = jsonDecode(content);
-    if (decoded is! Map<String, dynamic> || decoded['app'] != 'nochmal') {
-      throw const FormatException('Keine Nochmal-Sicherung');
+    if (decoded is! Map<String, dynamic> || decoded['app'] != 'topflop') {
+      throw const FormatException('Keine TopFlop-Sicherung');
     }
     final version = decoded['version'];
     if (version is! int || version > formatVersion) {

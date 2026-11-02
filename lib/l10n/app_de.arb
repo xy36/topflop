@@ -1,6 +1,6 @@
 {
   "@@locale": "de",
-  "appName": "Nochmal",
+  "appName": "TopFlop",
 
   "navOverview": "Übersicht",
   "navScan": "Scannen",
@@ -155,5 +155,5 @@
   "settingsImportFailed": "Die Datei konnte nicht gelesen werden.",
   "settingsAbout": "Über",
   "settingsAboutBody": "Produktdaten und Bilder stammen von Open Food Facts (ODbL), Kartendaten von OpenStreetMap.",
-  "backupShareText": "Nochmal-Datensicherung"
+  "backupShareText": "TopFlop-Datensicherung"
 }

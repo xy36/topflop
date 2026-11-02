@@ -1,4 +1,4 @@
-package com.nochmal.nochmal
+package com.topflop.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In de, this message translates to:
-  /// **'Nochmal'**
+  /// **'TopFlop'**
   String get appName;
 
   /// No description provided for @navOverview.
@@ -917,7 +917,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupShareText.
   ///
   /// In de, this message translates to:
-  /// **'Nochmal-Datensicherung'**
+  /// **'TopFlop-Datensicherung'**
   String get backupShareText;
 }
 
