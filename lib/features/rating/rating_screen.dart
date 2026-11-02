@@ -3,10 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/domain/product_category.dart';
 import '../../core/domain/score.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/category_picker.dart';
 import '../../core/widgets/common.dart';
+import '../../core/widgets/product_image.dart';
 import '../../data/db/database.dart';
 import '../../data/location/location_service.dart';
 import '../../data/providers.dart';
@@ -89,7 +92,9 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   Future<void> _save() async {
     setState(() => _saving = true);
     final note = _note.text.trim();
-    await ref.read(productRepositoryProvider).addRating(
+    await ref
+        .read(productRepositoryProvider)
+        .addRating(
           productId: widget.productId,
           score: _score,
           wouldBuyAgain: _again,
@@ -129,7 +134,10 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(l10n.ratingTitle, style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted)),
+                        Text(
+                          l10n.ratingTitle,
+                          style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted),
+                        ),
                         Text(
                           [product?.name, product?.brand].whereType<String>().join(' · '),
                           maxLines: 1,
@@ -146,6 +154,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 children: [
+                  if (product != null) ...[_CategoryRow(product: product), const SizedBox(height: 14)],
                   _ScoreCard(score: _score, onChanged: _setScore),
                   const SizedBox(height: 14),
                   AppCard(
@@ -172,14 +181,18 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                       children: [
                         Row(
                           children: [
-                            Expanded(child: Text(l10n.ratingWhere, style: AppText.body(15, weight: FontWeight.w700))),
+                            Expanded(
+                              child: Text(l10n.ratingWhere, style: AppText.body(15, weight: FontWeight.w700)),
+                            ),
                             if (_locationMatched)
                               Row(
                                 children: [
                                   const Icon(Icons.place_outlined, size: 14, color: AppColors.primary),
                                   const SizedBox(width: 4),
-                                  Text(l10n.ratingLocationFound,
-                                      style: AppText.body(12, weight: FontWeight.w600, color: AppColors.primary)),
+                                  Text(
+                                    l10n.ratingLocationFound,
+                                    style: AppText.body(12, weight: FontWeight.w600, color: AppColors.primary),
+                                  ),
                                 ],
                               ),
                           ],
@@ -255,9 +268,60 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
         padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.paddingOf(context).bottom + 16),
-        child: FilledButton(
-          onPressed: _saving ? null : _save,
-          child: Text(l10n.ratingSave),
+        child: FilledButton(onPressed: _saving ? null : _save, child: Text(l10n.ratingSave)),
+      ),
+    );
+  }
+}
+
+/// Zeigt die (meist von Open Food Facts geratene) Kategorie und lässt sie
+/// direkt nach dem Scannen ändern.
+class _CategoryRow extends ConsumerWidget {
+  const _CategoryRow({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final category = ProductCategory.fromName(product.category);
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () async {
+          final picked = await showCategoryPicker(context, category);
+          if (picked != null && picked != category) {
+            await ref.read(productRepositoryProvider).setCategory(product.id, picked);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 16, 10),
+          child: Row(
+            children: [
+              ProductImage(category: category, size: 40, radius: 12),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.productFormCategory,
+                      style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted),
+                    ),
+                    Text(category.label(l10n), style: AppText.body(15, weight: FontWeight.w700)),
+                  ],
+                ),
+              ),
+              Text(
+                l10n.change,
+                style: AppText.body(14, weight: FontWeight.w700, color: AppColors.primary),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+            ],
+          ),
         ),
       ),
     );
@@ -294,11 +358,17 @@ class _ScoreCard extends StatelessWidget {
             children: [
               Text('$score', style: AppText.display(44, weight: FontWeight.w800)),
               const SizedBox(width: 6),
-              Text('/ 10', style: AppText.body(16, weight: FontWeight.w600, color: AppColors.muted)),
+              Text(
+                '/ 10',
+                style: AppText.body(16, weight: FontWeight.w600, color: AppColors.muted),
+              ),
             ],
           ),
           const SizedBox(height: 4),
-          Text(Score.word(l10n, score), style: AppText.body(16, weight: FontWeight.w600, color: AppColors.primary)),
+          Text(
+            Score.word(l10n, score),
+            style: AppText.body(16, weight: FontWeight.w600, color: AppColors.primary),
+          ),
           const SizedBox(height: 8),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
@@ -342,9 +412,11 @@ class _ScoreCard extends StatelessWidget {
                             child: Center(
                               child: Text(
                                 '$n',
-                                style: AppText.body(14,
-                                    weight: n == score ? FontWeight.w700 : FontWeight.w600,
-                                    color: n == score ? AppColors.lime : AppColors.muted),
+                                style: AppText.body(
+                                  14,
+                                  weight: n == score ? FontWeight.w700 : FontWeight.w600,
+                                  color: n == score ? AppColors.lime : AppColors.muted,
+                                ),
                               ),
                             ),
                           ),
@@ -387,7 +459,13 @@ class _RingThumb extends SliderComponentShape {
   }) {
     final canvas = context.canvas;
     canvas
-      ..drawCircle(center + const Offset(0, 2), _radius, Paint()..color = AppColors.ink.withValues(alpha: 0.25)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4))
+      ..drawCircle(
+        center + const Offset(0, 2),
+        _radius,
+        Paint()
+          ..color = AppColors.ink.withValues(alpha: 0.25)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+      )
       ..drawCircle(center, _radius, Paint()..color = Colors.white)
       ..drawCircle(center, _radius - 4, Paint()..color = AppColors.primary);
   }
@@ -415,7 +493,9 @@ class _BuyAgainToggle extends StatelessWidget {
             decoration: BoxDecoration(
               color: active ? activeBg : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: active ? [BoxShadow(color: AppColors.ink.withValues(alpha: 0.15), blurRadius: 3, offset: const Offset(0, 1))] : null,
+              boxShadow: active
+                  ? [BoxShadow(color: AppColors.ink.withValues(alpha: 0.15), blurRadius: 3, offset: const Offset(0, 1))]
+                  : null,
             ),
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
@@ -425,7 +505,14 @@ class _BuyAgainToggle extends StatelessWidget {
                 children: [
                   Icon(icon, size: 18, color: active ? Colors.white : const Color(0xFF3E4A42)),
                   const SizedBox(width: 6),
-                  Text(label, style: AppText.body(15, weight: FontWeight.w700, color: active ? Colors.white : const Color(0xFF3E4A42))),
+                  Text(
+                    label,
+                    style: AppText.body(
+                      15,
+                      weight: FontWeight.w700,
+                      color: active ? Colors.white : const Color(0xFF3E4A42),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -456,10 +543,20 @@ class _OptionalLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text.rich(TextSpan(children: [
-      TextSpan(text: label, style: AppText.body(15, weight: FontWeight.w700)),
-      TextSpan(text: ' $optional', style: AppText.body(15, weight: FontWeight.w500, color: AppColors.muted)),
-    ]));
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: label,
+            style: AppText.body(15, weight: FontWeight.w700),
+          ),
+          TextSpan(
+            text: ' $optional',
+            style: AppText.body(15, weight: FontWeight.w500, color: AppColors.muted),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -484,7 +581,10 @@ class _DashedButton extends StatelessWidget {
           height: 40,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           alignment: Alignment.center,
-          child: Text(label, style: AppText.body(14, weight: FontWeight.w600, color: const Color(0xFF3E4A42))),
+          child: Text(
+            label,
+            style: AppText.body(14, weight: FontWeight.w600, color: const Color(0xFF3E4A42)),
+          ),
         ),
       ),
     );

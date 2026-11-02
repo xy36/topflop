@@ -14,6 +14,7 @@ import '../../core/widgets/score_badge.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/models.dart';
 import '../../l10n/app_localizations.dart';
+import 'product_edit_sheet.dart';
 
 class ProductScreen extends ConsumerWidget {
   const ProductScreen({super.key, required this.productId});
@@ -42,7 +43,9 @@ class ProductScreen extends ConsumerWidget {
         children: [
           CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(child: _Hero(summary: summary, height: 260 + topInset)),
+              SliverToBoxAdapter(
+                child: _Hero(summary: summary, height: 260 + topInset),
+              ),
               SliverToBoxAdapter(
                 child: Transform.translate(
                   offset: const Offset(0, -24),
@@ -80,6 +83,14 @@ class ProductScreen extends ConsumerWidget {
                   bordered: false,
                   elevated: true,
                   onPressed: () => repo.setFavorite(p.id, !p.isFavorite),
+                ),
+                const SizedBox(width: 8),
+                SquareIconButton(
+                  icon: Icons.edit_outlined,
+                  tooltip: l10n.productEditTitle,
+                  bordered: false,
+                  elevated: true,
+                  onPressed: () => showProductEditSheet(context, p),
                 ),
                 const SizedBox(width: 8),
                 SquareIconButton(
@@ -163,7 +174,11 @@ class _Body extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (subtitle.isNotEmpty) Text(subtitle, style: AppText.body(14, weight: FontWeight.w600, color: AppColors.muted)),
+        if (subtitle.isNotEmpty)
+          Text(
+            subtitle,
+            style: AppText.body(14, weight: FontWeight.w600, color: AppColors.muted),
+          ),
         const SizedBox(height: 6),
         Text(p.name, style: AppText.display(32)),
         const SizedBox(height: 12),
@@ -233,17 +248,18 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: 20),
           SectionHeader(l10n.productHistory),
           const SizedBox(height: 10),
-          for (final r in summary.ratings) ...[
-            _HistoryEntry(entry: r),
-            const SizedBox(height: 10),
-          ],
+          for (final r in summary.ratings) ...[_HistoryEntry(entry: r), const SizedBox(height: 10)],
         ] else
           AppCard(
             child: Text(l10n.productNoRatings, style: AppText.body(15, color: AppColors.muted)),
           ),
         const SizedBox(height: 8),
         if (p.barcode != null)
-          Text(l10n.dataSourceOff, textAlign: TextAlign.center, style: AppText.body(12, color: AppColors.muted)),
+          Text(
+            l10n.dataSourceOff,
+            textAlign: TextAlign.center,
+            style: AppText.body(12, color: AppColors.muted),
+          ),
       ],
     );
   }
@@ -264,9 +280,14 @@ class _InfoChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(99),
         border: Border.all(color: AppColors.border),
       ),
-      child: Text(label,
-          style: AppText.body(12,
-              weight: bold ? FontWeight.w700 : FontWeight.w600, color: bold ? AppColors.ink : const Color(0xFF3E4A42))),
+      child: Text(
+        label,
+        style: AppText.body(
+          12,
+          weight: bold ? FontWeight.w700 : FontWeight.w600,
+          color: bold ? AppColors.ink : const Color(0xFF3E4A42),
+        ),
+      ),
     );
   }
 }
@@ -302,14 +323,22 @@ class _Stat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(12, weight: FontWeight.w600, color: labelColor)),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppText.body(12, weight: FontWeight.w600, color: labelColor),
+          ),
           const SizedBox(height: 6),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Row(
               children: [
-                if (emoji != null) ...[Text(emoji!, style: const TextStyle(fontSize: 22, height: 1)), const SizedBox(width: 6)],
+                if (emoji != null) ...[
+                  Text(emoji!, style: const TextStyle(fontSize: 22, height: 1)),
+                  const SizedBox(width: 6),
+                ],
                 Text(value, style: AppText.display(26, color: foreground)),
               ],
             ),
@@ -362,10 +391,13 @@ class _HistoryEntry extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(entry.store?.name ?? l10n.ratingNoStore,
-                            style: AppText.body(15, weight: FontWeight.w600)),
+                        child: Text(
+                          entry.store?.name ?? l10n.ratingNoStore,
+                          style: AppText.body(15, weight: FontWeight.w600),
+                        ),
                       ),
-                      if (r.priceCents != null) Text(formatPrice(r.priceCents!, locale), style: AppText.body(15, weight: FontWeight.w600)),
+                      if (r.priceCents != null)
+                        Text(formatPrice(r.priceCents!, locale), style: AppText.body(15, weight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 4),

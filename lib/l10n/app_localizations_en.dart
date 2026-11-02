@@ -457,4 +457,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupShareText => 'TopFlop backup';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get homeAllProducts => 'All products';
+
+  @override
+  String get filterTitle => 'Filter';
+
+  @override
+  String get filterReset => 'Reset';
+
+  @override
+  String get filterRemove => 'Remove filter';
+
+  @override
+  String filterShowResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count products',
+      one: 'Show 1 product',
+      zero: 'No results',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filterNoMatchBody => 'No product matches your filters.';
+
+  @override
+  String get sortTitle => 'Sort by';
+
+  @override
+  String get sortRecent => 'Recently rated';
+
+  @override
+  String get sortBest => 'Best first';
+
+  @override
+  String get sortWorst => 'Worst first';
+
+  @override
+  String get sortName => 'Name A–Z';
+
+  @override
+  String get filterScore => 'Rating';
+
+  @override
+  String get filterAny => 'Any';
+
+  @override
+  String get filterFavoritesOnly => 'Favorites only';
+
+  @override
+  String get filterStores => 'Stores';
+
+  @override
+  String get filterCategories => 'Categories';
+
+  @override
+  String filterStoresCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stores',
+      one: '1 store',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String filterCategoriesCount(int count) {
+    return '$count categories';
+  }
+
+  @override
+  String get productEditTitle => 'Edit product';
+
+  @override
+  String get categoryChoose => 'Choose category';
+
+  @override
+  String get change => 'Change';
 }

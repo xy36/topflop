@@ -15,12 +15,18 @@ final appRouter = GoRouter(
     StatefulShellRoute.indexedStack(
       builder: (context, state, shell) => AppShell(navigationShell: shell),
       branches: [
-        StatefulShellBranch(routes: [GoRoute(path: '/', builder: (_, _) => const HomeScreen())]),
-        StatefulShellBranch(routes: [GoRoute(path: '/stores', builder: (_, _) => const StoresScreen())]),
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/', builder: (_, _) => const HomeScreen())],
+        ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/stores', builder: (_, _) => const StoresScreen())],
+        ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen())],
+        ),
       ],
     ),
     GoRoute(path: '/scan', builder: (_, _) => const ScannerScreen()),
-    GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
     GoRoute(
       path: '/product/new',
       builder: (_, state) => ProductFormScreen(barcode: state.uri.queryParameters['barcode']),

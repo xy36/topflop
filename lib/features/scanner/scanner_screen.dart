@@ -50,10 +50,18 @@ class ScannerScreen extends ConsumerStatefulWidget {
 class _ScannerScreenState extends ConsumerState<ScannerScreen> with SingleTickerProviderStateMixin {
   final _controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
-    formats: const [BarcodeFormat.ean13, BarcodeFormat.ean8, BarcodeFormat.upcA, BarcodeFormat.upcE, BarcodeFormat.code128],
+    formats: const [
+      BarcodeFormat.ean13,
+      BarcodeFormat.ean8,
+      BarcodeFormat.upcA,
+      BarcodeFormat.upcE,
+      BarcodeFormat.code128,
+    ],
   );
-  late final AnimationController _scanLine =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat(reverse: true);
+  late final AnimationController _scanLine = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  )..repeat(reverse: true);
   _ScanState? _state;
   bool _torch = false;
 
@@ -164,16 +172,22 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> with SingleTicker
                       right: 20,
                       child: Column(
                         children: [
-                          Text(l10n.scanHint,
-                              textAlign: TextAlign.center,
-                              style: AppText.body(15, color: Colors.white.withValues(alpha: 0.78))),
+                          Text(
+                            l10n.scanHint,
+                            textAlign: TextAlign.center,
+                            style: AppText.body(15, color: Colors.white.withValues(alpha: 0.78)),
+                          ),
                           const SizedBox(height: 14),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
                             alignment: WrapAlignment.center,
                             children: [
-                              _OutlineButton(icon: Icons.dialpad_rounded, label: l10n.scanEnterCode, onPressed: _enterCode),
+                              _OutlineButton(
+                                icon: Icons.dialpad_rounded,
+                                label: l10n.scanEnterCode,
+                                onPressed: _enterCode,
+                              ),
                               _OutlineButton(
                                 icon: Icons.edit_outlined,
                                 label: l10n.scanWithoutBarcode,
@@ -192,25 +206,28 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> with SingleTicker
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    child: Row(
-                      children: [
-                        _GlassButton(icon: Icons.close_rounded, tooltip: l10n.scanClose, onPressed: () => context.pop()),
-                        Expanded(
-                          child: Text(l10n.scanTitle,
-                              textAlign: TextAlign.center, style: AppText.body(16, weight: FontWeight.w600, color: Colors.white)),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                  child: Row(
+                    children: [
+                      _GlassButton(icon: Icons.close_rounded, tooltip: l10n.scanClose, onPressed: () => context.pop()),
+                      Expanded(
+                        child: Text(
+                          l10n.scanTitle,
+                          textAlign: TextAlign.center,
+                          style: AppText.body(16, weight: FontWeight.w600, color: Colors.white),
                         ),
-                        _GlassButton(
-                          icon: Icons.flash_on_rounded,
-                          tooltip: l10n.scanTorch,
-                          active: _torch,
-                          onPressed: () async {
-                            await _controller.toggleTorch();
-                            setState(() => _torch = !_torch);
-                          },
-                        ),
-                      ],
-                    ),
+                      ),
+                      _GlassButton(
+                        icon: Icons.flash_on_rounded,
+                        tooltip: l10n.scanTorch,
+                        active: _torch,
+                        onPressed: () async {
+                          await _controller.toggleTorch();
+                          setState(() => _torch = !_torch);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -244,59 +261,63 @@ class _ResultSheet extends StatelessWidget {
 
     final Widget content = switch (state) {
       _Looking() => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2.5)),
-              const SizedBox(width: 12),
-              Text(l10n.scanLooking, style: AppText.body(15, weight: FontWeight.w600)),
-            ],
-          ),
-        ),
-      _Known(:final summary) => _ProductResult(
-          name: summary.product.name,
-          subtitle: [summary.product.brand, summary.product.quantity].whereType<String>().join(' · '),
-          category: ProductCategory.fromName(summary.product.category),
-          imageUrl: summary.product.imageUrl,
-          verdict: summary.hasRatings ? _Verdict(summary) : null,
-          primaryLabel: l10n.rateNew,
-          onPrimary: () => context.pushReplacement('/product/${summary.product.id}/rate?then=detail'),
-          onDetails: () => context.pushReplacement('/product/${summary.product.id}'),
-        ),
-      _Remote(:final product) => _ProductResult(
-          name: product.name,
-          subtitle: [product.brand, product.quantity].whereType<String>().join(' · '),
-          category: product.category,
-          imageUrl: product.imageUrl,
-          primaryLabel: l10n.rate,
-          onPrimary: () => onRateRemote(product),
-        ),
-      _NotFound(:final offline) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(l10n.scanNotFoundTitle, style: AppText.display(22)),
-            const SizedBox(height: 6),
-            Text(offline ? l10n.scanOffline : l10n.scanNotFoundBody,
-                style: AppText.body(14, color: AppColors.muted).copyWith(height: 1.4)),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: OutlinedButton(onPressed: onDismiss, child: Text(l10n.scanAgain))),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-                    onPressed: () => context.pushReplacement(
-                      Uri(path: '/product/new', queryParameters: {'barcode': state.code}).toString(),
-                    ),
-                    child: Text(l10n.scanCreateProduct),
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2.5)),
+            const SizedBox(width: 12),
+            Text(l10n.scanLooking, style: AppText.body(15, weight: FontWeight.w600)),
           ],
         ),
+      ),
+      _Known(:final summary) => _ProductResult(
+        name: summary.product.name,
+        subtitle: [summary.product.brand, summary.product.quantity].whereType<String>().join(' · '),
+        category: ProductCategory.fromName(summary.product.category),
+        imageUrl: summary.product.imageUrl,
+        verdict: summary.hasRatings ? _Verdict(summary) : null,
+        primaryLabel: l10n.rateNew,
+        onPrimary: () => context.pushReplacement('/product/${summary.product.id}/rate?then=detail'),
+        onDetails: () => context.pushReplacement('/product/${summary.product.id}'),
+      ),
+      _Remote(:final product) => _ProductResult(
+        name: product.name,
+        subtitle: [product.brand, product.quantity].whereType<String>().join(' · '),
+        category: product.category,
+        imageUrl: product.imageUrl,
+        primaryLabel: l10n.rate,
+        onPrimary: () => onRateRemote(product),
+      ),
+      _NotFound(:final offline) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l10n.scanNotFoundTitle, style: AppText.display(22)),
+          const SizedBox(height: 6),
+          Text(
+            offline ? l10n.scanOffline : l10n.scanNotFoundBody,
+            style: AppText.body(14, color: AppColors.muted).copyWith(height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(onPressed: onDismiss, child: Text(l10n.scanAgain)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                  onPressed: () => context.pushReplacement(
+                    Uri(path: '/product/new', queryParameters: {'barcode': state.code}).toString(),
+                  ),
+                  child: Text(l10n.scanCreateProduct),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     };
 
     return Container(
@@ -332,7 +353,10 @@ class _ResultSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(l10n.scanDetected(state.code), style: AppText.body(13, weight: FontWeight.w600, color: AppColors.muted)),
+              Text(
+                l10n.scanDetected(state.code),
+                style: AppText.body(13, weight: FontWeight.w600, color: AppColors.muted),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -393,7 +417,9 @@ class _ProductResult extends StatelessWidget {
         Row(
           children: [
             if (onDetails != null) ...[
-              Expanded(child: OutlinedButton(onPressed: onDetails, child: Text(l10n.details))),
+              Expanded(
+                child: OutlinedButton(onPressed: onDetails, child: Text(l10n.details)),
+              ),
               const SizedBox(width: 10),
             ],
             Expanded(
@@ -406,7 +432,11 @@ class _ProductResult extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        Text(l10n.dataSourceOff, textAlign: TextAlign.center, style: AppText.body(12, color: AppColors.muted)),
+        Text(
+          l10n.dataSourceOff,
+          textAlign: TextAlign.center,
+          style: AppText.body(12, color: AppColors.muted),
+        ),
       ],
     );
   }
@@ -440,8 +470,10 @@ class _Verdict extends StatelessWidget {
               children: [
                 Text(l10n.scanAlreadyRated(score), style: AppText.body(15, weight: FontWeight.w700)),
                 const SizedBox(height: 2),
-                Text(store == null ? again : '$again · ${l10n.scanLastAt(store)}',
-                    style: AppText.body(13, color: const Color(0xFF3E4A42))),
+                Text(
+                  store == null ? again : '$again · ${l10n.scanLastAt(store)}',
+                  style: AppText.body(13, color: const Color(0xFF3E4A42)),
+                ),
               ],
             ),
           ),
@@ -540,16 +572,49 @@ class _ViewfinderPainter extends CustomPainter {
     const r = 18.0;
     final l = frame.left, t = frame.top, rt = frame.right, b = frame.bottom;
     canvas
-      ..drawPath(Path()..moveTo(l, t + len)..lineTo(l, t + r)..arcToPoint(Offset(l + r, t), radius: const Radius.circular(r))..lineTo(l + len, t), corner)
-      ..drawPath(Path()..moveTo(rt - len, t)..lineTo(rt - r, t)..arcToPoint(Offset(rt, t + r), radius: const Radius.circular(r))..lineTo(rt, t + len), corner)
-      ..drawPath(Path()..moveTo(l, b - len)..lineTo(l, b - r)..arcToPoint(Offset(l + r, b), radius: const Radius.circular(r), clockwise: false)..lineTo(l + len, b), corner)
-      ..drawPath(Path()..moveTo(rt - len, b)..lineTo(rt - r, b)..arcToPoint(Offset(rt, b - r), radius: const Radius.circular(r), clockwise: false)..lineTo(rt, b - len), corner);
+      ..drawPath(
+        Path()
+          ..moveTo(l, t + len)
+          ..lineTo(l, t + r)
+          ..arcToPoint(Offset(l + r, t), radius: const Radius.circular(r))
+          ..lineTo(l + len, t),
+        corner,
+      )
+      ..drawPath(
+        Path()
+          ..moveTo(rt - len, t)
+          ..lineTo(rt - r, t)
+          ..arcToPoint(Offset(rt, t + r), radius: const Radius.circular(r))
+          ..lineTo(rt, t + len),
+        corner,
+      )
+      ..drawPath(
+        Path()
+          ..moveTo(l, b - len)
+          ..lineTo(l, b - r)
+          ..arcToPoint(Offset(l + r, b), radius: const Radius.circular(r), clockwise: false)
+          ..lineTo(l + len, b),
+        corner,
+      )
+      ..drawPath(
+        Path()
+          ..moveTo(rt - len, b)
+          ..lineTo(rt - r, b)
+          ..arcToPoint(Offset(rt, b - r), radius: const Radius.circular(r), clockwise: false)
+          ..lineTo(rt, b - len),
+        corner,
+      );
 
     if (active) {
       final y = frame.top + 20 + (frame.height - 40) * Curves.easeInOut.transform(progress);
       final line = Rect.fromLTWH(frame.left + 18, y, frame.width - 36, 2);
       canvas
-        ..drawRect(line.inflate(4), Paint()..color = AppColors.lime.withValues(alpha: 0.25)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6))
+        ..drawRect(
+          line.inflate(4),
+          Paint()
+            ..color = AppColors.lime.withValues(alpha: 0.25)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        )
         ..drawRect(line, Paint()..color = AppColors.lime);
     }
   }

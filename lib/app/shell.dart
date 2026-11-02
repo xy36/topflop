@@ -5,7 +5,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 
-/// Grundgerüst mit unterer Navigation: Übersicht · Scannen · Läden.
+/// Grundgerüst mit unterer Navigation: Übersicht · Läden · Scannen · Einstellungen.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
 
@@ -40,28 +40,25 @@ class AppShell extends StatelessWidget {
             Positioned.fill(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(28, 0, 28, bottomInset + 10),
+                // Links zwei Tabs, rechts einer: beide Hälften sind gleich breit,
+                // damit der Scan-Knopf genau in der Mitte bleibt.
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: _NavItem(
-                        icon: Icons.format_list_bulleted_rounded,
-                        label: l10n.navOverview,
-                        selected: navigationShell.currentIndex == 0,
-                        onTap: () => navigationShell.goBranch(0, initialLocation: navigationShell.currentIndex == 0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(child: _tab(0, Icons.format_list_bulleted_rounded, l10n.navOverview)),
+                          Expanded(child: _tab(1, Icons.storefront_outlined, l10n.navStores)),
+                        ],
                       ),
                     ),
-                    Expanded(
+                    SizedBox(
+                      width: 88,
                       child: _ScanButton(label: l10n.navScan, onTap: () => context.push('/scan')),
                     ),
-                    Expanded(
-                      child: _NavItem(
-                        icon: Icons.storefront_outlined,
-                        label: l10n.navStores,
-                        selected: navigationShell.currentIndex == 1,
-                        onTap: () => navigationShell.goBranch(1, initialLocation: navigationShell.currentIndex == 1),
-                      ),
-                    ),
+                    Expanded(child: _tab(2, Icons.settings_outlined, l10n.navSettings)),
                   ],
                 ),
               ),
@@ -69,6 +66,17 @@ class AppShell extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _tab(int index, IconData icon, String label) {
+    final selected = navigationShell.currentIndex == index;
+    return _NavItem(
+      icon: icon,
+      label: label,
+      selected: selected,
+      // Erneutes Tippen auf den aktiven Tab springt an dessen Anfang zurück.
+      onTap: () => navigationShell.goBranch(index, initialLocation: selected),
     );
   }
 

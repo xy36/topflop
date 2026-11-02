@@ -13,6 +13,7 @@ import 'package:topflop/data/db/database.dart';
 import 'package:topflop/data/remote/open_food_facts_client.dart';
 import 'package:topflop/data/repositories/product_repository.dart';
 import 'package:topflop/data/repositories/store_repository.dart';
+import 'package:topflop/features/home/product_filter.dart';
 
 void main() {
   // Der Backup-Test öffnet absichtlich zwei In-Memory-Datenbanken.
@@ -172,6 +173,35 @@ void main() {
     test('Backup: fremde Dateien werden abgelehnt', () async {
       expect(BackupService(db).importJson('{"app":"other"}'), throwsFormatException);
       expect(BackupService(db).importJson('kein json'), throwsFormatException);
+    });
+
+    test('Filter nach Bewertung, Laden, Kategorie, Urteil und Sortierung', () async {
+      final salamiId = await salami();
+      final kaeseId = await products.createManual(name: 'Bergkäse', category: ProductCategory.cheese);
+      final colaId = await products.createManual(name: 'Cola', category: ProductCategory.drink);
+      final rewe = await stores.addStore(name: 'Rewe');
+      final edeka = await stores.addStore(name: 'Edeka');
+      await products.addRating(productId: salamiId, score: 9, wouldBuyAgain: true, storeId: rewe);
+      await products.addRating(productId: kaeseId, score: 4, wouldBuyAgain: false, storeId: edeka);
+      await products.setFavorite(kaeseId, true);
+      // Cola bleibt unbewertet.
+
+      final all = await products.loadSummaries();
+      List<String> names(ProductFilter f) => f.apply(all).map((s) => s.product.name).toList();
+
+      expect(names(const ProductFilter(minScore: 8)), ['Salami Milano']);
+      expect(names(ProductFilter(storeIds: {edeka})), ['Bergkäse']);
+      expect(names(const ProductFilter(categories: {ProductCategory.drink})), ['Cola']);
+      expect(names(const ProductFilter(buyAgain: false)), ['Bergkäse']);
+      expect(names(const ProductFilter(favoritesOnly: true)), ['Bergkäse']);
+      expect(names(const ProductFilter(sort: ProductSort.bestRated)), ['Salami Milano', 'Bergkäse', 'Cola']);
+      expect(names(const ProductFilter(sort: ProductSort.worstRated)), ['Bergkäse', 'Salami Milano', 'Cola']);
+      expect(const ProductFilter(minScore: 3, favoritesOnly: true).activeCount, 2);
+      expect(const ProductFilter(minScore: 3, sort: ProductSort.name).cleared().isActive, isFalse);
+
+      await products.setCategory(colaId, ProductCategory.dairy);
+      final cola = (await products.loadProduct(colaId))!;
+      expect(cola.product.category, ProductCategory.dairy.name);
     });
   });
 }

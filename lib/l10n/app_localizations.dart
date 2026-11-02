@@ -919,6 +919,138 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'TopFlop-Datensicherung'**
   String get backupShareText;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In de, this message translates to:
+  /// **'Einstellungen'**
+  String get navSettings;
+
+  /// No description provided for @homeAllProducts.
+  ///
+  /// In de, this message translates to:
+  /// **'Alle Produkte'**
+  String get homeAllProducts;
+
+  /// No description provided for @filterTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Filter'**
+  String get filterTitle;
+
+  /// No description provided for @filterReset.
+  ///
+  /// In de, this message translates to:
+  /// **'Zurücksetzen'**
+  String get filterReset;
+
+  /// No description provided for @filterRemove.
+  ///
+  /// In de, this message translates to:
+  /// **'Filter entfernen'**
+  String get filterRemove;
+
+  /// No description provided for @filterShowResults.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =0{Keine Treffer} =1{1 Produkt anzeigen} other{{count} Produkte anzeigen}}'**
+  String filterShowResults(int count);
+
+  /// No description provided for @filterNoMatchBody.
+  ///
+  /// In de, this message translates to:
+  /// **'Kein Produkt passt zu deinen Filtern.'**
+  String get filterNoMatchBody;
+
+  /// No description provided for @sortTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Sortierung'**
+  String get sortTitle;
+
+  /// No description provided for @sortRecent.
+  ///
+  /// In de, this message translates to:
+  /// **'Zuletzt bewertet'**
+  String get sortRecent;
+
+  /// No description provided for @sortBest.
+  ///
+  /// In de, this message translates to:
+  /// **'Beste zuerst'**
+  String get sortBest;
+
+  /// No description provided for @sortWorst.
+  ///
+  /// In de, this message translates to:
+  /// **'Schlechteste zuerst'**
+  String get sortWorst;
+
+  /// No description provided for @sortName.
+  ///
+  /// In de, this message translates to:
+  /// **'Name A–Z'**
+  String get sortName;
+
+  /// No description provided for @filterScore.
+  ///
+  /// In de, this message translates to:
+  /// **'Bewertung'**
+  String get filterScore;
+
+  /// No description provided for @filterAny.
+  ///
+  /// In de, this message translates to:
+  /// **'Egal'**
+  String get filterAny;
+
+  /// No description provided for @filterFavoritesOnly.
+  ///
+  /// In de, this message translates to:
+  /// **'Nur Favoriten'**
+  String get filterFavoritesOnly;
+
+  /// No description provided for @filterStores.
+  ///
+  /// In de, this message translates to:
+  /// **'Läden'**
+  String get filterStores;
+
+  /// No description provided for @filterCategories.
+  ///
+  /// In de, this message translates to:
+  /// **'Kategorien'**
+  String get filterCategories;
+
+  /// No description provided for @filterStoresCount.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =1{1 Laden} other{{count} Läden}}'**
+  String filterStoresCount(int count);
+
+  /// No description provided for @filterCategoriesCount.
+  ///
+  /// In de, this message translates to:
+  /// **'{count} Kategorien'**
+  String filterCategoriesCount(int count);
+
+  /// No description provided for @productEditTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Produkt bearbeiten'**
+  String get productEditTitle;
+
+  /// No description provided for @categoryChoose.
+  ///
+  /// In de, this message translates to:
+  /// **'Kategorie wählen'**
+  String get categoryChoose;
+
+  /// No description provided for @change.
+  ///
+  /// In de, this message translates to:
+  /// **'Ändern'**
+  String get change;
 }
 
 class _AppLocalizationsDelegate

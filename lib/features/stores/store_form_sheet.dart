@@ -7,16 +7,18 @@ import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Öffnet das Formular für einen neuen Laden. Liefert die ID oder `null`.
-Future<int?> showStoreForm(BuildContext context, {String? initialName, String? initialAddress, double? latitude, double? longitude}) {
+Future<int?> showStoreForm(
+  BuildContext context, {
+  String? initialName,
+  String? initialAddress,
+  double? latitude,
+  double? longitude,
+}) {
   return showModalBottomSheet<int>(
     context: context,
     isScrollControlled: true,
-    builder: (context) => _StoreForm(
-      initialName: initialName,
-      initialAddress: initialAddress,
-      latitude: latitude,
-      longitude: longitude,
-    ),
+    builder: (context) =>
+        _StoreForm(initialName: initialName, initialAddress: initialAddress, latitude: latitude, longitude: longitude),
   );
 }
 
@@ -58,7 +60,9 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
       lon = pos?.longitude;
     }
     final address = _address.text.trim();
-    final id = await ref.read(storeRepositoryProvider).addStore(
+    final id = await ref
+        .read(storeRepositoryProvider)
+        .addStore(
           name: name,
           address: address.isEmpty ? null : address,
           latitude: _useLocation ? lat : null,
@@ -71,7 +75,12 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.viewInsetsOf(context).bottom + MediaQuery.paddingOf(context).bottom + 20),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        MediaQuery.viewInsetsOf(context).bottom + MediaQuery.paddingOf(context).bottom + 20,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -103,7 +112,10 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
           FilledButton(
             onPressed: _name.text.trim().isEmpty || _saving ? null : _save,
             child: _saving
-                ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                  )
                 : Text(l10n.save),
           ),
         ],

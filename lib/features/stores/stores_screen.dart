@@ -48,7 +48,10 @@ class StoresScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.appName.toUpperCase(), style: AppText.overline().copyWith(fontSize: 12, letterSpacing: 1.4)),
+                      Text(
+                        l10n.appName.toUpperCase(),
+                        style: AppText.overline().copyWith(fontSize: 12, letterSpacing: 1.4),
+                      ),
                       const SizedBox(height: 4),
                       Text(l10n.storesTitle, style: AppText.display(32)),
                     ],
@@ -65,7 +68,12 @@ class StoresScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _StoreMap(position: position, stores: stores, youAreHere: l10n.storesYouAreHere, locationOff: l10n.storesLocationOff),
+            _StoreMap(
+              position: position,
+              stores: stores,
+              youAreHere: l10n.storesYouAreHere,
+              locationOff: l10n.storesLocationOff,
+            ),
             const SizedBox(height: 18),
             SectionHeader(
               position == null ? l10n.storesAll : l10n.storesNearby,
@@ -73,7 +81,9 @@ class StoresScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
             if (stores.isEmpty)
-              AppCard(child: Text(l10n.storesEmpty, style: AppText.body(14, color: AppColors.muted).copyWith(height: 1.45)))
+              AppCard(
+                child: Text(l10n.storesEmpty, style: AppText.body(14, color: AppColors.muted).copyWith(height: 1.45)),
+              )
             else
               for (final (summary, distance) in sorted) ...[
                 _StoreCard(
@@ -98,7 +108,11 @@ class StoresScreen extends ConsumerWidget {
               const SizedBox(height: 10),
             ],
             if (suggestions.isNotEmpty)
-              Text(l10n.storesMapAttribution, textAlign: TextAlign.center, style: AppText.body(12, color: AppColors.muted)),
+              Text(
+                l10n.storesMapAttribution,
+                textAlign: TextAlign.center,
+                style: AppText.body(12, color: AppColors.muted),
+              ),
           ],
         ),
       ),
@@ -261,7 +275,10 @@ class _StoreMap extends StatelessWidget {
                           height: 30,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
-                          child: Text('$count', style: AppText.body(12, weight: FontWeight.w800, color: Colors.white)),
+                          child: Text(
+                            '$count',
+                            style: AppText.body(12, weight: FontWeight.w800, color: Colors.white),
+                          ),
                         ),
                         Container(width: 2, height: 8, color: AppColors.primary),
                       ],
@@ -285,7 +302,10 @@ class _StoreMap extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Text(position == null ? locationOff : youAreHere, style: AppText.body(12, weight: FontWeight.w700)),
+                        Text(
+                          position == null ? locationOff : youAreHere,
+                          style: AppText.body(12, weight: FontWeight.w700),
+                        ),
                       ],
                     ),
                   ),
@@ -323,7 +343,13 @@ class _StoreMap extends StatelessWidget {
     final scale = math.min(halfW, halfH) / maxDist;
     return [
       for (final (o, count) in points)
-        (Offset(size.width / 2 + (o.dx * scale).clamp(-halfW, halfW), size.height / 2 + 14 + (o.dy * scale).clamp(-halfH, halfH - 14)), count),
+        (
+          Offset(
+            size.width / 2 + (o.dx * scale).clamp(-halfW, halfW),
+            size.height / 2 + 14 + (o.dy * scale).clamp(-halfH, halfH - 14),
+          ),
+          count,
+        ),
     ];
   }
 }
@@ -334,8 +360,20 @@ class _MapBackgroundPainter extends CustomPainter {
     canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFE3E8DD));
     final park = Paint()..color = const Color(0xFFCFE0C4);
     canvas
-      ..drawRRect(RRect.fromLTRBR(size.width * 0.6, -10, size.width * 0.94, size.height * 0.34, const Radius.circular(12)), park)
-      ..drawRRect(RRect.fromLTRBR(size.width * 0.06, size.height * 0.67, size.width * 0.31, size.height + 10, const Radius.circular(12)), park);
+      ..drawRRect(
+        RRect.fromLTRBR(size.width * 0.6, -10, size.width * 0.94, size.height * 0.34, const Radius.circular(12)),
+        park,
+      )
+      ..drawRRect(
+        RRect.fromLTRBR(
+          size.width * 0.06,
+          size.height * 0.67,
+          size.width * 0.31,
+          size.height + 10,
+          const Radius.circular(12),
+        ),
+        park,
+      );
 
     Paint road(double w) => Paint()
       ..color = Colors.white
@@ -344,13 +382,20 @@ class _MapBackgroundPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
     canvas
-      ..drawPath(Path()..moveTo(-10, h * 0.52)..cubicTo(w * 0.23, h * 0.45, w * 0.46, h * 0.62, w + 10, h * 0.4), road(14))
+      ..drawPath(
+        Path()
+          ..moveTo(-10, h * 0.52)
+          ..cubicTo(w * 0.23, h * 0.45, w * 0.46, h * 0.62, w + 10, h * 0.4),
+        road(14),
+      )
       ..drawLine(Offset(w * 0.37, -10), Offset(w * 0.43, h + 10), road(10))
       ..drawLine(Offset(w * 0.71, h * 0.4), Offset(w * 0.83, h + 10), road(8))
       ..drawLine(Offset(-10, h * 0.23), Offset(w * 0.4, h * 0.17), road(6))
       ..drawLine(Offset(w * 0.43, h * 0.8), Offset(w + 10, h * 0.85), road(6))
       ..drawPath(
-        Path()..moveTo(0, h * 0.91)..cubicTo(w * 0.17, h * 0.85, w * 0.26, h, w * 0.4, h * 0.95),
+        Path()
+          ..moveTo(0, h * 0.91)
+          ..cubicTo(w * 0.17, h * 0.85, w * 0.26, h, w * 0.4, h * 0.95),
         Paint()
           ..color = const Color(0xFFBCD3E0)
           ..style = PaintingStyle.stroke

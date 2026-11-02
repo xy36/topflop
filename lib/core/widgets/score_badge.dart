@@ -26,7 +26,11 @@ class ScoreBadge extends StatelessWidget {
           borderRadius: BorderRadius.circular(vertical ? 14 : 12),
         ),
         child: vertical
-            ? Column(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [emoji, number])
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [emoji, number],
+              )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,

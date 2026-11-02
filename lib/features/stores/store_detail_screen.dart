@@ -37,14 +37,21 @@ class StoreDetailScreen extends ConsumerWidget {
           children: [
             Row(
               children: [
-                SquareIconButton(icon: Icons.arrow_back_ios_new_rounded, tooltip: l10n.back, onPressed: () => context.pop()),
+                SquareIconButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  tooltip: l10n.back,
+                  onPressed: () => context.pop(),
+                ),
               ],
             ),
             const SizedBox(height: 20),
             Text(store.name, style: AppText.display(32)),
             if (meta.isNotEmpty) ...[
               const SizedBox(height: 6),
-              Text(meta, style: AppText.body(14, weight: FontWeight.w600, color: AppColors.muted)),
+              Text(
+                meta,
+                style: AppText.body(14, weight: FontWeight.w600, color: AppColors.muted),
+              ),
             ],
             const SizedBox(height: 20),
             SectionHeader(l10n.storeProducts, trailing: l10n.productCount(summary.ratedCount)),

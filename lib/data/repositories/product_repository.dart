@@ -118,4 +118,23 @@ class ProductRepository {
           ));
 
   Future<void> deleteRating(int ratingId) => (_db.delete(_db.ratings)..where((r) => r.id.equals(ratingId))).go();
+
+  /// Eigene Korrekturen an Name, Marke, Menge und Kategorie.
+  Future<void> updateProduct(
+    int productId, {
+    required String name,
+    String? brand,
+    String? quantity,
+    required ProductCategory category,
+  }) =>
+      (_db.update(_db.products)..where((p) => p.id.equals(productId))).write(ProductsCompanion(
+        name: Value(name),
+        brand: Value(brand),
+        quantity: Value(quantity),
+        category: Value(category.name),
+      ));
+
+  Future<void> setCategory(int productId, ProductCategory category) =>
+      (_db.update(_db.products)..where((p) => p.id.equals(productId)))
+          .write(ProductsCompanion(category: Value(category.name)));
 }

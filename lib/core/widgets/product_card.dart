@@ -40,17 +40,30 @@ class ProductCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(16, weight: FontWeight.w600)),
+                    Text(
+                      p.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.body(16, weight: FontWeight.w600),
+                    ),
                     if (meta.isNotEmpty) ...[
                       const SizedBox(height: 3),
-                      Text(meta, maxLines: 1, overflow: TextOverflow.ellipsis, style: AppText.body(13, color: AppColors.muted)),
+                      Text(
+                        meta,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.body(13, color: AppColors.muted),
+                      ),
                     ],
                     if (summary.wouldBuyAgain == false) ...[
                       const SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(color: AppColors.subtle, borderRadius: BorderRadius.circular(99)),
-                        child: Text(l10n.notBuyAgain, style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted)),
+                        child: Text(
+                          l10n.notBuyAgain,
+                          style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted),
+                        ),
                       ),
                     ],
                   ],
