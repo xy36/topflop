@@ -47,7 +47,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String productCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count products', one: '1 product');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count products',
+      one: '1 product',
+    );
     return '$_temp0';
   }
 
@@ -58,7 +63,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeEmptyTitle => 'Nothing rated yet';
 
   @override
-  String get homeEmptyBody => 'Scan your first product in the store and note how much you liked it.';
+  String get homeEmptyBody =>
+      'Scan your first product in the store and note how much you liked it.';
 
   @override
   String get homeNoMatchTitle => 'Not found';
@@ -123,10 +129,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanNotFoundTitle => 'Unknown product';
 
   @override
-  String get scanNotFoundBody => 'Open Food Facts has no data for this barcode yet. You can add it yourself.';
+  String get scanNotFoundBody =>
+      'Open Food Facts has no data for this barcode yet. You can add it yourself.';
 
   @override
-  String get scanOffline => 'No connection. You can still add the product yourself.';
+  String get scanOffline =>
+      'No connection. You can still add the product yourself.';
 
   @override
   String get scanCreateProduct => 'Add manually';
@@ -144,7 +152,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataSourceOff => 'Product data from Open Food Facts';
 
   @override
-  String get cameraUnavailable => 'Camera unavailable. Check the permission in your settings.';
+  String get cameraUnavailable =>
+      'Camera unavailable. Check the permission in your settings.';
 
   @override
   String get enterCodeTitle => 'Enter barcode';
@@ -189,7 +198,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteProductTitle => 'Delete product?';
 
   @override
-  String get deleteProductBody => 'The product and all its ratings will be removed.';
+  String get deleteProductBody =>
+      'The product and all its ratings will be removed.';
 
   @override
   String nutriScore(String grade) {
@@ -341,7 +351,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get storesEmpty => 'No stores yet. Add your supermarket so you remember where you found what.';
+  String get storesEmpty =>
+      'No stores yet. Add your supermarket so you remember where you found what.';
 
   @override
   String get storesSuggestion => 'Suggestion nearby';
@@ -362,16 +373,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storesLocationOff => 'Location unavailable';
 
   @override
-  String get storeFormName => 'Store name';
+  String get storeFormName => 'Store / chain';
 
   @override
   String get storeFormAddress => 'Address (optional)';
 
   @override
-  String get storeFormUseLocation => 'Save current location';
+  String get storeFormUseLocation => 'Save current location as a branch';
 
   @override
-  String get storeProducts => 'Bought here';
+  String get storeProducts => 'Available here';
 
   @override
   String get save => 'Save';
@@ -403,13 +414,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settingsSizeWarning => 'The automatic backup is close to its limit. Please export your data regularly.';
+  String get settingsSizeWarning =>
+      'The automatic backup is close to its limit. Please export your data regularly.';
 
   @override
   String get settingsImportTitle => 'Import data?';
 
   @override
-  String get settingsImportBody => 'All current data will be replaced by the backup.';
+  String get settingsImportBody =>
+      'All current data will be replaced by the backup.';
 
   @override
   String get settingsImportDone => 'Import finished';
@@ -486,7 +499,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String filterStoresCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count stores', one: '1 store');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count stores',
+      one: '1 store',
+    );
     return '$_temp0';
   }
 
@@ -503,6 +521,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get change => 'Change';
+
+  @override
+  String get storeFormNameHint => 'e.g. Lidl';
+
+  @override
+  String storeFormBranchOf(String name) {
+    return 'Will be saved as another branch of $name';
+  }
+
+  @override
+  String get storeFormAddBranch => 'Save current location as another branch';
+
+  @override
+  String storeBranchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count branches',
+      one: '1 branch',
+      zero: 'No branch yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get storeBranches => 'Branches';
+
+  @override
+  String get storeNoBranches =>
+      'No branch saved yet. Add one via “Edit” when you are in the store.';
+
+  @override
+  String get storeBranchUnnamed => 'Branch without address';
+
+  @override
+  String get storeBranchRemove => 'Remove branch';
+
+  @override
+  String get storeBranchRemoveTitle => 'Remove branch?';
+
+  @override
+  String storeBranchAdded(String name) {
+    return 'Saved as a branch of $name';
+  }
+
+  @override
+  String storesSuggestionBranch(String name) {
+    return 'New branch of $name';
+  }
 
   @override
   String get ratingChange => 'Change rating';
@@ -528,11 +595,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeEditTitle => 'Edit store';
 
   @override
-  String get storeFormUpdateLocation => 'Replace location with current one';
-
-  @override
   String get deleteStoreTitle => 'Delete store?';
 
   @override
-  String get deleteStoreBody => 'Your ratings are kept but will no longer be linked to a store.';
+  String get deleteStoreBody =>
+      'The store and all its branches will be deleted. Your ratings are kept.';
 }

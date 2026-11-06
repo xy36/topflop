@@ -26,9 +26,7 @@ class StoresScreen extends ConsumerWidget {
     final position = ref.watch(currentPositionProvider).value;
     final suggestions = ref.watch(nearbySuggestionsProvider).value ?? const <NearbySuggestion>[];
 
-    double? distanceOf(StoreSummary s) => position == null || s.store.latitude == null
-        ? null
-        : position.distanceTo(s.store.latitude!, s.store.longitude!);
+    double? distanceOf(StoreSummary s) => s.nearest(position?.distanceTo)?.$2;
     final sorted = [for (final s in stores) (s, distanceOf(s))]
       ..sort((a, b) => (a.$2 ?? double.infinity).compareTo(b.$2 ?? double.infinity));
 
@@ -83,13 +81,32 @@ class StoresScreen extends ConsumerWidget {
               _SuggestionCard(
                 suggestion: suggestion,
                 distance: formatDistance(suggestion.distance, locale),
-                onAdd: () => showStoreForm(
-                  context,
-                  initialName: suggestion.shop.name,
-                  initialAddress: suggestion.shop.address,
-                  latitude: suggestion.shop.latitude,
-                  longitude: suggestion.shop.longitude,
-                ),
+                onAdd: () async {
+                  final chain = suggestion.chain;
+                  if (chain == null) {
+                    await showStoreForm(
+                      context,
+                      initialName: suggestion.shop.name,
+                      initialAddress: suggestion.shop.address,
+                      latitude: suggestion.shop.latitude,
+                      longitude: suggestion.shop.longitude,
+                    );
+                    return;
+                  }
+                  // Bekannte Kette: einfach als weitere Filiale speichern.
+                  await ref
+                      .read(storeRepositoryProvider)
+                      .addLocation(
+                        chain.id,
+                        latitude: suggestion.shop.latitude,
+                        longitude: suggestion.shop.longitude,
+                        address: suggestion.shop.address,
+                      );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(l10n.storeBranchAdded(chain.name))));
+                  }
+                },
               ),
               const SizedBox(height: 10),
             ],
@@ -117,7 +134,11 @@ class _StoreCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final top = summary.top;
-    final meta = [distance, l10n.storesRatedCount(summary.ratedCount)].whereType<String>().join(' · ');
+    final meta = [
+      distance,
+      if (summary.locations.length > 1) l10n.storeBranchCount(summary.locations.length),
+      l10n.storesRatedCount(summary.ratedCount),
+    ].whereType<String>().join(' · ');
 
     return Material(
       color: AppColors.surface,
@@ -189,9 +210,18 @@ class _SuggestionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(l10n.storesSuggestion.toUpperCase(), style: AppText.overline().copyWith(fontSize: 12)),
+                Text(
+                  (suggestion.chain == null
+                          ? l10n.storesSuggestion
+                          : l10n.storesSuggestionBranch(suggestion.chain!.name))
+                      .toUpperCase(),
+                  style: AppText.overline().copyWith(fontSize: 12),
+                ),
                 const SizedBox(height: 3),
-                Text('${suggestion.shop.name} · $distance', style: AppText.body(15, weight: FontWeight.w600)),
+                Text(
+                  [suggestion.shop.address ?? suggestion.shop.name, distance].join(' · '),
+                  style: AppText.body(15, weight: FontWeight.w600),
+                ),
               ],
             ),
           ),
@@ -304,23 +334,24 @@ class _StoreMap extends StatelessWidget {
     );
   }
 
-  /// Läden mit Koordinaten auf die Kartenfläche abbilden (Maßstab passt sich an).
+  /// Filialen auf die Kartenfläche abbilden (Maßstab passt sich an). Jeder Pin
+  /// zeigt die Zahl der Produkte, die es bei der jeweiligen Kette gibt.
   List<(Offset, int)> _project(Size size) {
     final here = position;
     if (here == null) return const [];
-    final located = stores.where((s) => s.store.latitude != null).toList();
+    final located = [
+      for (final s in stores)
+        for (final l in s.locations) (l, s.ratedCount),
+    ];
     if (located.isEmpty) return const [];
 
     const metersPerDegLat = 111320.0;
     final metersPerDegLon = metersPerDegLat * math.cos(here.latitude * math.pi / 180);
     final points = [
-      for (final s in located)
+      for (final (l, count) in located)
         (
-          Offset(
-            (s.store.longitude! - here.longitude) * metersPerDegLon,
-            -(s.store.latitude! - here.latitude) * metersPerDegLat,
-          ),
-          s.ratedCount,
+          Offset((l.longitude - here.longitude) * metersPerDegLon, -(l.latitude - here.latitude) * metersPerDegLat),
+          count,
         ),
     ];
     final maxDist = points.map((p) => math.max(p.$1.dx.abs(), p.$1.dy.abs())).fold(200.0, math.max);

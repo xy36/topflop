@@ -11,6 +11,7 @@ import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 import 'store_form_sheet.dart';
 
+/// Eine Kette mit ihren Filialen und den Produkten, die es dort gibt.
 class StoreDetailScreen extends ConsumerWidget {
   const StoreDetailScreen({super.key, required this.storeId});
 
@@ -26,10 +27,8 @@ class StoreDetailScreen extends ConsumerWidget {
     if (summary == null) return Scaffold(appBar: AppBar());
 
     final store = summary.store;
-    final distance = position == null || store.latitude == null
-        ? null
-        : formatDistance(position.distanceTo(store.latitude!, store.longitude!), locale);
-    final meta = [store.address, distance].whereType<String>().join(' · ');
+    final locations = [for (final l in summary.locations) (l, position?.distanceTo(l.latitude, l.longitude))]
+      ..sort((a, b) => (a.$2 ?? double.infinity).compareTo(b.$2 ?? double.infinity));
 
     return Scaffold(
       body: SafeArea(
@@ -54,18 +53,8 @@ class StoreDetailScreen extends ConsumerWidget {
                   icon: Icons.delete_outline_rounded,
                   tooltip: l10n.delete,
                   onPressed: () async {
-                    final ok = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(l10n.deleteStoreTitle),
-                        content: Text(l10n.deleteStoreBody),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
-                          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.delete)),
-                        ],
-                      ),
-                    );
-                    if (ok == true && context.mounted) {
+                    final ok = await _confirm(context, l10n.deleteStoreTitle, l10n.deleteStoreBody);
+                    if (ok && context.mounted) {
                       context.pop();
                       await ref.read(storeRepositoryProvider).deleteStore(store.id);
                     }
@@ -75,14 +64,51 @@ class StoreDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             Text(store.name, style: AppText.display(32)),
-            if (meta.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(
-                meta,
-                style: AppText.body(14, weight: FontWeight.w600, color: AppColors.muted),
-              ),
-            ],
+            const SizedBox(height: 6),
+            Text(
+              l10n.storeBranchCount(summary.locations.length),
+              style: AppText.body(14, weight: FontWeight.w600, color: AppColors.muted),
+            ),
             const SizedBox(height: 20),
+            SectionHeader(l10n.storeBranches),
+            const SizedBox(height: 10),
+            if (locations.isEmpty)
+              AppCard(
+                radius: 20,
+                child: Text(
+                  l10n.storeNoBranches,
+                  style: AppText.body(14, color: AppColors.muted).copyWith(height: 1.4),
+                ),
+              )
+            else
+              AppCard(
+                radius: 20,
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Column(
+                  children: [
+                    for (final (location, distance) in locations)
+                      ListTile(
+                        leading: const Icon(Icons.place_outlined, color: AppColors.primary),
+                        title: Text(
+                          location.address ?? l10n.storeBranchUnnamed,
+                          style: AppText.body(15, weight: FontWeight.w600),
+                        ),
+                        subtitle: distance == null
+                            ? null
+                            : Text(formatDistance(distance, locale), style: AppText.body(13, color: AppColors.muted)),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close_rounded, color: AppColors.muted),
+                          tooltip: l10n.storeBranchRemove,
+                          onPressed: () async {
+                            final ok = await _confirm(context, l10n.storeBranchRemoveTitle, null);
+                            if (ok) await ref.read(storeRepositoryProvider).deleteLocation(location.id);
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 24),
             SectionHeader(l10n.storeProducts, trailing: l10n.productCount(summary.ratedCount)),
             const SizedBox(height: 10),
             for (final p in summary.products) ...[
@@ -94,4 +120,20 @@ class StoreDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<bool> _confirm(BuildContext context, String title, String? body) async {
+  final l10n = AppLocalizations.of(context);
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: body == null ? null : Text(body),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+        TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.delete)),
+      ],
+    ),
+  );
+  return ok ?? false;
 }

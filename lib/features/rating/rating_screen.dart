@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,9 +85,12 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     super.dispose();
   }
 
-  /// Läden nach Entfernung sortieren und den nächsten vorauswählen.
+  /// Ketten nach Entfernung ihrer nächsten Filiale sortieren und die Kette
+  /// vorauswählen, in deren Filiale man gerade steht.
   Future<void> _loadStores({int? select}) async {
-    final stores = await ref.read(storeRepositoryProvider).allStores();
+    final repo = ref.read(storeRepositoryProvider);
+    final stores = await repo.allStores();
+    final locations = await repo.allLocations();
     if (!mounted) return;
     // Läden sofort zeigen; der Standort kann (z. B. nach dem Start) dauern.
     if (_position == null) {
@@ -95,8 +100,14 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
       });
     }
     final position = _position ?? await ref.read(currentPositionProvider.future);
-    double? distance(Store s) =>
-        position == null || s.latitude == null ? null : position.distanceTo(s.latitude!, s.longitude!);
+    double? distance(Store s) {
+      if (position == null) return null;
+      final ds = [
+        for (final l in locations)
+          if (l.storeId == s.id) position.distanceTo(l.latitude, l.longitude),
+      ];
+      return ds.isEmpty ? null : ds.reduce(math.min);
+    }
 
     final sorted = [for (final s in stores) (s, distance(s))]
       ..sort((a, b) => (a.$2 ?? double.infinity).compareTo(b.$2 ?? double.infinity));
@@ -122,8 +133,24 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     setState(() => _score = value);
   }
 
+  /// Neuer Laden bzw. neue Filiale. Steht man direkt vor einem Geschäft aus
+  /// OpenStreetMap, ist dessen Name schon eingetragen.
   Future<void> _addStore() async {
-    final id = await showStoreForm(context, latitude: _position?.latitude, longitude: _position?.longitude);
+    NearbySuggestion? here;
+    try {
+      final suggestions = await ref.read(nearbySuggestionsProvider.future).timeout(const Duration(seconds: 3));
+      here = suggestions.where((s) => s.distance < 150).firstOrNull;
+    } catch (_) {
+      // Ohne Netz oder Standort einfach leer starten.
+    }
+    if (!mounted) return;
+    final id = await showStoreForm(
+      context,
+      initialName: here?.chain?.name ?? here?.shop.name,
+      initialAddress: here?.shop.address,
+      latitude: here?.shop.latitude ?? _position?.latitude,
+      longitude: here?.shop.longitude ?? _position?.longitude,
+    );
     if (id != null) await _loadStores(select: id);
   }
 
@@ -139,8 +166,6 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
           storeIds: _storeIds,
           priceCents: parsePriceCents(_price.text),
           note: note.isEmpty ? null : note,
-          latitude: _position?.latitude,
-          longitude: _position?.longitude,
         );
     if (!mounted) return;
     if (widget.openDetailAfterSave) {

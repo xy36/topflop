@@ -62,7 +62,8 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,15 +84,19 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('de'), Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
+    Locale('en'),
+  ];
 
   /// No description provided for @appName.
   ///
@@ -761,7 +767,7 @@ abstract class AppLocalizations {
   /// No description provided for @storeFormName.
   ///
   /// In de, this message translates to:
-  /// **'Name des Ladens'**
+  /// **'Laden / Kette'**
   String get storeFormName;
 
   /// No description provided for @storeFormAddress.
@@ -773,13 +779,13 @@ abstract class AppLocalizations {
   /// No description provided for @storeFormUseLocation.
   ///
   /// In de, this message translates to:
-  /// **'Aktuellen Standort speichern'**
+  /// **'Aktuellen Standort als Filiale speichern'**
   String get storeFormUseLocation;
 
   /// No description provided for @storeProducts.
   ///
   /// In de, this message translates to:
-  /// **'Hier gekauft'**
+  /// **'Gibt es hier'**
   String get storeProducts;
 
   /// No description provided for @save.
@@ -1004,6 +1010,72 @@ abstract class AppLocalizations {
   /// **'Ändern'**
   String get change;
 
+  /// No description provided for @storeFormNameHint.
+  ///
+  /// In de, this message translates to:
+  /// **'z. B. Lidl'**
+  String get storeFormNameHint;
+
+  /// No description provided for @storeFormBranchOf.
+  ///
+  /// In de, this message translates to:
+  /// **'Wird als weitere Filiale von {name} gespeichert'**
+  String storeFormBranchOf(String name);
+
+  /// No description provided for @storeFormAddBranch.
+  ///
+  /// In de, this message translates to:
+  /// **'Aktuellen Standort als weitere Filiale speichern'**
+  String get storeFormAddBranch;
+
+  /// No description provided for @storeBranchCount.
+  ///
+  /// In de, this message translates to:
+  /// **'{count, plural, =0{Noch keine Filiale} =1{1 Filiale} other{{count} Filialen}}'**
+  String storeBranchCount(int count);
+
+  /// No description provided for @storeBranches.
+  ///
+  /// In de, this message translates to:
+  /// **'Filialen'**
+  String get storeBranches;
+
+  /// No description provided for @storeNoBranches.
+  ///
+  /// In de, this message translates to:
+  /// **'Noch keine Filiale gespeichert. Füge eine über „Bearbeiten“ hinzu, wenn du im Laden bist.'**
+  String get storeNoBranches;
+
+  /// No description provided for @storeBranchUnnamed.
+  ///
+  /// In de, this message translates to:
+  /// **'Filiale ohne Adresse'**
+  String get storeBranchUnnamed;
+
+  /// No description provided for @storeBranchRemove.
+  ///
+  /// In de, this message translates to:
+  /// **'Filiale entfernen'**
+  String get storeBranchRemove;
+
+  /// No description provided for @storeBranchRemoveTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Filiale entfernen?'**
+  String get storeBranchRemoveTitle;
+
+  /// No description provided for @storeBranchAdded.
+  ///
+  /// In de, this message translates to:
+  /// **'Als Filiale von {name} gespeichert'**
+  String storeBranchAdded(String name);
+
+  /// No description provided for @storesSuggestionBranch.
+  ///
+  /// In de, this message translates to:
+  /// **'Neue Filiale von {name}'**
+  String storesSuggestionBranch(String name);
+
   /// No description provided for @ratingChange.
   ///
   /// In de, this message translates to:
@@ -1046,12 +1118,6 @@ abstract class AppLocalizations {
   /// **'Laden bearbeiten'**
   String get storeEditTitle;
 
-  /// No description provided for @storeFormUpdateLocation.
-  ///
-  /// In de, this message translates to:
-  /// **'Standort durch aktuellen ersetzen'**
-  String get storeFormUpdateLocation;
-
   /// No description provided for @deleteStoreTitle.
   ///
   /// In de, this message translates to:
@@ -1061,11 +1127,12 @@ abstract class AppLocalizations {
   /// No description provided for @deleteStoreBody.
   ///
   /// In de, this message translates to:
-  /// **'Deine Bewertungen bleiben erhalten, sind danach aber keinem Laden mehr zugeordnet.'**
+  /// **'Der Laden wird mit allen Filialen gelöscht. Deine Bewertungen bleiben erhalten.'**
   String get deleteStoreBody;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1074,7 +1141,8 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['de', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['de', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;

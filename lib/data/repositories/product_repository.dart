@@ -111,8 +111,6 @@ class ProductRepository {
     required Set<int> storeIds,
     int? priceCents,
     String? note,
-    double? latitude,
-    double? longitude,
   }) => _db.transaction(() async {
     final values = RatingsCompanion(
       score: Value(score),
@@ -123,11 +121,8 @@ class ProductRepository {
     );
     final existing = await findRating(productId);
     if (existing == null) {
-      await _db
-          .into(_db.ratings)
-          .insert(values.copyWith(productId: Value(productId), latitude: Value(latitude), longitude: Value(longitude)));
+      await _db.into(_db.ratings).insert(values.copyWith(productId: Value(productId)));
     } else {
-      // Standort der ersten Bewertung bleibt erhalten.
       await (_db.update(_db.ratings)..where((r) => r.id.equals(existing.id))).write(values);
     }
     await setStores(productId, storeIds);

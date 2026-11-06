@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/common.dart';
 import '../../data/db/database.dart';
 import '../../data/providers.dart';
+import '../../data/repositories/store_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Öffnet das Formular für einen neuen Laden – oder, mit [existing], zum
-/// Bearbeiten eines vorhandenen. Liefert die ID oder `null`.
+/// Umbenennen einer Kette. Gibt es die Kette schon, wird nur eine weitere
+/// Filiale gespeichert. Liefert die ID der Kette oder `null`.
 Future<int?> showStoreForm(
   BuildContext context, {
   Store? existing,
@@ -24,7 +27,7 @@ Future<int?> showStoreForm(
     builder: (context) => _StoreForm(
       existing: existing,
       initialName: initialName ?? existing?.name,
-      initialAddress: initialAddress ?? existing?.address,
+      initialAddress: initialAddress,
       latitude: latitude,
       longitude: longitude,
     ),
@@ -48,9 +51,11 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
   late final _name = TextEditingController(text: widget.initialName);
   late final _address = TextEditingController(text: widget.initialAddress);
 
-  /// Beim Bearbeiten bleibt der gespeicherte Standort, solange man ihn nicht bewusst ersetzt.
+  /// Neu: Standort als Filiale speichern. Beim Bearbeiten nur auf Wunsch.
   late bool _useLocation = widget.existing == null;
   bool _saving = false;
+
+  bool get _editing => widget.existing != null;
 
   @override
   void dispose() {
@@ -64,42 +69,43 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
     if (name.isEmpty) return;
     setState(() => _saving = true);
 
-    double? lat = widget.latitude;
-    double? lon = widget.longitude;
+    var lat = widget.latitude;
+    var lon = widget.longitude;
     if (_useLocation && lat == null) {
       final pos = await ref.read(currentPositionProvider.future);
       lat = pos?.latitude;
       lon = pos?.longitude;
     }
-    final address = _address.text.trim();
-    final existing = widget.existing;
-    if (existing != null) {
-      await ref
-          .read(storeRepositoryProvider)
-          .updateStore(
-            existing.id,
-            name: name,
-            address: address.isEmpty ? null : address,
-            latitude: _useLocation ? lat : existing.latitude,
-            longitude: _useLocation ? lon : existing.longitude,
-          );
-      if (mounted) Navigator.pop(context, existing.id);
-      return;
+    final address = _address.text.trim().isEmpty ? null : _address.text.trim();
+    final repo = ref.read(storeRepositoryProvider);
+
+    final int id;
+    if (_editing) {
+      id = widget.existing!.id;
+      await repo.renameStore(id, name);
+      if (_useLocation && lat != null && lon != null) {
+        await repo.addLocation(id, latitude: lat, longitude: lon, address: address);
+      }
+    } else {
+      id = await repo.addStore(
+        name: name,
+        address: address,
+        latitude: _useLocation ? lat : null,
+        longitude: _useLocation ? lon : null,
+      );
     }
-    final id = await ref
-        .read(storeRepositoryProvider)
-        .addStore(
-          name: name,
-          address: address.isEmpty ? null : address,
-          latitude: _useLocation ? lat : null,
-          longitude: _useLocation ? lon : null,
-        );
     if (mounted) Navigator.pop(context, id);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final chains = ref.watch(storeSummariesProvider).value?.map((s) => s.store).toList() ?? const <Store>[];
+    final typedKey = StoreRepository.chainKey(_name.text);
+    final matchingChain = _editing || typedKey.isEmpty
+        ? null
+        : chains.where((c) => StoreRepository.chainKey(c.name) == typedKey).firstOrNull;
+
     return Padding(
       padding: EdgeInsets.fromLTRB(
         20,
@@ -111,33 +117,66 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(widget.existing == null ? l10n.storesAdd : l10n.storeEditTitle, style: AppText.display(24)),
+          Text(_editing ? l10n.storeEditTitle : l10n.storesAdd, style: AppText.display(24)),
           const SizedBox(height: 16),
           TextField(
             controller: _name,
             autofocus: widget.initialName == null,
             textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(labelText: l10n.storeFormName),
+            decoration: InputDecoration(labelText: l10n.storeFormName, hintText: l10n.storeFormNameHint),
             onChanged: (_) => setState(() {}),
           ),
+          // Schnellauswahl vorhandener Ketten, damit kein zweiter „Lidl“ entsteht.
+          if (!_editing && chains.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final c in chains)
+                  PillChip(
+                    label: c.name,
+                    dark: false,
+                    selected: matchingChain?.id == c.id,
+                    onTap: () => setState(() => _name.text = c.name),
+                  ),
+              ],
+            ),
+          ],
+          if (matchingChain != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    l10n.storeFormBranchOf(matchingChain.name),
+                    style: AppText.body(13, weight: FontWeight.w600, color: AppColors.primary),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 10),
-          TextField(
-            controller: _address,
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(labelText: l10n.storeFormAddress),
-          ),
-          const SizedBox(height: 6),
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             value: _useLocation,
-            activeTrackColor: AppColors.primary,
             onChanged: (v) => setState(() => _useLocation = v),
             title: Text(
-              widget.existing == null ? l10n.storeFormUseLocation : l10n.storeFormUpdateLocation,
+              _editing ? l10n.storeFormAddBranch : l10n.storeFormUseLocation,
               style: AppText.body(15, weight: FontWeight.w600),
             ),
           ),
-          const SizedBox(height: 10),
+          if (_useLocation) ...[
+            TextField(
+              controller: _address,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(labelText: l10n.storeFormAddress),
+            ),
+            const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 6),
           FilledButton(
             onPressed: _name.text.trim().isEmpty || _saving ? null : _save,
             child: _saving

@@ -17,12 +17,21 @@ class Products extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
+/// Ein Laden im Sinne einer Kette („Lidl“). Produkte werden der Kette
+/// zugeordnet, weil das Sortiment fast überall gleich ist.
 class Stores extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Eine Filiale einer Kette – dient nur dazu, zu erkennen, wo man gerade ist.
+class StoreLocations extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get storeId => integer().references(Stores, #id, onDelete: KeyAction.cascade)();
   TextColumn get address => text().nullable()();
-  RealColumn get latitude => real().nullable()();
-  RealColumn get longitude => real().nullable()();
+  RealColumn get latitude => real()();
+  RealColumn get longitude => real()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -35,8 +44,6 @@ class Ratings extends Table {
   BoolColumn get wouldBuyAgain => boolean()();
   IntColumn get priceCents => integer().nullable()();
   TextColumn get note => text().nullable()();
-  RealColumn get latitude => real().nullable()();
-  RealColumn get longitude => real().nullable()();
 
   /// Zeitpunkt der letzten Änderung.
   DateTimeColumn get ratedAt => dateTime().withDefault(currentDateAndTime)();
@@ -60,7 +67,7 @@ class Settings extends Table {
   Set<Column<Object>> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [Products, Stores, Ratings, ProductStores, Settings])
+@DriftDatabase(tables: [Products, Stores, StoreLocations, Ratings, ProductStores, Settings])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: fileName));
 
@@ -70,8 +77,9 @@ class AppDatabase extends _$AppDatabase {
 
   /// 1: mehrere Bewertungen pro Produkt, Laden an der Bewertung.
   /// 2: eine Bewertung pro Produkt, Läden am Produkt (mehrere möglich).
+  /// 3: Läden sind Ketten mit Filialen; kein Standort mehr an Bewertungen.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -90,6 +98,37 @@ class AppDatabase extends _$AppDatabase {
           'AND (newer.rated_at > ratings.rated_at OR (newer.rated_at = ratings.rated_at AND newer.id > ratings.id)))',
         );
         // Tabelle neu aufbauen: ohne store_id, mit eindeutiger product_id.
+        await m.alterTable(TableMigration(ratings));
+      }
+      if (from < 3) {
+        await m.createTable(storeLocations);
+        // Jeder bisherige Laden mit Koordinaten wird zur Filiale seiner Kette.
+        await customStatement(
+          'INSERT INTO store_locations (store_id, address, latitude, longitude, created_at) '
+          'SELECT id, address, latitude, longitude, created_at FROM stores '
+          'WHERE latitude IS NOT NULL AND longitude IS NOT NULL',
+        );
+        // Läden mit gleichem Namen zu einer Kette zusammenführen.
+        await customStatement(
+          'CREATE TEMP TABLE store_merge AS SELECT s.id AS old_id, '
+          '(SELECT MIN(s2.id) FROM stores s2 WHERE lower(trim(s2.name)) = lower(trim(s.name))) AS new_id '
+          'FROM stores s',
+        );
+        await customStatement(
+          'INSERT OR IGNORE INTO product_stores (product_id, store_id) '
+          'SELECT ps.product_id, m.new_id FROM product_stores ps JOIN store_merge m ON m.old_id = ps.store_id '
+          'WHERE m.old_id != m.new_id',
+        );
+        await customStatement(
+          'DELETE FROM product_stores WHERE store_id IN (SELECT old_id FROM store_merge WHERE old_id != new_id)',
+        );
+        await customStatement(
+          'UPDATE store_locations SET store_id = (SELECT new_id FROM store_merge WHERE old_id = store_locations.store_id)',
+        );
+        await customStatement('DELETE FROM stores WHERE id IN (SELECT old_id FROM store_merge WHERE old_id != new_id)');
+        await customStatement('DROP TABLE store_merge');
+        // Spalten entfernen: Adresse/Koordinaten am Laden, Standort an Bewertungen.
+        await m.alterTable(TableMigration(stores));
         await m.alterTable(TableMigration(ratings));
       }
     },

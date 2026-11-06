@@ -172,18 +172,42 @@ void main() {
       final store = await stores.addStore(name: 'Aldi', latitude: 52, longitude: 8);
       await products.saveRating(productId: id, score: 7, wouldBuyAgain: true, storeIds: {store});
 
-      await stores.updateStore(store, name: 'Aldi Süd', latitude: 52, longitude: 8);
+      await stores.renameStore(store, 'Aldi Süd');
       expect((await products.loadProduct(id))!.storeName, 'Aldi Süd');
+      expect(await stores.allLocations(), hasLength(1));
 
       await stores.deleteStore(store);
       final summary = (await products.loadProduct(id))!;
       expect(summary.score, 7);
       expect(summary.stores, isEmpty);
+      expect(await stores.allLocations(), isEmpty);
+    });
+
+    test('Ketten: gleiche Kette wird erkannt, Filialen kommen dazu', () async {
+      expect(StoreRepository.chainKey('ALDI SÜD'), 'aldi');
+      expect(StoreRepository.chainKey('  Lidl  Ringstraße'), 'lidl');
+      expect(StoreRepository.chainKey('dm-drogerie markt'), 'dmdrogerie');
+
+      final lidl = await stores.addStore(name: 'Lidl', latitude: 52.0, longitude: 8.0, address: 'Hauptstraße 1');
+      final again = await stores.addStore(name: 'lidl ringstraße', latitude: 52.1, longitude: 8.1);
+      final aldi = await stores.addStore(name: 'ALDI SÜD');
+      expect(again, lidl);
+      expect(await stores.findOrCreateChain('Aldi'), aldi);
+
+      final summaries = await stores.loadSummaries();
+      final lidlSummary = summaries.firstWhere((s) => s.store.id == lidl);
+      expect(lidlSummary.store.name, 'Lidl');
+      expect(lidlSummary.locations, hasLength(2));
+      final nearest = lidlSummary.nearest((lat, lon) => (lat - 52.09).abs() * 100000)!;
+      expect(nearest.$1.latitude, 52.1);
+
+      await stores.deleteLocation(nearest.$1.id);
+      expect((await stores.allLocations()).map((l) => l.address), ['Hauptstraße 1']);
     });
 
     test('Backup: Export und Import ergeben dieselben Daten', () async {
       final id = await salami();
-      final a = await stores.addStore(name: 'Edeka Am Markt');
+      final a = await stores.addStore(name: 'Edeka Am Markt', latitude: 52, longitude: 8, address: 'Am Markt 1');
       final b = await stores.addStore(name: 'Rewe');
       await products.setFavorite(id, true);
       await products.saveRating(productId: id, score: 9, wouldBuyAgain: true, storeIds: {a, b}, note: 'Schön mild');
@@ -193,6 +217,7 @@ void main() {
         'version': BackupService.formatVersion,
         'products': [for (final p in await db.select(db.products).get()) p.toJson()],
         'stores': [for (final s in await db.select(db.stores).get()) s.toJson()],
+        'storeLocations': [for (final l in await db.select(db.storeLocations).get()) l.toJson()],
         'ratings': [for (final r in await db.select(db.ratings).get()) r.toJson()],
         'productStores': [for (final ps in await db.select(db.productStores).get()) ps.toJson()],
       });
@@ -205,6 +230,35 @@ void main() {
       expect(restored.product.isFavorite, isTrue);
       expect(restored.rating!.note, 'Schön mild');
       expect(restored.stores.map((s) => s.name), ['Edeka Am Markt', 'Rewe']);
+      expect((await target.select(target.storeLocations).get()).single.address, 'Am Markt 1');
+    });
+
+    test('Backup: Sicherung Version 2 – gleichnamige Läden werden zu einer Kette', () async {
+      final json = jsonEncode({
+        'app': 'topflop',
+        'version': 2,
+        'products': [
+          {'id': 1, 'name': 'Cola', 'category': 'drink', 'isFavorite': false, 'createdAt': 1000},
+        ],
+        'stores': [
+          {'id': 1, 'name': 'Lidl', 'latitude': 52.0, 'longitude': 8.0, 'address': 'A', 'createdAt': 1000},
+          {'id': 2, 'name': 'lidl', 'latitude': 53.0, 'longitude': 9.0, 'createdAt': 1000},
+          {'id': 3, 'name': 'Aldi', 'createdAt': 1000},
+        ],
+        'ratings': [
+          {'id': 1, 'productId': 1, 'score': 8, 'wouldBuyAgain': true, 'latitude': 1.0, 'ratedAt': 3000},
+        ],
+        'productStores': [
+          {'productId': 1, 'storeId': 1},
+          {'productId': 1, 'storeId': 2},
+          {'productId': 1, 'storeId': 3},
+        ],
+      });
+      await BackupService(db).importJson(json);
+
+      expect((await stores.allStores()).map((s) => s.name), ['Aldi', 'Lidl']);
+      expect(await stores.allLocations(), hasLength(2));
+      expect((await products.loadProduct(1))!.stores.map((s) => s.name), ['Aldi', 'Lidl']);
     });
 
     test('Backup: alte Sicherung (Version 1) mit mehreren Bewertungen wird übernommen', () async {
@@ -309,5 +363,45 @@ void main() {
       db.into(db.ratings).insert(RatingsCompanion.insert(productId: 1, score: 3, wouldBuyAgain: false)),
       throwsA(anything),
     );
+  });
+
+  test('Migration von Schema 2: Läden werden Ketten mit Filialen, gleiche Namen zusammengeführt', () async {
+    final legacy = NativeDatabase.memory(
+      setup: (raw) {
+        raw.execute('''
+          CREATE TABLE products (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, barcode TEXT NULL UNIQUE,
+            name TEXT NOT NULL, brand TEXT NULL, quantity TEXT NULL, image_url TEXT NULL, nutri_score TEXT NULL,
+            category TEXT NOT NULL DEFAULT 'other', is_favorite INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)));
+          CREATE TABLE stores (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
+            address TEXT NULL, latitude REAL NULL, longitude REAL NULL,
+            created_at INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)));
+          CREATE TABLE ratings (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER NOT NULL UNIQUE REFERENCES products (id) ON DELETE CASCADE,
+            score INTEGER NOT NULL CHECK (score BETWEEN 1 AND 10), would_buy_again INTEGER NOT NULL,
+            price_cents INTEGER NULL, note TEXT NULL, latitude REAL NULL, longitude REAL NULL,
+            rated_at INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)));
+          CREATE TABLE product_stores (product_id INTEGER NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+            store_id INTEGER NOT NULL REFERENCES stores (id) ON DELETE CASCADE, PRIMARY KEY (product_id, store_id));
+          CREATE TABLE settings ("key" TEXT NOT NULL, value TEXT NOT NULL, PRIMARY KEY ("key"));
+          INSERT INTO products (id, name) VALUES (1, 'Cola'), (2, 'Chips');
+          INSERT INTO stores (id, name, address, latitude, longitude) VALUES
+            (1, 'Lidl', 'Hauptstraße', 52.0, 8.0), (2, 'Lidl ', NULL, 53.0, 9.0), (3, 'Aldi', NULL, NULL, NULL);
+          INSERT INTO ratings (product_id, score, would_buy_again, latitude, longitude) VALUES (1, 8, 1, 52.0, 8.0);
+          INSERT INTO product_stores VALUES (1, 1), (1, 2), (2, 2), (2, 3);
+          PRAGMA user_version = 2;
+        ''');
+      },
+    );
+    final db = AppDatabase(legacy);
+    addTearDown(db.close);
+    final repo = ProductRepository(db);
+
+    expect((await db.select(db.stores).get()).map((s) => s.name), ['Lidl', 'Aldi']);
+    final locations = await db.select(db.storeLocations).get();
+    expect(locations.map((l) => (l.storeId, l.address)), [(1, 'Hauptstraße'), (1, null)]);
+    expect((await repo.loadProduct(1))!.stores.map((s) => s.name), ['Lidl']);
+    expect((await repo.loadProduct(2))!.stores.map((s) => s.name), ['Aldi', 'Lidl']);
+    expect((await repo.loadProduct(1))!.score, 8);
   });
 }

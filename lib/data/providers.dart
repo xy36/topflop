@@ -40,18 +40,27 @@ final storeSummariesProvider = StreamProvider<List<StoreSummary>>(
 /// Aktueller Standort; wird bei Bedarf über `ref.invalidate` neu ermittelt.
 final currentPositionProvider = FutureProvider<LatLon?>((ref) => ref.watch(locationServiceProvider).currentPosition());
 
-/// Geschäfte aus OpenStreetMap in der Nähe, die noch nicht angelegt sind.
+/// Filialen aus OpenStreetMap in der Nähe, die noch nicht gespeichert sind –
+/// auch neue Filialen bekannter Ketten (z. B. ein anderer Lidl).
 final nearbySuggestionsProvider = FutureProvider<List<NearbySuggestion>>((ref) async {
   final position = await ref.watch(currentPositionProvider.future);
   if (position == null) return const [];
   final known = await ref.watch(storeSummariesProvider.future);
-  final knownNames = known.map((s) => s.store.name.toLowerCase()).toSet();
+  final knownLocations = [for (final s in known) ...s.locations];
   try {
     final shops = await ref.watch(overpassProvider).shopsAround(position.latitude, position.longitude);
     final suggestions = [
       for (final shop in shops)
-        if (!knownNames.contains(shop.name.toLowerCase()))
-          NearbySuggestion(shop, position.distanceTo(shop.latitude, shop.longitude)),
+        // Schon gespeichert, wenn eine Filiale fast am selben Ort liegt.
+        if (!knownLocations.any((l) => LatLon(l.latitude, l.longitude).distanceTo(shop.latitude, shop.longitude) < 75))
+          NearbySuggestion(
+            shop,
+            position.distanceTo(shop.latitude, shop.longitude),
+            chain: known
+                .map((s) => s.store)
+                .where((s) => StoreRepository.chainKey(s.name) == StoreRepository.chainKey(shop.name))
+                .firstOrNull,
+          ),
     ]..sort((a, b) => a.distance.compareTo(b.distance));
     return suggestions.take(3).toList();
   } catch (_) {
@@ -60,8 +69,11 @@ final nearbySuggestionsProvider = FutureProvider<List<NearbySuggestion>>((ref) a
 });
 
 class NearbySuggestion {
-  const NearbySuggestion(this.shop, this.distance);
+  const NearbySuggestion(this.shop, this.distance, {this.chain});
 
   final NearbyShop shop;
   final double distance;
+
+  /// Bereits bekannte Kette, zu der diese Filiale gehören würde.
+  final Store? chain;
 }
