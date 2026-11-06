@@ -47,12 +47,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String productCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Produkte',
-      one: '1 Produkt',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count Produkte', one: '1 Produkt');
     return '$_temp0';
   }
 
@@ -63,8 +58,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeEmptyTitle => 'Noch nichts bewertet';
 
   @override
-  String get homeEmptyBody =>
-      'Scanne dein erstes Produkt im Laden und halte fest, wie es dir geschmeckt hat.';
+  String get homeEmptyBody => 'Scanne dein erstes Produkt im Laden und halte fest, wie es dir geschmeckt hat.';
 
   @override
   String get homeNoMatchTitle => 'Nicht gefunden';
@@ -133,8 +127,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zu diesem Barcode gibt es noch keine Daten bei Open Food Facts. Du kannst es selbst anlegen.';
 
   @override
-  String get scanOffline =>
-      'Keine Verbindung. Du kannst das Produkt trotzdem selbst anlegen.';
+  String get scanOffline => 'Keine Verbindung. Du kannst das Produkt trotzdem selbst anlegen.';
 
   @override
   String get scanCreateProduct => 'Selbst anlegen';
@@ -155,8 +148,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get dataSourceOff => 'Produktdaten von Open Food Facts';
 
   @override
-  String get cameraUnavailable =>
-      'Kamera nicht verfügbar. Prüfe die Berechtigung in den Einstellungen.';
+  String get cameraUnavailable => 'Kamera nicht verfügbar. Prüfe die Berechtigung in den Einstellungen.';
 
   @override
   String get enterCodeTitle => 'Barcode eingeben';
@@ -213,8 +205,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteProductTitle => 'Produkt löschen?';
 
   @override
-  String get deleteProductBody =>
-      'Das Produkt und alle Bewertungen werden entfernt.';
+  String get deleteProductBody => 'Das Produkt und alle Bewertungen werden entfernt.';
 
   @override
   String nutriScore(String grade) {
@@ -369,8 +360,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get storesEmpty =>
-      'Noch keine Läden. Lege deinen Supermarkt an, damit du später weißt, wo es was gab.';
+  String get storesEmpty => 'Noch keine Läden. Lege deinen Supermarkt an, damit du später weißt, wo es was gab.';
 
   @override
   String get storesSuggestion => 'Vorschlag in der Nähe';
@@ -439,8 +429,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsImportTitle => 'Daten importieren?';
 
   @override
-  String get settingsImportBody =>
-      'Alle aktuellen Daten werden durch die Sicherung ersetzt.';
+  String get settingsImportBody => 'Alle aktuellen Daten werden durch die Sicherung ersetzt.';
 
   @override
   String get settingsImportDone => 'Import abgeschlossen';
@@ -517,12 +506,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String filterStoresCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Läden',
-      one: '1 Laden',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count Läden', one: '1 Laden');
     return '$_temp0';
   }
 
@@ -559,6 +543,5 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteStoreTitle => 'Laden löschen?';
 
   @override
-  String get deleteStoreBody =>
-      'Deine Bewertungen bleiben erhalten, sind danach aber keinem Laden mehr zugeordnet.';
+  String get deleteStoreBody => 'Deine Bewertungen bleiben erhalten, sind danach aber keinem Laden mehr zugeordnet.';
 }

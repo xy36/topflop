@@ -86,6 +86,14 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   /// Läden nach Entfernung sortieren und den nächsten vorauswählen.
   Future<void> _loadStores({int? select}) async {
     final stores = await ref.read(storeRepositoryProvider).allStores();
+    if (!mounted) return;
+    // Läden sofort zeigen; der Standort kann (z. B. nach dem Start) dauern.
+    if (_position == null) {
+      setState(() {
+        _stores = [for (final s in stores) (s, null)]..sort((a, b) => a.$1.name.compareTo(b.$1.name));
+        if (select != null) _storeId = select;
+      });
+    }
     final position = _position ?? await ref.read(currentPositionProvider.future);
     double? distance(Store s) =>
         position == null || s.latitude == null ? null : position.distanceTo(s.latitude!, s.longitude!);
@@ -618,13 +626,18 @@ class _DashedButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
+        // Row statt `alignment`, sonst wird der Knopf im Wrap volle Breite.
         child: Container(
           height: 40,
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: AppText.body(14, weight: FontWeight.w600, color: const Color(0xFF3E4A42)),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: AppText.body(14, weight: FontWeight.w600, color: const Color(0xFF3E4A42)),
+              ),
+            ],
           ),
         ),
       ),
