@@ -539,4 +539,26 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get change => 'Ändern';
+
+  @override
+  String get ratingEditTitle => 'Bewertung bearbeiten';
+
+  @override
+  String get ratingDeleted => 'Bewertung gelöscht';
+
+  @override
+  String get undo => 'Rückgängig';
+
+  @override
+  String get storeEditTitle => 'Laden bearbeiten';
+
+  @override
+  String get storeFormUpdateLocation => 'Standort durch aktuellen ersetzen';
+
+  @override
+  String get deleteStoreTitle => 'Laden löschen?';
+
+  @override
+  String get deleteStoreBody =>
+      'Deine Bewertungen bleiben erhalten, sind danach aber keinem Laden mehr zugeordnet.';
 }

@@ -539,4 +539,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get change => 'Change';
+
+  @override
+  String get ratingEditTitle => 'Edit rating';
+
+  @override
+  String get ratingDeleted => 'Rating deleted';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get storeEditTitle => 'Edit store';
+
+  @override
+  String get storeFormUpdateLocation => 'Replace location with current one';
+
+  @override
+  String get deleteStoreTitle => 'Delete store?';
+
+  @override
+  String get deleteStoreBody =>
+      'Your ratings are kept but will no longer be linked to a store.';
 }

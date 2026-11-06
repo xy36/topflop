@@ -17,9 +17,12 @@ import '../../l10n/app_localizations.dart';
 import '../stores/store_form_sheet.dart';
 
 class RatingScreen extends ConsumerStatefulWidget {
-  const RatingScreen({super.key, required this.productId, this.openDetailAfterSave = false});
+  const RatingScreen({super.key, required this.productId, this.ratingId, this.openDetailAfterSave = false});
 
   final int productId;
+
+  /// Gesetzt: bestehende Bewertung bearbeiten statt eine neue anzulegen.
+  final int? ratingId;
 
   /// Kommt man vom Scanner, geht es nach dem Speichern zur Produktseite.
   final bool openDetailAfterSave;
@@ -43,10 +46,34 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   List<(Store, double?)> _stores = const [];
   bool _locationMatched = false;
 
+  bool get _editing => widget.ratingId != null;
+
   @override
   void initState() {
     super.initState();
-    _loadStores();
+    _init();
+  }
+
+  /// Beim Bearbeiten zuerst die alte Bewertung laden, damit die Vorauswahl
+  /// des nächsten Ladens den gespeicherten Laden nicht überschreibt.
+  Future<void> _init() async {
+    if (_editing) {
+      final r = await ref.read(productRepositoryProvider).findRating(widget.ratingId!);
+      if (!mounted) return;
+      if (r != null) {
+        final locale = Localizations.localeOf(context).toString();
+        setState(() {
+          _score = r.score;
+          _again = r.wouldBuyAgain;
+          _storeId = r.storeId;
+          _price.text = r.priceCents == null
+              ? ''
+              : formatPrice(r.priceCents!, locale).replaceAll(RegExp(r'[^0-9.,]'), '');
+          _note.text = r.note ?? '';
+        });
+      }
+    }
+    await _loadStores();
   }
 
   @override
@@ -71,7 +98,10 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
       _stores = sorted;
       if (select != null) {
         _storeId = select;
-      } else if (_storeId == null && sorted.isNotEmpty && (sorted.first.$2 ?? double.infinity) < _nearbyMeters) {
+      } else if (!_editing &&
+          _storeId == null &&
+          sorted.isNotEmpty &&
+          (sorted.first.$2 ?? double.infinity) < _nearbyMeters) {
         _storeId = sorted.first.$1.id;
         _locationMatched = true;
       }
@@ -92,18 +122,29 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   Future<void> _save() async {
     setState(() => _saving = true);
     final note = _note.text.trim();
-    await ref
-        .read(productRepositoryProvider)
-        .addRating(
-          productId: widget.productId,
-          score: _score,
-          wouldBuyAgain: _again,
-          storeId: _storeId,
-          priceCents: parsePriceCents(_price.text),
-          note: note.isEmpty ? null : note,
-          latitude: _position?.latitude,
-          longitude: _position?.longitude,
-        );
+    final repo = ref.read(productRepositoryProvider);
+    if (_editing) {
+      await repo.updateRating(
+        widget.ratingId!,
+        score: _score,
+        wouldBuyAgain: _again,
+        storeId: _storeId,
+        priceCents: parsePriceCents(_price.text),
+        note: note.isEmpty ? null : note,
+      );
+      if (mounted) context.pop();
+      return;
+    }
+    await repo.addRating(
+      productId: widget.productId,
+      score: _score,
+      wouldBuyAgain: _again,
+      storeId: _storeId,
+      priceCents: parsePriceCents(_price.text),
+      note: note.isEmpty ? null : note,
+      latitude: _position?.latitude,
+      longitude: _position?.longitude,
+    );
     if (!mounted) return;
     if (widget.openDetailAfterSave) {
       context.pushReplacement('/product/${widget.productId}');
@@ -135,7 +176,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n.ratingTitle,
+                          _editing ? l10n.ratingEditTitle : l10n.ratingTitle,
                           style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted),
                         ),
                         Text(

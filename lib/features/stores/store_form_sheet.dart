@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../data/db/database.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 
-/// Öffnet das Formular für einen neuen Laden. Liefert die ID oder `null`.
+/// Öffnet das Formular für einen neuen Laden – oder, mit [existing], zum
+/// Bearbeiten eines vorhandenen. Liefert die ID oder `null`.
 Future<int?> showStoreForm(
   BuildContext context, {
+  Store? existing,
   String? initialName,
   String? initialAddress,
   double? latitude,
@@ -18,14 +21,20 @@ Future<int?> showStoreForm(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
-    builder: (context) =>
-        _StoreForm(initialName: initialName, initialAddress: initialAddress, latitude: latitude, longitude: longitude),
+    builder: (context) => _StoreForm(
+      existing: existing,
+      initialName: initialName ?? existing?.name,
+      initialAddress: initialAddress ?? existing?.address,
+      latitude: latitude,
+      longitude: longitude,
+    ),
   );
 }
 
 class _StoreForm extends ConsumerStatefulWidget {
-  const _StoreForm({this.initialName, this.initialAddress, this.latitude, this.longitude});
+  const _StoreForm({this.existing, this.initialName, this.initialAddress, this.latitude, this.longitude});
 
+  final Store? existing;
   final String? initialName;
   final String? initialAddress;
   final double? latitude;
@@ -38,7 +47,9 @@ class _StoreForm extends ConsumerStatefulWidget {
 class _StoreFormState extends ConsumerState<_StoreForm> {
   late final _name = TextEditingController(text: widget.initialName);
   late final _address = TextEditingController(text: widget.initialAddress);
-  bool _useLocation = true;
+
+  /// Beim Bearbeiten bleibt der gespeicherte Standort, solange man ihn nicht bewusst ersetzt.
+  late bool _useLocation = widget.existing == null;
   bool _saving = false;
 
   @override
@@ -61,6 +72,20 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
       lon = pos?.longitude;
     }
     final address = _address.text.trim();
+    final existing = widget.existing;
+    if (existing != null) {
+      await ref
+          .read(storeRepositoryProvider)
+          .updateStore(
+            existing.id,
+            name: name,
+            address: address.isEmpty ? null : address,
+            latitude: _useLocation ? lat : existing.latitude,
+            longitude: _useLocation ? lon : existing.longitude,
+          );
+      if (mounted) Navigator.pop(context, existing.id);
+      return;
+    }
     final id = await ref
         .read(storeRepositoryProvider)
         .addStore(
@@ -86,7 +111,7 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l10n.storesAdd, style: AppText.display(24)),
+          Text(widget.existing == null ? l10n.storesAdd : l10n.storeEditTitle, style: AppText.display(24)),
           const SizedBox(height: 16),
           TextField(
             controller: _name,
@@ -107,7 +132,10 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
             value: _useLocation,
             activeTrackColor: AppColors.primary,
             onChanged: (v) => setState(() => _useLocation = v),
-            title: Text(l10n.storeFormUseLocation, style: AppText.body(15, weight: FontWeight.w600)),
+            title: Text(
+              widget.existing == null ? l10n.storeFormUseLocation : l10n.storeFormUpdateLocation,
+              style: AppText.body(15, weight: FontWeight.w600),
+            ),
           ),
           const SizedBox(height: 10),
           FilledButton(

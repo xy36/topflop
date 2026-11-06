@@ -52,5 +52,16 @@ class StoreRepository {
         ),
       );
 
+  Future<void> updateStore(int id, {required String name, String? address, double? latitude, double? longitude}) =>
+      (_db.update(_db.stores)..where((s) => s.id.equals(id))).write(
+        StoresCompanion(
+          name: Value(name),
+          address: Value(address),
+          latitude: Value(latitude),
+          longitude: Value(longitude),
+        ),
+      );
+
+  /// Bewertungen bleiben erhalten; ihr Laden wird per Fremdschlüssel auf `null` gesetzt.
   Future<void> deleteStore(int id) => (_db.delete(_db.stores)..where((s) => s.id.equals(id))).go();
 }

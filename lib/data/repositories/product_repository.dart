@@ -125,6 +125,30 @@ class ProductRepository {
 
   Future<void> deleteRating(int ratingId) => (_db.delete(_db.ratings)..where((r) => r.id.equals(ratingId))).go();
 
+  /// Stellt eine gelöschte Bewertung unverändert (inkl. ID und Datum) wieder her.
+  Future<void> restoreRating(Rating rating) => _db.into(_db.ratings).insert(rating);
+
+  Future<Rating?> findRating(int ratingId) =>
+      (_db.select(_db.ratings)..where((r) => r.id.equals(ratingId))).getSingleOrNull();
+
+  /// Ändert eine bestehende Bewertung; Datum und Standort bleiben erhalten.
+  Future<void> updateRating(
+    int ratingId, {
+    required int score,
+    required bool wouldBuyAgain,
+    int? storeId,
+    int? priceCents,
+    String? note,
+  }) => (_db.update(_db.ratings)..where((r) => r.id.equals(ratingId))).write(
+    RatingsCompanion(
+      score: Value(score),
+      wouldBuyAgain: Value(wouldBuyAgain),
+      storeId: Value(storeId),
+      priceCents: Value(priceCents),
+      note: Value(note),
+    ),
+  );
+
   /// Eigene Korrekturen an Name, Marke, Menge und Kategorie.
   Future<void> updateProduct(
     int productId, {

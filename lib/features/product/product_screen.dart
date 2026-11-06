@@ -16,14 +16,38 @@ import '../../data/repositories/models.dart';
 import '../../l10n/app_localizations.dart';
 import 'product_edit_sheet.dart';
 
-class ProductScreen extends ConsumerWidget {
+class ProductScreen extends ConsumerStatefulWidget {
   const ProductScreen({super.key, required this.productId});
 
   final int productId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProductScreen> createState() => _ProductScreenState();
+}
+
+class _ProductScreenState extends ConsumerState<ProductScreen> {
+  static const _heroHeight = 260.0;
+  static const _barHeight = 68.0;
+
+  /// Sobald das Bild weggescrollt ist, bekommt die Kopfzeile einen festen
+  /// Hintergrund und zeigt den Produktnamen.
+  final _collapsed = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    _collapsed.dispose();
+    super.dispose();
+  }
+
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth == 0) _collapsed.value = n.metrics.pixels > _heroHeight - _barHeight - 24;
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final productId = widget.productId;
     final async = ref.watch(productProvider(productId));
     final summary = async.value;
 
@@ -41,72 +65,97 @@ class ProductScreen extends ConsumerWidget {
     return Scaffold(
       body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: _Hero(summary: summary, height: 260 + topInset),
-              ),
-              SliverToBoxAdapter(
-                child: Transform.translate(
-                  offset: const Offset(0, -24),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          NotificationListener<ScrollNotification>(
+            onNotification: _onScroll,
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _Hero(summary: summary, height: _heroHeight + topInset),
+                ),
+                SliverToBoxAdapter(
+                  child: Transform.translate(
+                    offset: const Offset(0, -24),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                      ),
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                      child: _Body(summary: summary),
                     ),
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                    child: _Body(summary: summary),
                   ),
                 ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 96)),
-            ],
-          ),
-          Positioned(
-            top: topInset + 12,
-            left: 20,
-            right: 20,
-            child: Row(
-              children: [
-                SquareIconButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  tooltip: l10n.back,
-                  bordered: false,
-                  elevated: true,
-                  onPressed: () => context.canPop() ? context.pop() : context.go('/'),
-                ),
-                const Spacer(),
-                SquareIconButton(
-                  icon: p.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                  tooltip: l10n.favorite,
-                  foreground: AppColors.primary,
-                  bordered: false,
-                  elevated: true,
-                  onPressed: () => repo.setFavorite(p.id, !p.isFavorite),
-                ),
-                const SizedBox(width: 8),
-                SquareIconButton(
-                  icon: Icons.edit_outlined,
-                  tooltip: l10n.productEditTitle,
-                  bordered: false,
-                  elevated: true,
-                  onPressed: () => showProductEditSheet(context, p),
-                ),
-                const SizedBox(width: 8),
-                SquareIconButton(
-                  icon: Icons.delete_outline_rounded,
-                  tooltip: l10n.delete,
-                  bordered: false,
-                  elevated: true,
-                  onPressed: () async {
-                    final ok = await _confirm(context, l10n.deleteProductTitle, l10n.deleteProductBody);
-                    if (ok && context.mounted) {
-                      context.pop();
-                      await repo.deleteProduct(p.id);
-                    }
-                  },
-                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 96)),
               ],
+            ),
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: _collapsed,
+            builder: (context, collapsed, _) => AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              height: topInset + _barHeight,
+              padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 12),
+              decoration: BoxDecoration(
+                color: collapsed ? AppColors.background : AppColors.background.withValues(alpha: 0),
+                border: Border(
+                  bottom: BorderSide(color: collapsed ? AppColors.border : AppColors.border.withValues(alpha: 0)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  SquareIconButton(
+                    icon: Icons.arrow_back_ios_new_rounded,
+                    tooltip: l10n.back,
+                    bordered: false,
+                    elevated: !collapsed,
+                    onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AnimatedOpacity(
+                      opacity: collapsed ? 1 : 0,
+                      duration: const Duration(milliseconds: 180),
+                      child: Text(
+                        p.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.body(16, weight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SquareIconButton(
+                    icon: p.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                    tooltip: l10n.favorite,
+                    foreground: AppColors.primary,
+                    bordered: false,
+                    elevated: !collapsed,
+                    onPressed: () => repo.setFavorite(p.id, !p.isFavorite),
+                  ),
+                  const SizedBox(width: 8),
+                  SquareIconButton(
+                    icon: Icons.edit_outlined,
+                    tooltip: l10n.productEditTitle,
+                    bordered: false,
+                    elevated: !collapsed,
+                    onPressed: () => showProductEditSheet(context, p),
+                  ),
+                  const SizedBox(width: 8),
+                  SquareIconButton(
+                    icon: Icons.delete_outline_rounded,
+                    tooltip: l10n.delete,
+                    bordered: false,
+                    elevated: !collapsed,
+                    onPressed: () async {
+                      final ok = await _confirm(context, l10n.deleteProductTitle, l10n.deleteProductBody);
+                      if (ok && context.mounted) {
+                        context.pop();
+                        await repo.deleteProduct(p.id);
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -370,49 +419,75 @@ class _HistoryEntry extends ConsumerWidget {
         decoration: BoxDecoration(color: AppColors.scoreLow, borderRadius: BorderRadius.circular(20)),
         child: const Icon(Icons.delete_outline_rounded, color: Color(0xFF7A2E1C)),
       ),
-      confirmDismiss: (_) => _confirm(context, l10n.deleteRatingTitle, null),
-      onDismissed: (_) => ref.read(productRepositoryProvider).deleteRating(r.id),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.borderSoft),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ScoreBadge(score: r.score, vertical: true),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          entry.store?.name ?? l10n.ratingNoStore,
-                          style: AppText.body(15, weight: FontWeight.w600),
-                        ),
-                      ),
-                      if (r.priceCents != null)
-                        Text(formatPrice(r.priceCents!, locale), style: AppText.body(15, weight: FontWeight.w600)),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${DateFormat.yMMMMd(locale).format(r.ratedAt)} · ${r.wouldBuyAgain ? l10n.productBuyAgain : l10n.notBuyAgain}',
-                    style: AppText.body(13, color: AppColors.muted),
-                  ),
-                  if (note != null && note.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text('„$note“', style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45)),
-                  ],
-                ],
+      // Kein Bestätigungsdialog: Löschen geht sofort, lässt sich aber rückgängig machen.
+      onDismissed: (_) async {
+        final repo = ref.read(productRepositoryProvider);
+        final messenger = ScaffoldMessenger.of(context);
+        await repo.deleteRating(r.id);
+        messenger
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(l10n.ratingDeleted),
+              action: SnackBarAction(
+                label: l10n.undo,
+                textColor: AppColors.lime,
+                onPressed: () => repo.restoreRating(r),
               ),
             ),
-          ],
+          );
+      },
+      child: Material(
+        color: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.borderSoft),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => context.push('/product/${r.productId}/rate?rating=${r.id}'),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ScoreBadge(score: r.score, vertical: true),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              entry.store?.name ?? l10n.ratingNoStore,
+                              style: AppText.body(15, weight: FontWeight.w600),
+                            ),
+                          ),
+                          if (r.priceCents != null)
+                            Text(formatPrice(r.priceCents!, locale), style: AppText.body(15, weight: FontWeight.w600)),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${DateFormat.yMMMMd(locale).format(r.ratedAt)} · ${r.wouldBuyAgain ? l10n.productBuyAgain : l10n.notBuyAgain}',
+                        style: AppText.body(13, color: AppColors.muted),
+                      ),
+                      if (note != null && note.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text('„$note“', style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45)),
+                      ],
+                    ],
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(left: 6, top: 2),
+                  child: Icon(Icons.chevron_right_rounded, color: Color(0xFF8A948C)),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

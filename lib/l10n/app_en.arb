@@ -165,5 +165,12 @@
   "filterCategoriesCount": "{count} categories",
   "productEditTitle": "Edit product",
   "categoryChoose": "Choose category",
-  "change": "Change"
+  "change": "Change",
+  "ratingEditTitle": "Edit rating",
+  "ratingDeleted": "Rating deleted",
+  "undo": "Undo",
+  "storeEditTitle": "Edit store",
+  "storeFormUpdateLocation": "Replace location with current one",
+  "deleteStoreTitle": "Delete store?",
+  "deleteStoreBody": "Your ratings are kept but will no longer be linked to a store."
 }

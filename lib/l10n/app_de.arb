@@ -179,5 +179,12 @@
   "@filterCategoriesCount": { "placeholders": { "count": { "type": "int" } } },
   "productEditTitle": "Produkt bearbeiten",
   "categoryChoose": "Kategorie wählen",
-  "change": "Ändern"
+  "change": "Ändern",
+  "ratingEditTitle": "Bewertung bearbeiten",
+  "ratingDeleted": "Bewertung gelöscht",
+  "undo": "Rückgängig",
+  "storeEditTitle": "Laden bearbeiten",
+  "storeFormUpdateLocation": "Standort durch aktuellen ersetzen",
+  "deleteStoreTitle": "Laden löschen?",
+  "deleteStoreBody": "Deine Bewertungen bleiben erhalten, sind danach aber keinem Laden mehr zugeordnet."
 }

@@ -87,7 +87,7 @@ class OpenFoodFactsClient {
     if (json['status'] != 1) return null;
     final p = json['product'] as Map<String, dynamic>? ?? const {};
 
-    final name = _firstNonEmpty([p['product_name_$languageCode'], p['product_name'], p['generic_name']]);
+    final name = pickName([p['product_name_$languageCode'], p['product_name'], p['generic_name']]);
     if (name == null) return null;
 
     final tags = (p['categories_tags'] as List?)?.cast<String>() ?? const [];
@@ -105,6 +105,21 @@ class OpenFoodFactsClient {
       category: category,
     );
   }
+
+  /// Nimmt den ersten brauchbaren Namen. Manche Einträge bei OFF enthalten
+  /// Händlertexte wie „… 1L (1,29 € / 1 l) zzgl. Pfand 0,15 €“ – solche
+  /// werden übersprungen, solange es eine sauberere Alternative gibt.
+  static String? pickName(List<Object?> candidates) {
+    final names = [
+      for (final c in candidates)
+        if (c is String && c.trim().isNotEmpty) c.trim().replaceAll(RegExp(r'\s+'), ' '),
+    ];
+    return names.where((n) => !_looksLikeShopText(n)).firstOrNull ?? names.firstOrNull;
+  }
+
+  static final _shopText = RegExp(r'€|\bEUR\b|\bPfand\b|\bzzgl\.|\binkl\.|\d+\s*x\s*\d', caseSensitive: false);
+
+  static bool _looksLikeShopText(String name) => name.length > 60 || _shopText.hasMatch(name);
 
   static String? _firstNonEmpty(List<Object?> values) {
     for (final v in values) {

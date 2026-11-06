@@ -48,18 +48,20 @@ void main() {
           expect(request.url.host, 'world.openfoodfacts.org');
           expect(request.headers['User-Agent'], contains('TopFlop'));
           return http.Response.bytes(
-            utf8.encode(jsonEncode({
-              'status': 1,
-              'product': {
-                'product_name': 'Salami',
-                'product_name_de': 'Salami Milano',
-                'brands': 'Hofgut Lindner, Andere',
-                'quantity': '200 g',
-                'nutriscore_grade': 'd',
-                'image_front_url': 'https://images.example/salami.jpg',
-                'categories_tags': ['en:meats', 'en:salamis'],
-              },
-            })),
+            utf8.encode(
+              jsonEncode({
+                'status': 1,
+                'product': {
+                  'product_name': 'Salami',
+                  'product_name_de': 'Salami Milano',
+                  'brands': 'Hofgut Lindner, Andere',
+                  'quantity': '200 g',
+                  'nutriscore_grade': 'd',
+                  'image_front_url': 'https://images.example/salami.jpg',
+                  'categories_tags': ['en:meats', 'en:salamis'],
+                },
+              }),
+            ),
             200,
           );
         }),
@@ -88,6 +90,15 @@ void main() {
       final client = OpenFoodFactsClient(httpClient: MockClient((_) async => throw http.ClientException('offline')));
       expect(client.lookup('123'), throwsA(isA<OffLookupException>()));
     });
+
+    test('Händlertexte als Produktname werden übersprungen', () {
+      const shopText = 'EDEKA Hayunga Getränke Coca-Cola Zero  Mehrweg Pet 1L X11 l (1,29 € / 1 l) zzgl. Pfand 0,15 €';
+      expect(OpenFoodFactsClient.pickName([shopText, 'Coca-Cola Zero', null]), 'Coca-Cola Zero');
+      expect(OpenFoodFactsClient.pickName(['', '  Salami   Milano ']), 'Salami Milano');
+      // Gibt es nur den unsauberen Namen, wird er trotzdem genommen.
+      expect(OpenFoodFactsClient.pickName([shopText]), startsWith('EDEKA'));
+      expect(OpenFoodFactsClient.pickName([null, '']), isNull);
+    });
   });
 
   group('Datenbank', () {
@@ -102,12 +113,14 @@ void main() {
     });
     tearDown(() => db.close());
 
-    Future<int> salami() => products.upsertFromOff(const OffProduct(
-          barcode: '4012345678901',
-          name: 'Salami Milano',
-          brand: 'Hofgut Lindner',
-          category: ProductCategory.meat,
-        ));
+    Future<int> salami() => products.upsertFromOff(
+      const OffProduct(
+        barcode: '4012345678901',
+        name: 'Salami Milano',
+        brand: 'Hofgut Lindner',
+        category: ProductCategory.meat,
+      ),
+    );
 
     test('Verlauf, Durchschnitt und letztes Urteil', () async {
       final id = await salami();
@@ -202,6 +215,40 @@ void main() {
       await products.setCategory(colaId, ProductCategory.dairy);
       final cola = (await products.loadProduct(colaId))!;
       expect(cola.product.category, ProductCategory.dairy.name);
+    });
+
+    test('Bewertung bearbeiten, löschen und wiederherstellen', () async {
+      final id = await salami();
+      final rewe = await stores.addStore(name: 'Rewe');
+      final ratingId = await products.addRating(productId: id, score: 6, wouldBuyAgain: false, note: 'naja');
+
+      await products.updateRating(ratingId, score: 8, wouldBuyAgain: true, storeId: rewe, priceCents: 299, note: null);
+      final edited = (await products.findRating(ratingId))!;
+      expect(
+        [edited.score, edited.wouldBuyAgain, edited.storeId, edited.priceCents, edited.note],
+        [8, true, rewe, 299, null],
+      );
+
+      await products.deleteRating(ratingId);
+      expect(await products.findRating(ratingId), isNull);
+      await products.restoreRating(edited);
+      final restored = (await products.findRating(ratingId))!;
+      expect(restored.score, 8);
+      expect(restored.ratedAt, edited.ratedAt);
+    });
+
+    test('Laden umbenennen und löschen – Bewertungen bleiben', () async {
+      final id = await salami();
+      final store = await stores.addStore(name: 'Aldi', latitude: 52, longitude: 8);
+      final ratingId = await products.addRating(productId: id, score: 7, wouldBuyAgain: true, storeId: store);
+
+      await stores.updateStore(store, name: 'Aldi Süd', latitude: 52, longitude: 8);
+      expect((await stores.allStores()).single.name, 'Aldi Süd');
+
+      await stores.deleteStore(store);
+      expect(await stores.allStores(), isEmpty);
+      final rating = (await products.findRating(ratingId))!;
+      expect(rating.storeId, isNull);
     });
   });
 }

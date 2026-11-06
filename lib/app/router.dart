@@ -37,6 +37,7 @@ final appRouter = GoRouter(
           path: 'rate',
           builder: (_, state) => RatingScreen(
             productId: int.parse(state.pathParameters['id']!),
+            ratingId: int.tryParse(state.uri.queryParameters['rating'] ?? ''),
             openDetailAfterSave: state.uri.queryParameters['then'] == 'detail',
           ),
         ),

@@ -9,6 +9,7 @@ import '../../core/widgets/product_card.dart';
 import '../../data/location/location_service.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
+import 'store_form_sheet.dart';
 
 class StoreDetailScreen extends ConsumerWidget {
   const StoreDetailScreen({super.key, required this.storeId});
@@ -41,6 +42,34 @@ class StoreDetailScreen extends ConsumerWidget {
                   icon: Icons.arrow_back_ios_new_rounded,
                   tooltip: l10n.back,
                   onPressed: () => context.pop(),
+                ),
+                const Spacer(),
+                SquareIconButton(
+                  icon: Icons.edit_outlined,
+                  tooltip: l10n.storeEditTitle,
+                  onPressed: () => showStoreForm(context, existing: store),
+                ),
+                const SizedBox(width: 8),
+                SquareIconButton(
+                  icon: Icons.delete_outline_rounded,
+                  tooltip: l10n.delete,
+                  onPressed: () async {
+                    final ok = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(l10n.deleteStoreTitle),
+                        content: Text(l10n.deleteStoreBody),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+                          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.delete)),
+                        ],
+                      ),
+                    );
+                    if (ok == true && context.mounted) {
+                      context.pop();
+                      await ref.read(storeRepositoryProvider).deleteStore(store.id);
+                    }
+                  },
                 ),
               ],
             ),

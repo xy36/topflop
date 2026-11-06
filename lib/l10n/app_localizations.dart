@@ -1045,6 +1045,48 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Ändern'**
   String get change;
+
+  /// No description provided for @ratingEditTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Bewertung bearbeiten'**
+  String get ratingEditTitle;
+
+  /// No description provided for @ratingDeleted.
+  ///
+  /// In de, this message translates to:
+  /// **'Bewertung gelöscht'**
+  String get ratingDeleted;
+
+  /// No description provided for @undo.
+  ///
+  /// In de, this message translates to:
+  /// **'Rückgängig'**
+  String get undo;
+
+  /// No description provided for @storeEditTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Laden bearbeiten'**
+  String get storeEditTitle;
+
+  /// No description provided for @storeFormUpdateLocation.
+  ///
+  /// In de, this message translates to:
+  /// **'Standort durch aktuellen ersetzen'**
+  String get storeFormUpdateLocation;
+
+  /// No description provided for @deleteStoreTitle.
+  ///
+  /// In de, this message translates to:
+  /// **'Laden löschen?'**
+  String get deleteStoreTitle;
+
+  /// No description provided for @deleteStoreBody.
+  ///
+  /// In de, this message translates to:
+  /// **'Deine Bewertungen bleiben erhalten, sind danach aber keinem Laden mehr zugeordnet.'**
+  String get deleteStoreBody;
 }
 
 class _AppLocalizationsDelegate

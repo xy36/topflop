@@ -327,7 +327,7 @@ class _StoreMap extends StatelessWidget {
     final halfW = size.width / 2 - 24;
     final halfH = size.height / 2 - 24;
     final scale = math.min(halfW, halfH) / maxDist;
-    return [
+    final projected = [
       for (final (o, count) in points)
         (
           Offset(
@@ -337,6 +337,23 @@ class _StoreMap extends StatelessWidget {
           count,
         ),
     ];
+    return _spreadOverlapping(projected, size);
+  }
+
+  /// Läden am (fast) selben Ort würden exakt übereinander liegen: solche Pins
+  /// abwechselnd nach rechts und links versetzen, bis sie frei stehen.
+  static List<(Offset, int)> _spreadOverlapping(List<(Offset, int)> pins, Size size) {
+    const minGap = 36.0;
+    final placed = <(Offset, int)>[];
+    for (final (origin, count) in pins) {
+      var candidate = origin;
+      for (var step = 1; placed.any((p) => (p.$1 - candidate).distance < minGap) && step < 12; step++) {
+        final shift = minGap * ((step + 1) ~/ 2) * (step.isOdd ? 1 : -1);
+        candidate = Offset((origin.dx + shift).clamp(18, size.width - 18), origin.dy);
+      }
+      placed.add((candidate, count));
+    }
+    return placed;
   }
 }
 
