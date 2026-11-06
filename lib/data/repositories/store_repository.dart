@@ -12,7 +12,8 @@ class StoreRepository {
 
   Stream<List<StoreSummary>> watchSummaries() async* {
     yield await loadSummaries();
-    await for (final _ in _db.tableUpdates(TableUpdateQuery.onAllTables([_db.products, _db.ratings, _db.stores]))) {
+    final tables = <TableInfo>[_db.products, _db.ratings, _db.stores, _db.productStores];
+    await for (final _ in _db.tableUpdates(TableUpdateQuery.onAllTables(tables))) {
       yield await loadSummaries();
     }
   }
@@ -24,19 +25,10 @@ class StoreRepository {
       for (final store in stores)
         StoreSummary(
           store: store,
-          products: products.where((p) => p.ratings.any((r) => r.store?.id == store.id)).toList()
-            ..sort((a, b) => _scoreAt(b, store.id).compareTo(_scoreAt(a, store.id))),
+          products: products.where((p) => p.stores.any((s) => s.id == store.id)).toList()
+            ..sort((a, b) => (b.score ?? 0).compareTo(a.score ?? 0)),
         ),
     ];
-  }
-
-  /// Durchschnitt der Bewertungen eines Produkts in einem bestimmten Laden.
-  static double _scoreAt(ProductSummary p, int storeId) {
-    final scores = [
-      for (final r in p.ratings)
-        if (r.store?.id == storeId) r.rating.score,
-    ];
-    return scores.isEmpty ? 0 : scores.reduce((a, b) => a + b) / scores.length;
   }
 
   Future<List<Store>> allStores() => _db.select(_db.stores).get();
@@ -62,6 +54,6 @@ class StoreRepository {
         ),
       );
 
-  /// Bewertungen bleiben erhalten; ihr Laden wird per Fremdschlüssel auf `null` gesetzt.
+  /// Bewertungen bleiben erhalten; nur die Zuordnung zu diesem Laden entfällt.
   Future<void> deleteStore(int id) => (_db.delete(_db.stores)..where((s) => s.id.equals(id))).go();
 }

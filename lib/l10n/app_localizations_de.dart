@@ -139,9 +139,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get details => 'Details';
 
   @override
-  String get rateNew => 'Neu bewerten';
-
-  @override
   String get rate => 'Bewerten';
 
   @override
@@ -166,13 +163,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get search => 'Suchen';
 
   @override
-  String get productAverage => 'Durchschnitt';
-
-  @override
   String get productBuyAgain => 'Wieder kaufen';
-
-  @override
-  String get productBought => 'Gekauft';
 
   @override
   String get yes => 'Ja';
@@ -182,9 +173,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get productAvailableAt => 'Gibt es bei';
-
-  @override
-  String get productHistory => 'Verlauf';
 
   @override
   String get productNoRatings => 'Noch keine Bewertung. Wie war es?';
@@ -197,9 +185,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get delete => 'Löschen';
-
-  @override
-  String get deleteRatingTitle => 'Bewertung löschen?';
 
   @override
   String get deleteProductTitle => 'Produkt löschen?';
@@ -233,16 +218,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get ratingNo => 'Eher nicht';
 
   @override
-  String get ratingWhere => 'Wo gekauft?';
+  String get ratingWhere => 'Wo gibt es das?';
 
   @override
   String get ratingLocationFound => 'Standort erkannt';
 
   @override
   String get ratingOtherStore => 'Anderer Laden';
-
-  @override
-  String get ratingNoStore => 'Ohne Laden';
 
   @override
   String get ratingPrice => 'Preis';
@@ -525,13 +507,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get change => 'Ändern';
 
   @override
+  String get ratingChange => 'Bewertung ändern';
+
+  @override
+  String get productScore => 'Bewertung';
+
+  @override
+  String productRatedOn(String date) {
+    return 'Bewertet am $date';
+  }
+
+  @override
+  String get productYourNote => 'Deine Notiz';
+
+  @override
+  String get ratingWhereHint => 'Mehrere Läden möglich';
+
+  @override
   String get ratingEditTitle => 'Bewertung bearbeiten';
-
-  @override
-  String get ratingDeleted => 'Bewertung gelöscht';
-
-  @override
-  String get undo => 'Rückgängig';
 
   @override
   String get storeEditTitle => 'Laden bearbeiten';

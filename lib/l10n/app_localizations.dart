@@ -326,12 +326,6 @@ abstract class AppLocalizations {
   /// **'Details'**
   String get details;
 
-  /// No description provided for @rateNew.
-  ///
-  /// In de, this message translates to:
-  /// **'Neu bewerten'**
-  String get rateNew;
-
   /// No description provided for @rate.
   ///
   /// In de, this message translates to:
@@ -380,23 +374,11 @@ abstract class AppLocalizations {
   /// **'Suchen'**
   String get search;
 
-  /// No description provided for @productAverage.
-  ///
-  /// In de, this message translates to:
-  /// **'Durchschnitt'**
-  String get productAverage;
-
   /// No description provided for @productBuyAgain.
   ///
   /// In de, this message translates to:
   /// **'Wieder kaufen'**
   String get productBuyAgain;
-
-  /// No description provided for @productBought.
-  ///
-  /// In de, this message translates to:
-  /// **'Gekauft'**
-  String get productBought;
 
   /// No description provided for @yes.
   ///
@@ -415,12 +397,6 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Gibt es bei'**
   String get productAvailableAt;
-
-  /// No description provided for @productHistory.
-  ///
-  /// In de, this message translates to:
-  /// **'Verlauf'**
-  String get productHistory;
 
   /// No description provided for @productNoRatings.
   ///
@@ -445,12 +421,6 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Löschen'**
   String get delete;
-
-  /// No description provided for @deleteRatingTitle.
-  ///
-  /// In de, this message translates to:
-  /// **'Bewertung löschen?'**
-  String get deleteRatingTitle;
 
   /// No description provided for @deleteProductTitle.
   ///
@@ -509,7 +479,7 @@ abstract class AppLocalizations {
   /// No description provided for @ratingWhere.
   ///
   /// In de, this message translates to:
-  /// **'Wo gekauft?'**
+  /// **'Wo gibt es das?'**
   String get ratingWhere;
 
   /// No description provided for @ratingLocationFound.
@@ -523,12 +493,6 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Anderer Laden'**
   String get ratingOtherStore;
-
-  /// No description provided for @ratingNoStore.
-  ///
-  /// In de, this message translates to:
-  /// **'Ohne Laden'**
-  String get ratingNoStore;
 
   /// No description provided for @ratingPrice.
   ///
@@ -1040,23 +1004,41 @@ abstract class AppLocalizations {
   /// **'Ändern'**
   String get change;
 
+  /// No description provided for @ratingChange.
+  ///
+  /// In de, this message translates to:
+  /// **'Bewertung ändern'**
+  String get ratingChange;
+
+  /// No description provided for @productScore.
+  ///
+  /// In de, this message translates to:
+  /// **'Bewertung'**
+  String get productScore;
+
+  /// No description provided for @productRatedOn.
+  ///
+  /// In de, this message translates to:
+  /// **'Bewertet am {date}'**
+  String productRatedOn(String date);
+
+  /// No description provided for @productYourNote.
+  ///
+  /// In de, this message translates to:
+  /// **'Deine Notiz'**
+  String get productYourNote;
+
+  /// No description provided for @ratingWhereHint.
+  ///
+  /// In de, this message translates to:
+  /// **'Mehrere Läden möglich'**
+  String get ratingWhereHint;
+
   /// No description provided for @ratingEditTitle.
   ///
   /// In de, this message translates to:
   /// **'Bewertung bearbeiten'**
   String get ratingEditTitle;
-
-  /// No description provided for @ratingDeleted.
-  ///
-  /// In de, this message translates to:
-  /// **'Bewertung gelöscht'**
-  String get ratingDeleted;
-
-  /// No description provided for @undo.
-  ///
-  /// In de, this message translates to:
-  /// **'Rückgängig'**
-  String get undo;
 
   /// No description provided for @storeEditTitle.
   ///

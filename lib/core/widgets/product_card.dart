@@ -18,8 +18,8 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final p = summary.product;
-    final meta = [p.brand, summary.lastStoreName].whereType<String>().join(' · ');
-    final score = summary.displayScore;
+    final meta = [p.brand, summary.storeName].whereType<String>().join(' · ');
+    final score = summary.score;
 
     return Material(
       color: AppColors.surface,

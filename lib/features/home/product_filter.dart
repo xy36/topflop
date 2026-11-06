@@ -50,9 +50,9 @@ class ProductFilter {
     if (favoritesOnly && !s.product.isFavorite) return false;
     if (buyAgain != null && s.wouldBuyAgain != buyAgain) return false;
     if (categories.isNotEmpty && !categories.contains(ProductCategory.fromName(s.product.category))) return false;
-    if (storeIds.isNotEmpty && !s.ratings.any((r) => storeIds.contains(r.store?.id))) return false;
+    if (storeIds.isNotEmpty && !s.stores.any((st) => storeIds.contains(st.id))) return false;
     if (scoreActive) {
-      final score = s.displayScore;
+      final score = s.score;
       if (score == null || score < minScore || score > maxScore) return false;
     }
     return true;
@@ -60,7 +60,7 @@ class ProductFilter {
 
   List<ProductSummary> apply(Iterable<ProductSummary> items) {
     final result = items.where(matches).toList();
-    int byScore(ProductSummary a, ProductSummary b) => (a.averageScore ?? 0).compareTo(b.averageScore ?? 0);
+    int byScore(ProductSummary a, ProductSummary b) => (a.score ?? 0).compareTo(b.score ?? 0);
     switch (sort) {
       case ProductSort.recent:
         result.sort((a, b) => b.lastActivity.compareTo(a.lastActivity));
@@ -68,7 +68,7 @@ class ProductFilter {
         result.sort((a, b) => byScore(b, a));
       case ProductSort.worstRated:
         // Unbewertete Produkte ans Ende, nicht an den Anfang.
-        result.sort((a, b) => (a.averageScore ?? 99).compareTo(b.averageScore ?? 99));
+        result.sort((a, b) => (a.score ?? 99).compareTo(b.score ?? 99));
       case ProductSort.name:
         result.sort((a, b) => a.product.name.toLowerCase().compareTo(b.product.name.toLowerCase()));
     }

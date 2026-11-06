@@ -12,28 +12,29 @@ class ProductRepository {
 
   Stream<void> get _changes async* {
     yield null;
-    yield* _db.tableUpdates(TableUpdateQuery.onAllTables([_db.products, _db.ratings, _db.stores]));
+    yield* _db.tableUpdates(TableUpdateQuery.onAllTables([_db.products, _db.ratings, _db.stores, _db.productStores]));
   }
 
-  /// Alle Produkte mit Bewertungen, zuletzt aktive zuerst.
+  /// Alle Produkte, zuletzt bewertete zuerst.
   Stream<List<ProductSummary>> watchSummaries() => _changes.asyncMap((_) => loadSummaries());
 
   Stream<ProductSummary?> watchProduct(int id) => _changes.asyncMap((_) => loadProduct(id));
 
   Future<List<ProductSummary>> loadSummaries() async {
     final products = await _db.select(_db.products).get();
-    final ratingsByProduct = await _ratingsByProduct();
-    final summaries = [
-      for (final p in products) ProductSummary(product: p, ratings: ratingsByProduct[p.id] ?? const []),
+    final ratings = {for (final r in await _db.select(_db.ratings).get()) r.productId: r};
+    final stores = await _storesByProduct();
+    return [
+      for (final p in products) ProductSummary(product: p, rating: ratings[p.id], stores: stores[p.id] ?? const []),
     ]..sort((a, b) => b.lastActivity.compareTo(a.lastActivity));
-    return summaries;
   }
 
   Future<ProductSummary?> loadProduct(int id) async {
     final product = await (_db.select(_db.products)..where((p) => p.id.equals(id))).getSingleOrNull();
     if (product == null) return null;
-    final ratings = await _ratingsByProduct(productId: id);
-    return ProductSummary(product: product, ratings: ratings[id] ?? const []);
+    final rating = await findRating(id);
+    final stores = await _storesByProduct(productId: id);
+    return ProductSummary(product: product, rating: rating, stores: stores[id] ?? const []);
   }
 
   Future<ProductSummary?> findByBarcode(String barcode) async {
@@ -41,17 +42,16 @@ class ProductRepository {
     return product == null ? null : loadProduct(product.id);
   }
 
-  Future<Map<int, List<RatingWithStore>>> _ratingsByProduct({int? productId}) async {
-    final query = _db.select(_db.ratings).join([
-      leftOuterJoin(_db.stores, _db.stores.id.equalsExp(_db.ratings.storeId)),
+  Future<Map<int, List<Store>>> _storesByProduct({int? productId}) async {
+    final query = _db.select(_db.productStores).join([
+      innerJoin(_db.stores, _db.stores.id.equalsExp(_db.productStores.storeId)),
     ]);
-    if (productId != null) query.where(_db.ratings.productId.equals(productId));
-    query.orderBy([OrderingTerm.desc(_db.ratings.ratedAt), OrderingTerm.desc(_db.ratings.id)]);
+    if (productId != null) query.where(_db.productStores.productId.equals(productId));
+    query.orderBy([OrderingTerm.asc(_db.stores.name)]);
 
-    final result = <int, List<RatingWithStore>>{};
+    final result = <int, List<Store>>{};
     for (final row in await query.get()) {
-      final rating = row.readTable(_db.ratings);
-      result.putIfAbsent(rating.productId, () => []).add(RatingWithStore(rating, row.readTableOrNull(_db.stores)));
+      result.putIfAbsent(row.readTable(_db.productStores).productId, () => []).add(row.readTable(_db.stores));
     }
     return result;
   }
@@ -99,55 +99,48 @@ class ProductRepository {
 
   Future<void> deleteProduct(int productId) => (_db.delete(_db.products)..where((p) => p.id.equals(productId))).go();
 
-  Future<int> addRating({
+  Future<Rating?> findRating(int productId) =>
+      (_db.select(_db.ratings)..where((r) => r.productId.equals(productId))).getSingleOrNull();
+
+  /// Speichert die Bewertung eines Produkts (neu oder überschreibend) und
+  /// setzt die Läden, in denen es das Produkt gibt.
+  Future<void> saveRating({
     required int productId,
     required int score,
     required bool wouldBuyAgain,
-    int? storeId,
+    required Set<int> storeIds,
     int? priceCents,
     String? note,
     double? latitude,
     double? longitude,
-  }) => _db
-      .into(_db.ratings)
-      .insert(
-        RatingsCompanion.insert(
-          productId: productId,
-          score: score,
-          wouldBuyAgain: wouldBuyAgain,
-          storeId: Value(storeId),
-          priceCents: Value(priceCents),
-          note: Value(note),
-          latitude: Value(latitude),
-          longitude: Value(longitude),
-        ),
-      );
-
-  Future<void> deleteRating(int ratingId) => (_db.delete(_db.ratings)..where((r) => r.id.equals(ratingId))).go();
-
-  /// Stellt eine gelöschte Bewertung unverändert (inkl. ID und Datum) wieder her.
-  Future<void> restoreRating(Rating rating) => _db.into(_db.ratings).insert(rating);
-
-  Future<Rating?> findRating(int ratingId) =>
-      (_db.select(_db.ratings)..where((r) => r.id.equals(ratingId))).getSingleOrNull();
-
-  /// Ändert eine bestehende Bewertung; Datum und Standort bleiben erhalten.
-  Future<void> updateRating(
-    int ratingId, {
-    required int score,
-    required bool wouldBuyAgain,
-    int? storeId,
-    int? priceCents,
-    String? note,
-  }) => (_db.update(_db.ratings)..where((r) => r.id.equals(ratingId))).write(
-    RatingsCompanion(
+  }) => _db.transaction(() async {
+    final values = RatingsCompanion(
       score: Value(score),
       wouldBuyAgain: Value(wouldBuyAgain),
-      storeId: Value(storeId),
       priceCents: Value(priceCents),
       note: Value(note),
-    ),
-  );
+      ratedAt: Value(DateTime.now()),
+    );
+    final existing = await findRating(productId);
+    if (existing == null) {
+      await _db
+          .into(_db.ratings)
+          .insert(values.copyWith(productId: Value(productId), latitude: Value(latitude), longitude: Value(longitude)));
+    } else {
+      // Standort der ersten Bewertung bleibt erhalten.
+      await (_db.update(_db.ratings)..where((r) => r.id.equals(existing.id))).write(values);
+    }
+    await setStores(productId, storeIds);
+  });
+
+  Future<void> setStores(int productId, Set<int> storeIds) => _db.transaction(() async {
+    await (_db.delete(_db.productStores)..where((ps) => ps.productId.equals(productId))).go();
+    await _db.batch(
+      (b) => b.insertAll(_db.productStores, [
+        for (final id in storeIds) ProductStoresCompanion.insert(productId: productId, storeId: id),
+      ]),
+    );
+  });
 
   /// Eigene Korrekturen an Name, Marke, Menge und Kategorie.
   Future<void> updateProduct(

@@ -10,7 +10,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/product_image.dart';
-import '../../core/widgets/score_badge.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/models.dart';
 import '../../l10n/app_localizations.dart';
@@ -168,8 +167,8 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
         padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.paddingOf(context).bottom + 16),
         child: FilledButton.icon(
           onPressed: () => context.push('/product/${p.id}/rate'),
-          icon: const Icon(Icons.add_rounded),
-          label: Text(l10n.rateNew),
+          icon: Icon(summary.isRated ? Icons.edit_outlined : Icons.add_rounded),
+          label: Text(summary.isRated ? l10n.ratingChange : l10n.rate),
         ),
       ),
     );
@@ -217,7 +216,7 @@ class _Body extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final p = summary.product;
-    final avg = summary.averageScore;
+    final rating = summary.rating;
     final subtitle = [p.brand, p.quantity].whereType<String>().join(' · ');
 
     return Column(
@@ -240,68 +239,79 @@ class _Body extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 20),
-        if (summary.hasRatings) ...[
+        if (rating != null) ...[
           Row(
             children: [
               Expanded(
                 child: _Stat(
-                  label: l10n.productAverage,
+                  label: l10n.productScore,
                   background: AppColors.ink,
                   foreground: Colors.white,
                   labelColor: Colors.white.withValues(alpha: 0.72),
-                  value: NumberFormat('0.0', locale).format(avg),
-                  emoji: Score.emoji(avg!.round()),
+                  value: '${rating.score}',
+                  emoji: Score.emoji(rating.score),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: _Stat(
                   label: l10n.productBuyAgain,
-                  background: summary.wouldBuyAgain == true ? AppColors.lime : AppColors.scoreLow,
+                  background: rating.wouldBuyAgain ? AppColors.lime : AppColors.scoreLow,
                   labelColor: const Color(0xFF2E3A16),
-                  value: summary.wouldBuyAgain == true ? l10n.yes : l10n.no,
+                  value: rating.wouldBuyAgain ? l10n.yes : l10n.no,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: _Stat(
-                  label: l10n.productBought,
+                  label: l10n.ratingPrice,
                   background: AppColors.surface,
                   bordered: true,
-                  value: '${summary.ratingCount}×',
+                  value: rating.priceCents == null ? '–' : formatPrice(rating.priceCents!, locale),
                 ),
               ),
             ],
           ),
-          if (summary.stores.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text(
+            l10n.productRatedOn(DateFormat.yMMMMd(locale).format(rating.ratedAt)),
+            style: AppText.body(13, color: AppColors.muted),
+          ),
+          if (rating.note != null && rating.note!.isNotEmpty) ...[
             const SizedBox(height: 20),
-            SectionHeader(l10n.productAvailableAt),
+            SectionHeader(l10n.productYourNote),
             const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final store in summary.stores)
-                  ActionChip(
-                    avatar: const Icon(Icons.place_outlined, size: 16, color: AppColors.primary),
-                    label: Text(store.name),
-                    labelStyle: AppText.body(14, weight: FontWeight.w600),
-                    backgroundColor: AppColors.surface,
-                    side: const BorderSide(color: AppColors.border),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    onPressed: () => context.push('/store/${store.id}'),
-                  ),
-              ],
+            AppCard(
+              radius: 20,
+              child: Text(rating.note!, style: AppText.body(15, color: AppColors.inkSoft).copyWith(height: 1.45)),
             ),
           ],
-          const SizedBox(height: 20),
-          SectionHeader(l10n.productHistory),
-          const SizedBox(height: 10),
-          for (final r in summary.ratings) ...[_HistoryEntry(entry: r), const SizedBox(height: 10)],
         ] else
           AppCard(
             child: Text(l10n.productNoRatings, style: AppText.body(15, color: AppColors.muted)),
           ),
+        if (summary.stores.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          SectionHeader(l10n.productAvailableAt),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final store in summary.stores)
+                ActionChip(
+                  avatar: const Icon(Icons.place_outlined, size: 16, color: AppColors.primary),
+                  label: Text(store.name),
+                  labelStyle: AppText.body(14, weight: FontWeight.w600),
+                  backgroundColor: AppColors.surface,
+                  side: const BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  onPressed: () => context.push('/store/${store.id}'),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 20),
         const SizedBox(height: 8),
         if (p.barcode != null)
           Text(
@@ -393,102 +403,6 @@ class _Stat extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _HistoryEntry extends ConsumerWidget {
-  const _HistoryEntry({required this.entry});
-
-  final RatingWithStore entry;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final r = entry.rating;
-    final note = r.note;
-
-    return Dismissible(
-      key: ValueKey(r.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 24),
-        decoration: BoxDecoration(color: AppColors.scoreLow, borderRadius: BorderRadius.circular(20)),
-        child: const Icon(Icons.delete_outline_rounded, color: Color(0xFF7A2E1C)),
-      ),
-      // Kein Bestätigungsdialog: Löschen geht sofort, lässt sich aber rückgängig machen.
-      onDismissed: (_) async {
-        final repo = ref.read(productRepositoryProvider);
-        final messenger = ScaffoldMessenger.of(context);
-        await repo.deleteRating(r.id);
-        messenger
-          ..clearSnackBars()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(l10n.ratingDeleted),
-              action: SnackBarAction(
-                label: l10n.undo,
-                textColor: AppColors.lime,
-                onPressed: () => repo.restoreRating(r),
-              ),
-            ),
-          );
-      },
-      child: Material(
-        color: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.borderSoft),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () => context.push('/product/${r.productId}/rate?rating=${r.id}'),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ScoreBadge(score: r.score, vertical: true),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              entry.store?.name ?? l10n.ratingNoStore,
-                              style: AppText.body(15, weight: FontWeight.w600),
-                            ),
-                          ),
-                          if (r.priceCents != null)
-                            Text(formatPrice(r.priceCents!, locale), style: AppText.body(15, weight: FontWeight.w600)),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${DateFormat.yMMMMd(locale).format(r.ratedAt)} · ${r.wouldBuyAgain ? l10n.productBuyAgain : l10n.notBuyAgain}',
-                        style: AppText.body(13, color: AppColors.muted),
-                      ),
-                      if (note != null && note.isNotEmpty) ...[
-                        const SizedBox(height: 6),
-                        Text('„$note“', style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45)),
-                      ],
-                    ],
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 6, top: 2),
-                  child: Icon(Icons.chevron_right_rounded, color: Color(0xFF8A948C)),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

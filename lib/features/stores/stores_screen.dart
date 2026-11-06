@@ -146,10 +146,10 @@ class _StoreCard extends StatelessWidget {
                     Text(summary.store.name, style: AppText.body(16, weight: FontWeight.w600)),
                     const SizedBox(height: 3),
                     Text(meta, style: AppText.body(13, color: AppColors.muted)),
-                    if (top != null && top.displayScore != null) ...[
+                    if (top != null && top.score != null) ...[
                       const SizedBox(height: 3),
                       Text(
-                        l10n.storesTop('${Score.emoji(top.displayScore!)} ${top.product.name} · ${top.displayScore}'),
+                        l10n.storesTop('${Score.emoji(top.score!)} ${top.product.name} · ${top.score}'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppText.body(13, color: AppColors.inkSoft),

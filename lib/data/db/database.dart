@@ -26,11 +26,10 @@ class Stores extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-/// Ein Eintrag im Verlauf: ein Kauf mit Bewertung.
+/// Die (einzige) Bewertung eines Produkts.
 class Ratings extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get productId => integer().references(Products, #id, onDelete: KeyAction.cascade)();
-  IntColumn get storeId => integer().nullable().references(Stores, #id, onDelete: KeyAction.setNull)();
+  IntColumn get productId => integer().unique().references(Products, #id, onDelete: KeyAction.cascade)();
   // ignore: recursive_getters
   IntColumn get score => integer().check(score.isBetweenValues(1, 10))();
   BoolColumn get wouldBuyAgain => boolean()();
@@ -38,7 +37,18 @@ class Ratings extends Table {
   TextColumn get note => text().nullable()();
   RealColumn get latitude => real().nullable()();
   RealColumn get longitude => real().nullable()();
+
+  /// Zeitpunkt der letzten Änderung.
   DateTimeColumn get ratedAt => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// In welchen Läden es ein Produkt gibt (beliebig viele).
+class ProductStores extends Table {
+  IntColumn get productId => integer().references(Products, #id, onDelete: KeyAction.cascade)();
+  IntColumn get storeId => integer().references(Stores, #id, onDelete: KeyAction.cascade)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {productId, storeId};
 }
 
 /// Kleine Schlüssel-Wert-Ablage für App-Einstellungen (z. B. letzter Export).
@@ -50,7 +60,7 @@ class Settings extends Table {
   Set<Column<Object>> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [Products, Stores, Ratings, Settings])
+@DriftDatabase(tables: [Products, Stores, Ratings, ProductStores, Settings])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? driftDatabase(name: fileName));
 
@@ -58,11 +68,31 @@ class AppDatabase extends _$AppDatabase {
   /// System-Backup (Android Auto Backup / iCloud) erfasst.
   static const fileName = 'topflop';
 
+  /// 1: mehrere Bewertungen pro Produkt, Laden an der Bewertung.
+  /// 2: eine Bewertung pro Produkt, Läden am Produkt (mehrere möglich).
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(productStores);
+        // Alle Läden aus dem bisherigen Verlauf übernehmen.
+        await customStatement(
+          'INSERT OR IGNORE INTO product_stores (product_id, store_id) '
+          'SELECT product_id, store_id FROM ratings WHERE store_id IS NOT NULL',
+        );
+        // Pro Produkt nur die neueste Bewertung behalten.
+        await customStatement(
+          'DELETE FROM ratings WHERE EXISTS ('
+          'SELECT 1 FROM ratings newer WHERE newer.product_id = ratings.product_id '
+          'AND (newer.rated_at > ratings.rated_at OR (newer.rated_at = ratings.rated_at AND newer.id > ratings.id)))',
+        );
+        // Tabelle neu aufbauen: ohne store_id, mit eindeutiger product_id.
+        await m.alterTable(TableMigration(ratings));
+      }
+    },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },

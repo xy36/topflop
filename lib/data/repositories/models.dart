@@ -1,46 +1,27 @@
 import '../db/database.dart';
 
-class RatingWithStore {
-  const RatingWithStore(this.rating, this.store);
-
-  final Rating rating;
-  final Store? store;
-}
-
-/// Ein Produkt mit verdichteten Bewertungsdaten für Listen.
+/// Ein Produkt mit seiner Bewertung und den Läden, in denen es das gibt.
 class ProductSummary {
-  const ProductSummary({required this.product, required this.ratings});
+  const ProductSummary({required this.product, required this.rating, required this.stores});
 
   final Product product;
 
-  /// Neueste zuerst.
-  final List<RatingWithStore> ratings;
+  /// `null`, solange das Produkt noch nicht bewertet ist.
+  final Rating? rating;
 
-  bool get hasRatings => ratings.isNotEmpty;
-  int get ratingCount => ratings.length;
-  RatingWithStore? get latest => ratings.isEmpty ? null : ratings.first;
+  /// Nach Name sortiert.
+  final List<Store> stores;
 
-  double? get averageScore =>
-      ratings.isEmpty ? null : ratings.map((r) => r.rating.score).reduce((a, b) => a + b) / ratings.length;
+  bool get isRated => rating != null;
 
-  /// Für Badges: gerundeter Durchschnitt.
-  int? get displayScore => averageScore?.round();
+  int? get score => rating?.score;
 
-  /// Das Urteil der letzten Bewertung zählt.
-  bool? get wouldBuyAgain => latest?.rating.wouldBuyAgain;
+  bool? get wouldBuyAgain => rating?.wouldBuyAgain;
 
-  String? get lastStoreName => ratings.map((r) => r.store?.name).firstWhere((n) => n != null, orElse: () => null);
+  /// Für die Anzeige in Listen: erster Laden (alphabetisch).
+  String? get storeName => stores.isEmpty ? null : stores.first.name;
 
-  DateTime get lastActivity => latest?.rating.ratedAt ?? product.createdAt;
-
-  /// Alle Läden, in denen das Produkt gekauft wurde, ohne Duplikate.
-  List<Store> get stores {
-    final seen = <int>{};
-    return [
-      for (final r in ratings)
-        if (r.store != null && seen.add(r.store!.id)) r.store!,
-    ];
-  }
+  DateTime get lastActivity => rating?.ratedAt ?? product.createdAt;
 }
 
 class StoreSummary {
@@ -48,7 +29,7 @@ class StoreSummary {
 
   final Store store;
 
-  /// Produkte, die hier gekauft wurden, bestbewertete zuerst.
+  /// Produkte, die es hier gibt, bestbewertete zuerst.
   final List<ProductSummary> products;
 
   int get ratedCount => products.length;

@@ -276,8 +276,8 @@ class _ResultSheet extends StatelessWidget {
         subtitle: [summary.product.brand, summary.product.quantity].whereType<String>().join(' · '),
         category: ProductCategory.fromName(summary.product.category),
         imageUrl: summary.product.imageUrl,
-        verdict: summary.hasRatings ? _Verdict(summary) : null,
-        primaryLabel: l10n.rateNew,
+        verdict: summary.isRated ? _Verdict(summary) : null,
+        primaryLabel: summary.isRated ? l10n.ratingChange : l10n.rate,
         onPrimary: () => context.pushReplacement('/product/${summary.product.id}/rate?then=detail'),
         onDetails: () => context.pushReplacement('/product/${summary.product.id}'),
       ),
@@ -451,9 +451,9 @@ class _Verdict extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final score = summary.displayScore!;
+    final score = summary.score!;
     final again = summary.wouldBuyAgain == true ? l10n.scanLastAgainYes : l10n.scanLastAgainNo;
-    final store = summary.lastStoreName;
+    final store = summary.storeName;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(

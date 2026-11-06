@@ -138,9 +138,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get details => 'Details';
 
   @override
-  String get rateNew => 'Rate again';
-
-  @override
   String get rate => 'Rate';
 
   @override
@@ -165,13 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search';
 
   @override
-  String get productAverage => 'Average';
-
-  @override
   String get productBuyAgain => 'Buy again';
-
-  @override
-  String get productBought => 'Bought';
 
   @override
   String get yes => 'Yes';
@@ -181,9 +172,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productAvailableAt => 'Available at';
-
-  @override
-  String get productHistory => 'History';
 
   @override
   String get productNoRatings => 'No rating yet. How was it?';
@@ -196,9 +184,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get delete => 'Delete';
-
-  @override
-  String get deleteRatingTitle => 'Delete rating?';
 
   @override
   String get deleteProductTitle => 'Delete product?';
@@ -232,16 +217,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratingNo => 'Rather not';
 
   @override
-  String get ratingWhere => 'Where did you buy it?';
+  String get ratingWhere => 'Where can you get it?';
 
   @override
   String get ratingLocationFound => 'Location found';
 
   @override
   String get ratingOtherStore => 'Other store';
-
-  @override
-  String get ratingNoStore => 'No store';
 
   @override
   String get ratingPrice => 'Price';
@@ -523,13 +505,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get change => 'Change';
 
   @override
+  String get ratingChange => 'Change rating';
+
+  @override
+  String get productScore => 'Rating';
+
+  @override
+  String productRatedOn(String date) {
+    return 'Rated on $date';
+  }
+
+  @override
+  String get productYourNote => 'Your note';
+
+  @override
+  String get ratingWhereHint => 'Pick as many stores as you like';
+
+  @override
   String get ratingEditTitle => 'Edit rating';
-
-  @override
-  String get ratingDeleted => 'Rating deleted';
-
-  @override
-  String get undo => 'Undo';
 
   @override
   String get storeEditTitle => 'Edit store';

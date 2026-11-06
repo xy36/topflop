@@ -34,7 +34,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final q = _search.text.trim().toLowerCase();
     if (q.isEmpty) return true;
     final p = s.product;
-    return [p.name, p.brand, p.barcode, s.lastStoreName].whereType<String>().any((v) => v.toLowerCase().contains(q));
+    return [
+      p.name,
+      p.brand,
+      p.barcode,
+      ...s.stores.map((st) => st.name),
+    ].whereType<String>().any((v) => v.toLowerCase().contains(q));
   }
 
   @override

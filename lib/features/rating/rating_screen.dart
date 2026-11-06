@@ -17,12 +17,9 @@ import '../../l10n/app_localizations.dart';
 import '../stores/store_form_sheet.dart';
 
 class RatingScreen extends ConsumerStatefulWidget {
-  const RatingScreen({super.key, required this.productId, this.ratingId, this.openDetailAfterSave = false});
+  const RatingScreen({super.key, required this.productId, this.openDetailAfterSave = false});
 
   final int productId;
-
-  /// Gesetzt: bestehende Bewertung bearbeiten statt eine neue anzulegen.
-  final int? ratingId;
 
   /// Kommt man vom Scanner, geht es nach dem Speichern zur Produktseite.
   final bool openDetailAfterSave;
@@ -37,7 +34,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
 
   int _score = 7;
   bool _again = true;
-  int? _storeId;
+  Set<int> _storeIds = {};
   final _price = TextEditingController();
   final _note = TextEditingController();
   bool _saving = false;
@@ -46,7 +43,8 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   List<(Store, double?)> _stores = const [];
   bool _locationMatched = false;
 
-  bool get _editing => widget.ratingId != null;
+  /// Es gibt pro Produkt nur eine Bewertung – existiert sie, wird sie geändert.
+  bool _editing = false;
 
   @override
   void initState() {
@@ -54,24 +52,26 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     _init();
   }
 
-  /// Beim Bearbeiten zuerst die alte Bewertung laden, damit die Vorauswahl
-  /// des nächsten Ladens den gespeicherten Laden nicht überschreibt.
+  /// Zuerst eine vorhandene Bewertung laden, damit die Vorauswahl des
+  /// nächsten Ladens die gespeicherten Läden nicht überschreibt.
   Future<void> _init() async {
-    if (_editing) {
-      final r = await ref.read(productRepositoryProvider).findRating(widget.ratingId!);
-      if (!mounted) return;
-      if (r != null) {
-        final locale = Localizations.localeOf(context).toString();
-        setState(() {
-          _score = r.score;
-          _again = r.wouldBuyAgain;
-          _storeId = r.storeId;
-          _price.text = r.priceCents == null
-              ? ''
-              : formatPrice(r.priceCents!, locale).replaceAll(RegExp(r'[^0-9.,]'), '');
-          _note.text = r.note ?? '';
-        });
-      }
+    final existing = await ref.read(productRepositoryProvider).loadProduct(widget.productId);
+    if (!mounted) return;
+    final r = existing?.rating;
+    if (r != null) {
+      final locale = Localizations.localeOf(context).toString();
+      setState(() {
+        _editing = true;
+        _score = r.score;
+        _again = r.wouldBuyAgain;
+        _storeIds = {for (final s in existing!.stores) s.id};
+        _price.text = r.priceCents == null
+            ? ''
+            : formatPrice(r.priceCents!, locale).replaceAll(RegExp(r'[^0-9.,]'), '');
+        _note.text = r.note ?? '';
+      });
+    } else if (existing != null && existing.stores.isNotEmpty) {
+      setState(() => _storeIds = {for (final s in existing.stores) s.id});
     }
     await _loadStores();
   }
@@ -91,7 +91,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     if (_position == null) {
       setState(() {
         _stores = [for (final s in stores) (s, null)]..sort((a, b) => a.$1.name.compareTo(b.$1.name));
-        if (select != null) _storeId = select;
+        if (select != null) _storeIds = {..._storeIds, select};
       });
     }
     final position = _position ?? await ref.read(currentPositionProvider.future);
@@ -105,12 +105,12 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
       _position = position;
       _stores = sorted;
       if (select != null) {
-        _storeId = select;
+        _storeIds = {..._storeIds, select};
       } else if (!_editing &&
-          _storeId == null &&
+          _storeIds.isEmpty &&
           sorted.isNotEmpty &&
           (sorted.first.$2 ?? double.infinity) < _nearbyMeters) {
-        _storeId = sorted.first.$1.id;
+        _storeIds = {sorted.first.$1.id};
         _locationMatched = true;
       }
     });
@@ -130,29 +130,18 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   Future<void> _save() async {
     setState(() => _saving = true);
     final note = _note.text.trim();
-    final repo = ref.read(productRepositoryProvider);
-    if (_editing) {
-      await repo.updateRating(
-        widget.ratingId!,
-        score: _score,
-        wouldBuyAgain: _again,
-        storeId: _storeId,
-        priceCents: parsePriceCents(_price.text),
-        note: note.isEmpty ? null : note,
-      );
-      if (mounted) context.pop();
-      return;
-    }
-    await repo.addRating(
-      productId: widget.productId,
-      score: _score,
-      wouldBuyAgain: _again,
-      storeId: _storeId,
-      priceCents: parsePriceCents(_price.text),
-      note: note.isEmpty ? null : note,
-      latitude: _position?.latitude,
-      longitude: _position?.longitude,
-    );
+    await ref
+        .read(productRepositoryProvider)
+        .saveRating(
+          productId: widget.productId,
+          score: _score,
+          wouldBuyAgain: _again,
+          storeIds: _storeIds,
+          priceCents: parsePriceCents(_price.text),
+          note: note.isEmpty ? null : note,
+          latitude: _position?.latitude,
+          longitude: _position?.longitude,
+        );
     if (!mounted) return;
     if (widget.openDetailAfterSave) {
       context.pushReplacement('/product/${widget.productId}');
@@ -231,7 +220,13 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(l10n.ratingWhere, style: AppText.body(15, weight: FontWeight.w700)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(l10n.ratingWhere, style: AppText.body(15, weight: FontWeight.w700)),
+                                  Text(l10n.ratingWhereHint, style: AppText.body(12, color: AppColors.muted)),
+                                ],
+                              ),
                             ),
                             if (_locationMatched)
                               Row(
@@ -251,13 +246,17 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            for (final (store, distance) in _stores.take(6))
+                            for (final (store, distance) in _stores)
                               PillChip(
                                 dark: false,
                                 label: store.name,
                                 trailing: distance == null ? null : formatDistance(distance, locale),
-                                selected: _storeId == store.id,
-                                onTap: () => setState(() => _storeId = _storeId == store.id ? null : store.id),
+                                selected: _storeIds.contains(store.id),
+                                onTap: () => setState(
+                                  () => _storeIds = _storeIds.contains(store.id)
+                                      ? ({..._storeIds}..remove(store.id))
+                                      : {..._storeIds, store.id},
+                                ),
                               ),
                             _DashedButton(label: '+ ${l10n.ratingOtherStore}', onTap: _addStore),
                           ],

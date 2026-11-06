@@ -122,22 +122,28 @@ void main() {
       ),
     );
 
-    test('Verlauf, Durchschnitt und letztes Urteil', () async {
+    test('Eine Bewertung pro Produkt: Speichern überschreibt, Läden mehrfach', () async {
       final id = await salami();
-      final rewe = await stores.addStore(name: 'Rewe Lindenstraße', latitude: 52.0, longitude: 8.0);
-      await products.addRating(productId: id, score: 8, wouldBuyAgain: false, storeId: rewe);
-      await Future<void>.delayed(const Duration(seconds: 1));
-      await products.addRating(productId: id, score: 9, wouldBuyAgain: true, storeId: rewe, priceCents: 349);
+      final rewe = await stores.addStore(name: 'Rewe');
+      final edeka = await stores.addStore(name: 'Edeka');
 
+      await products.saveRating(productId: id, score: 6, wouldBuyAgain: false, storeIds: {rewe}, note: 'naja');
+      await products.saveRating(productId: id, score: 9, wouldBuyAgain: true, storeIds: {rewe, edeka}, priceCents: 349);
+
+      expect(await db.select(db.ratings).get(), hasLength(1));
       final summary = (await products.findByBarcode('4012345678901'))!;
-      expect(summary.ratingCount, 2);
-      expect(summary.averageScore, 8.5);
+      expect(summary.score, 9);
       expect(summary.wouldBuyAgain, isTrue);
-      expect(summary.lastStoreName, 'Rewe Lindenstraße');
-      expect(summary.stores.map((s) => s.name), ['Rewe Lindenstraße']);
+      expect(summary.rating!.priceCents, 349);
+      expect(summary.rating!.note, isNull);
+      expect(summary.stores.map((s) => s.name), ['Edeka', 'Rewe']);
+      expect(summary.storeName, 'Edeka');
 
-      final storeSummaries = await stores.loadSummaries();
-      expect(storeSummaries.single.ratedCount, 1);
+      final perStore = await stores.loadSummaries();
+      expect(perStore.map((s) => s.ratedCount), [1, 1]);
+
+      await products.saveRating(productId: id, score: 9, wouldBuyAgain: true, storeIds: {});
+      expect((await products.loadProduct(id))!.stores, isEmpty);
     });
 
     test('erneuter Scan aktualisiert statt zu duplizieren', () async {
@@ -149,21 +155,38 @@ void main() {
 
     test('Bewertung außerhalb 1–10 wird abgelehnt', () async {
       final id = await salami();
-      expect(products.addRating(productId: id, score: 11, wouldBuyAgain: true), throwsA(anything));
+      expect(products.saveRating(productId: id, score: 11, wouldBuyAgain: true, storeIds: {}), throwsA(anything));
     });
 
-    test('Produkt löschen entfernt seine Bewertungen', () async {
+    test('Produkt löschen entfernt Bewertung und Ladenzuordnung', () async {
       final id = await salami();
-      await products.addRating(productId: id, score: 7, wouldBuyAgain: true);
+      final store = await stores.addStore(name: 'Aldi');
+      await products.saveRating(productId: id, score: 7, wouldBuyAgain: true, storeIds: {store});
       await products.deleteProduct(id);
       expect(await db.select(db.ratings).get(), isEmpty);
+      expect(await db.select(db.productStores).get(), isEmpty);
+    });
+
+    test('Laden umbenennen und löschen – Bewertung bleibt', () async {
+      final id = await salami();
+      final store = await stores.addStore(name: 'Aldi', latitude: 52, longitude: 8);
+      await products.saveRating(productId: id, score: 7, wouldBuyAgain: true, storeIds: {store});
+
+      await stores.updateStore(store, name: 'Aldi Süd', latitude: 52, longitude: 8);
+      expect((await products.loadProduct(id))!.storeName, 'Aldi Süd');
+
+      await stores.deleteStore(store);
+      final summary = (await products.loadProduct(id))!;
+      expect(summary.score, 7);
+      expect(summary.stores, isEmpty);
     });
 
     test('Backup: Export und Import ergeben dieselben Daten', () async {
       final id = await salami();
-      final store = await stores.addStore(name: 'Edeka Am Markt');
+      final a = await stores.addStore(name: 'Edeka Am Markt');
+      final b = await stores.addStore(name: 'Rewe');
       await products.setFavorite(id, true);
-      await products.addRating(productId: id, score: 9, wouldBuyAgain: true, storeId: store, note: 'Schön mild');
+      await products.saveRating(productId: id, score: 9, wouldBuyAgain: true, storeIds: {a, b}, note: 'Schön mild');
 
       final json = jsonEncode({
         'app': 'topflop',
@@ -171,6 +194,7 @@ void main() {
         'products': [for (final p in await db.select(db.products).get()) p.toJson()],
         'stores': [for (final s in await db.select(db.stores).get()) s.toJson()],
         'ratings': [for (final r in await db.select(db.ratings).get()) r.toJson()],
+        'productStores': [for (final ps in await db.select(db.productStores).get()) ps.toJson()],
       });
 
       final target = AppDatabase(NativeDatabase.memory());
@@ -179,8 +203,31 @@ void main() {
 
       final restored = (await ProductRepository(target).findByBarcode('4012345678901'))!;
       expect(restored.product.isFavorite, isTrue);
-      expect(restored.ratings.single.rating.note, 'Schön mild');
-      expect(restored.ratings.single.store?.name, 'Edeka Am Markt');
+      expect(restored.rating!.note, 'Schön mild');
+      expect(restored.stores.map((s) => s.name), ['Edeka Am Markt', 'Rewe']);
+    });
+
+    test('Backup: alte Sicherung (Version 1) mit mehreren Bewertungen wird übernommen', () async {
+      final json = jsonEncode({
+        'app': 'topflop',
+        'version': 1,
+        'products': [
+          {'id': 1, 'barcode': '1', 'name': 'Cola', 'category': 'drink', 'isFavorite': false, 'createdAt': 1000},
+        ],
+        'stores': [
+          {'id': 1, 'name': 'Aldi', 'createdAt': 1000},
+          {'id': 2, 'name': 'Lidl', 'createdAt': 1000},
+        ],
+        'ratings': [
+          {'id': 1, 'productId': 1, 'storeId': 1, 'score': 5, 'wouldBuyAgain': false, 'ratedAt': 2000},
+          {'id': 2, 'productId': 1, 'storeId': 2, 'score': 8, 'wouldBuyAgain': true, 'ratedAt': 3000},
+        ],
+      });
+      await BackupService(db).importJson(json);
+
+      final cola = (await products.loadProduct(1))!;
+      expect(cola.score, 8);
+      expect(cola.stores.map((s) => s.name), ['Aldi', 'Lidl']);
     });
 
     test('Backup: fremde Dateien werden abgelehnt', () async {
@@ -194,8 +241,8 @@ void main() {
       final colaId = await products.createManual(name: 'Cola', category: ProductCategory.drink);
       final rewe = await stores.addStore(name: 'Rewe');
       final edeka = await stores.addStore(name: 'Edeka');
-      await products.addRating(productId: salamiId, score: 9, wouldBuyAgain: true, storeId: rewe);
-      await products.addRating(productId: kaeseId, score: 4, wouldBuyAgain: false, storeId: edeka);
+      await products.saveRating(productId: salamiId, score: 9, wouldBuyAgain: true, storeIds: {rewe});
+      await products.saveRating(productId: kaeseId, score: 4, wouldBuyAgain: false, storeIds: {edeka, rewe});
       await products.setFavorite(kaeseId, true);
       // Cola bleibt unbewertet.
 
@@ -204,6 +251,7 @@ void main() {
 
       expect(names(const ProductFilter(minScore: 8)), ['Salami Milano']);
       expect(names(ProductFilter(storeIds: {edeka})), ['Bergkäse']);
+      expect(names(ProductFilter(storeIds: {rewe}, sort: ProductSort.name)), ['Bergkäse', 'Salami Milano']);
       expect(names(const ProductFilter(categories: {ProductCategory.drink})), ['Cola']);
       expect(names(const ProductFilter(buyAgain: false)), ['Bergkäse']);
       expect(names(const ProductFilter(favoritesOnly: true)), ['Bergkäse']);
@@ -213,42 +261,53 @@ void main() {
       expect(const ProductFilter(minScore: 3, sort: ProductSort.name).cleared().isActive, isFalse);
 
       await products.setCategory(colaId, ProductCategory.dairy);
-      final cola = (await products.loadProduct(colaId))!;
-      expect(cola.product.category, ProductCategory.dairy.name);
+      expect((await products.loadProduct(colaId))!.product.category, ProductCategory.dairy.name);
     });
+  });
 
-    test('Bewertung bearbeiten, löschen und wiederherstellen', () async {
-      final id = await salami();
-      final rewe = await stores.addStore(name: 'Rewe');
-      final ratingId = await products.addRating(productId: id, score: 6, wouldBuyAgain: false, note: 'naja');
+  test('Migration von Schema 1: neueste Bewertung bleibt, alle Läden werden übernommen', () async {
+    // Datenbank im Stand von Version 1 (mehrere Bewertungen, Laden an der Bewertung).
+    final legacy = NativeDatabase.memory(
+      setup: (raw) {
+        raw.execute('''
+          CREATE TABLE products (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, barcode TEXT NULL UNIQUE,
+            name TEXT NOT NULL, brand TEXT NULL, quantity TEXT NULL, image_url TEXT NULL, nutri_score TEXT NULL,
+            category TEXT NOT NULL DEFAULT 'other', is_favorite INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)));
+          CREATE TABLE stores (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
+            address TEXT NULL, latitude REAL NULL, longitude REAL NULL,
+            created_at INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)));
+          CREATE TABLE ratings (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+            store_id INTEGER NULL REFERENCES stores (id) ON DELETE SET NULL,
+            score INTEGER NOT NULL CHECK (score BETWEEN 1 AND 10), would_buy_again INTEGER NOT NULL,
+            price_cents INTEGER NULL, note TEXT NULL, latitude REAL NULL, longitude REAL NULL,
+            rated_at INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)));
+          CREATE TABLE settings ("key" TEXT NOT NULL, value TEXT NOT NULL, PRIMARY KEY ("key"));
+          INSERT INTO products (id, name) VALUES (1, 'Salami'), (2, 'Käse');
+          INSERT INTO stores (id, name) VALUES (1, 'Aldi'), (2, 'Lidl');
+          INSERT INTO ratings (product_id, store_id, score, would_buy_again, note, rated_at) VALUES
+            (1, 1, 5, 0, 'alt', 100), (1, 2, 9, 1, 'neu', 200), (1, NULL, 7, 1, 'mittel', 150),
+            (2, NULL, 4, 0, NULL, 100);
+          PRAGMA user_version = 1;
+        ''');
+      },
+    );
+    final db = AppDatabase(legacy);
+    addTearDown(db.close);
+    final repo = ProductRepository(db);
 
-      await products.updateRating(ratingId, score: 8, wouldBuyAgain: true, storeId: rewe, priceCents: 299, note: null);
-      final edited = (await products.findRating(ratingId))!;
-      expect(
-        [edited.score, edited.wouldBuyAgain, edited.storeId, edited.priceCents, edited.note],
-        [8, true, rewe, 299, null],
-      );
+    final salami = (await repo.loadProduct(1))!;
+    expect([salami.score, salami.rating!.note], [9, 'neu']);
+    expect(salami.stores.map((s) => s.name), ['Aldi', 'Lidl']);
+    final kaese = (await repo.loadProduct(2))!;
+    expect([kaese.score, kaese.stores], [4, isEmpty]);
+    expect(await db.select(db.ratings).get(), hasLength(2));
 
-      await products.deleteRating(ratingId);
-      expect(await products.findRating(ratingId), isNull);
-      await products.restoreRating(edited);
-      final restored = (await products.findRating(ratingId))!;
-      expect(restored.score, 8);
-      expect(restored.ratedAt, edited.ratedAt);
-    });
-
-    test('Laden umbenennen und löschen – Bewertungen bleiben', () async {
-      final id = await salami();
-      final store = await stores.addStore(name: 'Aldi', latitude: 52, longitude: 8);
-      final ratingId = await products.addRating(productId: id, score: 7, wouldBuyAgain: true, storeId: store);
-
-      await stores.updateStore(store, name: 'Aldi Süd', latitude: 52, longitude: 8);
-      expect((await stores.allStores()).single.name, 'Aldi Süd');
-
-      await stores.deleteStore(store);
-      expect(await stores.allStores(), isEmpty);
-      final rating = (await products.findRating(ratingId))!;
-      expect(rating.storeId, isNull);
-    });
+    // Eindeutigkeit gilt nach der Migration.
+    expect(
+      db.into(db.ratings).insert(RatingsCompanion.insert(productId: 1, score: 3, wouldBuyAgain: false)),
+      throwsA(anything),
+    );
   });
 }

@@ -14,7 +14,9 @@ class BackupService {
 
   final AppDatabase _db;
 
-  static const formatVersion = 1;
+  /// 1: mehrere Bewertungen pro Produkt mit `storeId`.
+  /// 2: eine Bewertung pro Produkt, Läden in `productStores`.
+  static const formatVersion = 2;
   static const _lastExportKey = 'last_export';
 
   /// Android Auto Backup sichert maximal 25 MB pro App. Ab hier warnen wir.
@@ -29,6 +31,7 @@ class BackupService {
       'products': [for (final p in await _db.select(_db.products).get()) p.toJson()],
       'stores': [for (final s in await _db.select(_db.stores).get()) s.toJson()],
       'ratings': [for (final r in await _db.select(_db.ratings).get()) r.toJson()],
+      'productStores': [for (final ps in await _db.select(_db.productStores).get()) ps.toJson()],
     };
 
     final dir = await getTemporaryDirectory();
@@ -66,9 +69,30 @@ class BackupService {
 
     final products = list('products').map(Product.fromJson).toList();
     final stores = list('stores').map(Store.fromJson).toList();
-    final ratings = list('ratings').map(Rating.fromJson).toList();
+    final rawRatings = list('ratings');
+
+    final List<ProductStore> productStores;
+    final List<Map<String, dynamic>> ratingRows;
+    if (version == 1) {
+      // Alte Sicherung: Läden hingen an den Bewertungen, mehrere pro Produkt.
+      productStores = {
+        for (final r in rawRatings)
+          if (r['storeId'] != null) (r['productId'] as int, r['storeId'] as int),
+      }.map((e) => ProductStore(productId: e.$1, storeId: e.$2)).toList();
+      final newest = <int, Map<String, dynamic>>{};
+      for (final r in rawRatings) {
+        final current = newest[r['productId'] as int];
+        if (current == null || (r['ratedAt'] as int) >= (current['ratedAt'] as int)) newest[r['productId'] as int] = r;
+      }
+      ratingRows = newest.values.toList();
+    } else {
+      productStores = list('productStores').map(ProductStore.fromJson).toList();
+      ratingRows = rawRatings;
+    }
+    final ratings = ratingRows.map(Rating.fromJson).toList();
 
     await _db.transaction(() async {
+      await _db.delete(_db.productStores).go();
       await _db.delete(_db.ratings).go();
       await _db.delete(_db.products).go();
       await _db.delete(_db.stores).go();
@@ -76,6 +100,7 @@ class BackupService {
         b.insertAll(_db.products, products);
         b.insertAll(_db.stores, stores);
         b.insertAll(_db.ratings, ratings);
+        b.insertAll(_db.productStores, productStores);
       });
     });
   }
