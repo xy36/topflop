@@ -1,9 +1,9 @@
 // Rendert App-Icon und Splash-Logo als PNG nach assets/brand/ und die
 // Play-Store-Grafiken nach store/play/.
 //
-//   flutter test tool/render_brand_assets.dart
-//   dart run flutter_launcher_icons
-//   dart run flutter_native_splash:create
+//   fvm flutter test tool/render_brand_assets.dart
+//   fvm dart run flutter_launcher_icons
+//   fvm dart run flutter_native_splash:create
 //
 // Die Schriften für die Store-Grafik liegen in tool/fonts/ (SIL Open Font License).
 //

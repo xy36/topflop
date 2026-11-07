@@ -49,3 +49,6 @@ app.*.map.json
 
 # Erzeugte Test-Barcodes (tool/make_test_barcodes.ps1)
 /tool/test_barcodes/
+
+# FVM Version Cache
+.fvm/

@@ -35,12 +35,26 @@ lib/
 
 ## Entwicklung
 
+Die Flutter-Version ist mit [FVM](https://fvm.app) in `.fvmrc` festgelegt.
+Einmalig einrichten:
+
 ```bash
-flutter pub get
-dart run build_runner build   # nach Änderungen an lib/data/db/database.dart
-flutter test
-flutter run
+dart pub global activate fvm
+fvm install                   # lädt die Version aus .fvmrc
 ```
+
+Danach alle Befehle mit `fvm` davor:
+
+```bash
+fvm flutter pub get
+fvm dart run build_runner build   # nach Änderungen an lib/data/db/database.dart
+fvm flutter test
+fvm flutter run
+```
+
+VS Code nutzt das SDK aus `.fvm/` automatisch (`.vscode/settings.json`). In Android
+Studio den Flutter-SDK-Pfad auf `.fvm/flutter_sdk` im Projekt setzen. Für ein
+Flutter-Update `fvm use <version>` ausführen und `.fvmrc` committen.
 
 Die Lokalisierungen werden bei `flutter run` bzw. `flutter gen-l10n` automatisch erzeugt.
 
