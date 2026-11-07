@@ -9,7 +9,7 @@ Persönliche Produktbewertungen für den Einkauf. Du scannst den Barcode, bewert
 - **Übersicht:** Suche, Laden-Schnellfilter, Filter (Bewertung, Kategorie, Favoriten, Wieder kaufen), Favoriten-Herz.
 - **Läden:** Ketten wie „Lidl“, ganz ohne Standort. Beim Bewerten sind die Läden der letzten Bewertung vorausgewählt.
 - **Produkte ohne Barcode** (Frischetheke, Wochenmarkt) lassen sich selbst anlegen.
-- **Sprachen:** Deutsch und Englisch.
+- **Sprachen:** Deutsch, Englisch, Französisch, Spanisch, Italienisch und Niederländisch.
 - **Backup:** automatisch über Android Auto Backup bzw. iCloud, zusätzlich manueller Export und Import als JSON (Einstellungen).
 
 ## Technik
@@ -48,6 +48,8 @@ Die Lokalisierungen werden bei `flutter run` bzw. `flutter gen-l10n` automatisch
 
 1. `lib/l10n/app_de.arb` nach `lib/l10n/app_<code>.arb` kopieren und übersetzen.
 2. Bei iOS den Sprachcode zusätzlich in `ios/Runner/Info.plist` unter `CFBundleLocalizations` eintragen.
+3. Bei Android den Sprachcode in `android/app/src/main/res/xml/locales_config.xml` eintragen (App-Sprache in den Systemeinstellungen ab Android 13).
+4. Den Sprachcode in den Test „Alle Übersetzungen haben dieselben Schlüssel …“ in `test/app_test.dart` aufnehmen.
 
 ### iOS
 

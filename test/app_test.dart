@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
@@ -18,6 +19,28 @@ import 'package:topflop/features/home/product_filter.dart';
 void main() {
   // Der Backup-Test öffnet absichtlich zwei In-Memory-Datenbanken.
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+
+  group('Sprachen', () {
+    test('Alle Übersetzungen haben dieselben Schlüssel wie die deutsche Vorlage', () {
+      Set<String> keys(String lang) =>
+          (jsonDecode(File('lib/l10n/app_$lang.arb').readAsStringSync()) as Map<String, dynamic>).keys
+              .where((k) => !k.startsWith('@'))
+              .toSet();
+      final template = keys('de');
+      for (final lang in ['en', 'es', 'fr', 'it', 'nl']) {
+        expect(keys(lang), template, reason: lang);
+      }
+    });
+
+    test('Preise im Format der Sprache', () {
+      expect(formatPrice(229, 'de'), '2,29 €');
+      expect(formatPrice(229, 'en'), '€2.29');
+      expect(formatPrice(229, 'nl'), '€ 2,29');
+      for (final lang in ['de', 'en', 'es', 'fr', 'it', 'nl']) {
+        expect(parsePriceCents(formatPrice(229, lang).replaceAll(RegExp(r'[^0-9.,]'), '')), 229, reason: lang);
+      }
+    });
+  });
 
   group('Domain', () {
     test('Emoji-Skala deckt 1–10 ab und klemmt Randwerte', () {

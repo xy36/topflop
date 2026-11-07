@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
@@ -171,10 +172,9 @@ class PillChip extends StatelessWidget {
   }
 }
 
-String formatPrice(int cents, String locale) {
-  final value = (cents / 100).toStringAsFixed(2);
-  return locale.startsWith('de') ? '${value.replaceAll('.', ',')} €' : '€$value';
-}
+/// Preis in Euro im Format der jeweiligen Sprache, z. B. „2,29 €“ oder „€2.29“.
+String formatPrice(int cents, String locale) =>
+    NumberFormat.simpleCurrency(locale: locale, name: 'EUR').format(cents / 100);
 
 /// Parst „3,49“ oder „3.49“ zu Cent.
 int? parsePriceCents(String input) {

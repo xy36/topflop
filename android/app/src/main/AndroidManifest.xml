@@ -1,10 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Open Food Facts, OpenStreetMap, Google Fonts -->
+    <!-- Open Food Facts, Google Fonts -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Barcode-Scanner -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
-    <!-- Laden automatisch vorauswählen -->
 
     <!-- allowBackup: Android Auto Backup sichert die Datenbank ins Google-Konto
          (max. 25 MB). Der Bild-Cache liegt im cacheDir und wird automatisch ausgelassen. -->
@@ -12,7 +11,8 @@
         android:label="TopFlop"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:allowBackup="true">
+        android:allowBackup="true"
+        android:localeConfig="@xml/locales_config">
         <activity
             android:name=".MainActivity"
             android:exported="true"
