@@ -1,9 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "bootstrap-sha": "a1b8b1d9348bb11c9b4c2fc044219ad48c4e3ed9",
+  "bootstrap-sha": "1c1a20d0c8cf6aeb8629b804cb51658872991e03",
   "packages": {
     ".": {
       "release-type": "dart",
+      "bump-minor-pre-major": true,
       "package-name": "topflop",
       "include-component-in-tag": false,
       "changelog-path": "CHANGELOG.md",

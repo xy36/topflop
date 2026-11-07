@@ -69,15 +69,18 @@ Releases laufen über [release-please](https://github.com/googleapis/release-ple
 
 | Präfix | Wirkung |
 | --- | --- |
-| `feat: …` | neue Funktion, erhöht die Minor-Version (1.1.0 → 1.2.0) |
-| `fix: …` | Fehlerbehebung, erhöht die Patch-Version (1.1.0 → 1.1.1) |
-| `feat!: …` oder `BREAKING CHANGE:` im Text | erhöht die Major-Version |
+| `feat: …` | neue Funktion, erhöht die Minor-Version (0.6.0 → 0.7.0) |
+| `fix: …` | Fehlerbehebung, erhöht die Patch-Version (0.6.0 → 0.6.1) |
+| `feat!: …` oder `BREAKING CHANGE:` im Text | vor 1.0 nur die Minor-Version, danach die Major-Version |
 | `docs:`, `refactor:`, `test:`, `build:`, `ci:`, `chore:` | kein neues Release, nicht im Changelog |
 
 release-please hält danach einen Release-PR offen, der `CHANGELOG.md` und die
 Version in `pubspec.yaml` fortschreibt. Die Build-Nummer hinter dem `+` zählt dabei
 automatisch hoch, wie es der Play Store verlangt. Wird der PR gemergt, entstehen
 Tag und GitHub-Release.
+
+Während der Testphase bleibt die Version unter 1.0. Für das erste stabile Release
+einen Commit mit der Zeile `Release-As: 1.0.0` im Text pushen.
 
 ## Datenquellen
 
