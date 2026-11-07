@@ -88,6 +88,10 @@ Releases laufen über [release-please](https://github.com/googleapis/release-ple
 | `feat!: …` oder `BREAKING CHANGE:` im Text | vor 1.0 nur die Minor-Version, danach die Major-Version |
 | `docs:`, `refactor:`, `test:`, `build:`, `ci:`, `chore:` | kein neues Release, nicht im Changelog |
 
+Der Changelog ist auf Englisch und übernimmt die Commit-Betreffzeilen wörtlich –
+Commit-Nachrichten deshalb auf Englisch schreiben, z. B. `feat: shopping list from "buy again"`.
+Änderungen kommen über Branches und Pull Requests auf `main`, nicht per direktem Push.
+
 release-please hält danach einen Release-PR offen, der `CHANGELOG.md` und die
 Version in `pubspec.yaml` fortschreibt. Die Build-Nummer hinter dem `+` zählt dabei
 automatisch hoch, wie es der Play Store verlangt. Wird der PR gemergt, entstehen
