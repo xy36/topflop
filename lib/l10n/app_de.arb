@@ -138,7 +138,7 @@
   "settingsImportDone": "Import abgeschlossen",
   "settingsImportFailed": "Die Datei konnte nicht gelesen werden.",
   "settingsAbout": "Über",
-  "settingsAboutBody": "Produktdaten und Bilder stammen von Open Food Facts (ODbL), Kartendaten von OpenStreetMap.",
+  "settingsAboutBody": "Produktdaten und Bilder stammen von Open Food Facts (ODbL).",
   "backupShareText": "TopFlop-Datensicherung",
   "homeAllProducts": "Alle Produkte",
   "filterTitle": "Filter",
@@ -174,5 +174,9 @@
   "ratingEditTitle": "Bewertung bearbeiten",
   "storeEditTitle": "Laden bearbeiten",
   "deleteStoreTitle": "Laden löschen?",
-  "deleteStoreBody": "Der Laden wird mit allen Filialen gelöscht. Deine Bewertungen bleiben erhalten."
+  "deleteStoreBody": "Der Laden wird gelöscht. Deine Bewertungen bleiben erhalten.",
+  "settingsAppearance": "Darstellung",
+  "themeSystem": "System",
+  "themeLight": "Hell",
+  "themeDark": "Dunkel"
 }

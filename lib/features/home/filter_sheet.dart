@@ -18,7 +18,7 @@ Future<void> showFilterSheet(BuildContext context) => showModalBottomSheet<void>
   useRootNavigator: true,
   isScrollControlled: true,
   useSafeArea: true,
-  backgroundColor: AppColors.background,
+  backgroundColor: context.colors.background,
   builder: (_) => const _FilterSheet(),
 );
 
@@ -74,8 +74,8 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                     icon: const Icon(Icons.restart_alt_rounded, size: 18),
                     label: Text(l10n.filterReset),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      disabledForegroundColor: AppColors.muted,
+                      foregroundColor: context.colors.primary,
+                      disabledForegroundColor: context.colors.muted,
                       textStyle: AppText.body(14, weight: FontWeight.w700),
                     ),
                   ),
@@ -144,10 +144,10 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryTint,
+                          color: context.colors.primaryTint,
                           borderRadius: BorderRadius.circular(11),
                         ),
-                        child: const Icon(Icons.favorite_rounded, size: 18, color: AppColors.primary),
+                        child: Icon(Icons.favorite_rounded, size: 18, color: context.colors.primary),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -155,7 +155,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                       ),
                       Switch.adaptive(
                         value: _draft.favoritesOnly,
-                        activeTrackColor: AppColors.primary,
+                        activeTrackColor: context.colors.primary,
                         onChanged: (v) => _update((f) => f.copyWith(favoritesOnly: v)),
                       ),
                     ],
@@ -172,7 +172,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                         for (final s in stores)
                           _SelectChip(
                             label: s.store.name,
-                            leading: const Icon(Icons.storefront_outlined, size: 18, color: AppColors.primary),
+                            leading: Icon(Icons.storefront_outlined, size: 18, color: context.colors.primary),
                             selected: _draft.storeIds.contains(s.store.id),
                             onTap: () => _update((f) => f.copyWith(storeIds: _toggle(f.storeIds, s.store.id))),
                           ),
@@ -201,9 +201,9 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
             ),
           ),
           Container(
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(top: BorderSide(color: AppColors.border)),
+            decoration: BoxDecoration(
+              color: context.colors.surface,
+              border: Border(top: BorderSide(color: context.colors.border)),
             ),
             padding: EdgeInsets.fromLTRB(20, 14, 20, MediaQuery.paddingOf(context).bottom + 14),
             child: FilledButton(
@@ -214,8 +214,8 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                       Navigator.pop(context);
                     },
               style: FilledButton.styleFrom(
-                disabledBackgroundColor: AppColors.border,
-                disabledForegroundColor: AppColors.muted,
+                disabledBackgroundColor: context.colors.border,
+                disabledForegroundColor: context.colors.muted,
               ),
               child: Text(l10n.filterShowResults(resultCount)),
             ),
@@ -284,15 +284,15 @@ class _SortTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? AppColors.primary : AppColors.inkSoft;
+    final fg = selected ? context.colors.primary : context.colors.inkSoft;
     return Semantics(
       button: true,
       selected: selected,
       child: Material(
-        color: selected ? AppColors.primaryTint : AppColors.background,
+        color: selected ? context.colors.primaryTint : context.colors.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: selected ? AppColors.primary : Colors.transparent, width: 1.5),
+          side: BorderSide(color: selected ? context.colors.primary : Colors.transparent, width: 1.5),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -331,7 +331,7 @@ class _ScoreRangeLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(99)),
+      decoration: BoxDecoration(color: context.colors.background, borderRadius: BorderRadius.circular(99)),
       child: Text.rich(
         TextSpan(
           children: [
@@ -342,7 +342,7 @@ class _ScoreRangeLabel extends StatelessWidget {
             ),
             TextSpan(
               text: '  –  ',
-              style: AppText.body(14, color: AppColors.muted),
+              style: AppText.body(14, color: context.colors.muted),
             ),
             TextSpan(text: '${Score.emoji(max)} '),
             TextSpan(
@@ -373,8 +373,8 @@ class _ScoreRange extends StatelessWidget {
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             trackHeight: 8,
-            activeTrackColor: AppColors.primary,
-            inactiveTrackColor: AppColors.border,
+            activeTrackColor: context.colors.primary,
+            inactiveTrackColor: context.colors.border,
             thumbColor: Colors.white,
             overlayColor: AppColors.lime.withValues(alpha: 0.35),
             rangeThumbShape: const _RingRangeThumb(),
@@ -408,7 +408,7 @@ class _ScoreRange extends StatelessWidget {
                     style: AppText.body(
                       12,
                       weight: n >= min && n <= max ? FontWeight.w700 : FontWeight.w500,
-                      color: n >= min && n <= max ? AppColors.ink : const Color(0xFF9AA39C),
+                      color: n >= min && n <= max ? context.colors.ink : context.colors.faint,
                     ),
                   ),
                 ),
@@ -447,11 +447,11 @@ class _RingRangeThumb extends RangeSliderThumbShape {
         center + const Offset(0, 1.5),
         _radius,
         Paint()
-          ..color = AppColors.ink.withValues(alpha: 0.22)
+          ..color = Colors.black.withValues(alpha: 0.22)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
       )
       ..drawCircle(center, _radius, Paint()..color = Colors.white)
-      ..drawCircle(center, _radius - 4, Paint()..color = AppColors.primary);
+      ..drawCircle(center, _radius - 4, Paint()..color = sliderTheme.activeTrackColor ?? Colors.green);
   }
 }
 
@@ -467,7 +467,7 @@ class _Segmented<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: context.colors.background, borderRadius: BorderRadius.circular(16)),
       child: Row(
         children: [
           for (final (option, icon, label) in options)
@@ -479,12 +479,12 @@ class _Segmented<T> extends StatelessWidget {
                   duration: const Duration(milliseconds: 160),
                   height: 42,
                   decoration: BoxDecoration(
-                    color: option == value ? AppColors.surface : Colors.transparent,
+                    color: option == value ? context.colors.surface : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: option == value
                         ? [
                             BoxShadow(
-                              color: AppColors.ink.withValues(alpha: 0.12),
+                              color: context.colors.shadow.withValues(alpha: 0.12),
                               blurRadius: 4,
                               offset: const Offset(0, 1),
                             ),
@@ -498,7 +498,7 @@ class _Segmented<T> extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (icon != null) ...[
-                          Icon(icon, size: 16, color: option == value ? AppColors.primary : AppColors.muted),
+                          Icon(icon, size: 16, color: option == value ? context.colors.primary : context.colors.muted),
                           const SizedBox(width: 5),
                         ],
                         Text(
@@ -506,7 +506,7 @@ class _Segmented<T> extends StatelessWidget {
                           style: AppText.body(
                             14,
                             weight: option == value ? FontWeight.w700 : FontWeight.w600,
-                            color: option == value ? AppColors.ink : AppColors.muted,
+                            color: option == value ? context.colors.ink : context.colors.muted,
                           ),
                         ),
                       ],
@@ -536,8 +536,10 @@ class _SelectChip extends StatelessWidget {
       button: true,
       selected: selected,
       child: Material(
-        color: selected ? AppColors.primaryTint : AppColors.background,
-        shape: StadiumBorder(side: BorderSide(color: selected ? AppColors.primary : Colors.transparent, width: 1.5)),
+        color: selected ? context.colors.primaryTint : context.colors.background,
+        shape: StadiumBorder(
+          side: BorderSide(color: selected ? context.colors.primary : Colors.transparent, width: 1.5),
+        ),
         child: InkWell(
           customBorder: const StadiumBorder(),
           onTap: onTap,
@@ -553,7 +555,7 @@ class _SelectChip extends StatelessWidget {
                           key: const ValueKey('check'),
                           width: 24,
                           height: 24,
-                          decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                          decoration: BoxDecoration(color: context.colors.primary, shape: BoxShape.circle),
                           child: const Icon(Icons.check_rounded, size: 16, color: Colors.white),
                         )
                       : SizedBox(
@@ -569,7 +571,7 @@ class _SelectChip extends StatelessWidget {
                   style: AppText.body(
                     14,
                     weight: selected ? FontWeight.w700 : FontWeight.w600,
-                    color: selected ? AppColors.primary : AppColors.ink,
+                    color: selected ? context.colors.onPrimaryTint : context.colors.ink,
                   ),
                 ),
               ],
@@ -593,10 +595,10 @@ class _CountBadge extends StatelessWidget {
       height: 24,
       padding: const EdgeInsets.symmetric(horizontal: 7),
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: AppColors.ink, borderRadius: BorderRadius.circular(99)),
+      decoration: BoxDecoration(color: context.colors.strong, borderRadius: BorderRadius.circular(99)),
       child: Text(
         '$count',
-        style: AppText.body(12, weight: FontWeight.w800, color: AppColors.lime),
+        style: AppText.body(12, weight: FontWeight.w800, color: context.colors.strongAccent),
       ),
     );
   }

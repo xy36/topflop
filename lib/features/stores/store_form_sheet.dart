@@ -108,12 +108,12 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
             const SizedBox(height: 10),
             Row(
               children: [
-                const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primary),
+                Icon(Icons.info_outline_rounded, size: 16, color: context.colors.primary),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     l10n.storeFormExists(matchingChain.name),
-                    style: AppText.body(13, weight: FontWeight.w600, color: AppColors.primary),
+                    style: AppText.body(13, weight: FontWeight.w600, color: context.colors.primary),
                   ),
                 ),
               ],

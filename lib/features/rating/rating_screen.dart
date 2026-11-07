@@ -152,7 +152,7 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                       children: [
                         Text(
                           _editing ? l10n.ratingEditTitle : l10n.ratingTitle,
-                          style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted),
+                          style: AppText.body(12, weight: FontWeight.w600, color: context.colors.muted),
                         ),
                         Text(
                           [product?.name, product?.brand].whereType<String>().join(' · '),
@@ -202,18 +202,18 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(l10n.ratingWhere, style: AppText.body(15, weight: FontWeight.w700)),
-                                  Text(l10n.ratingWhereHint, style: AppText.body(12, color: AppColors.muted)),
+                                  Text(l10n.ratingWhereHint, style: AppText.body(12, color: context.colors.muted)),
                                 ],
                               ),
                             ),
                             if (_fromLastTime)
                               Row(
                                 children: [
-                                  const Icon(Icons.history_rounded, size: 14, color: AppColors.primary),
+                                  Icon(Icons.history_rounded, size: 14, color: context.colors.primary),
                                   const SizedBox(width: 4),
                                   Text(
                                     l10n.ratingLastStores,
-                                    style: AppText.body(12, weight: FontWeight.w600, color: AppColors.primary),
+                                    style: AppText.body(12, weight: FontWeight.w600, color: context.colors.primary),
                                   ),
                                 ],
                               ),
@@ -289,9 +289,9 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-          border: Border(top: BorderSide(color: AppColors.border)),
+        decoration: BoxDecoration(
+          color: context.colors.background,
+          border: Border(top: BorderSide(color: context.colors.border)),
         ),
         padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.paddingOf(context).bottom + 16),
         child: FilledButton(onPressed: _saving ? null : _save, child: Text(l10n.ratingSave)),
@@ -312,7 +312,7 @@ class _CategoryRow extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final category = ProductCategory.fromName(product.category);
     return Material(
-      color: AppColors.surface,
+      color: context.colors.surface,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -334,7 +334,7 @@ class _CategoryRow extends ConsumerWidget {
                   children: [
                     Text(
                       l10n.productFormCategory,
-                      style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted),
+                      style: AppText.body(12, weight: FontWeight.w600, color: context.colors.muted),
                     ),
                     Text(category.label(l10n), style: AppText.body(15, weight: FontWeight.w700)),
                   ],
@@ -342,10 +342,10 @@ class _CategoryRow extends ConsumerWidget {
               ),
               Text(
                 l10n.change,
-                style: AppText.body(14, weight: FontWeight.w700, color: AppColors.primary),
+                style: AppText.body(14, weight: FontWeight.w700, color: context.colors.primary),
               ),
               const SizedBox(width: 4),
-              const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+              Icon(Icons.chevron_right_rounded, color: context.colors.primary),
             ],
           ),
         ),
@@ -386,22 +386,22 @@ class _ScoreCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 '/ 10',
-                style: AppText.body(16, weight: FontWeight.w600, color: AppColors.muted),
+                style: AppText.body(16, weight: FontWeight.w600, color: context.colors.muted),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
             Score.word(l10n, score),
-            style: AppText.body(16, weight: FontWeight.w600, color: AppColors.primary),
+            style: AppText.body(16, weight: FontWeight.w600, color: context.colors.primary),
           ),
           const SizedBox(height: 8),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               trackHeight: 10,
-              activeTrackColor: AppColors.primary,
-              inactiveTrackColor: AppColors.border,
-              thumbColor: AppColors.primary,
+              activeTrackColor: context.colors.primary,
+              inactiveTrackColor: context.colors.border,
+              thumbColor: context.colors.primary,
               overlayColor: AppColors.lime.withValues(alpha: 0.4),
               thumbShape: const _RingThumb(),
               tickMarkShape: SliderTickMarkShape.noTickMark,
@@ -428,7 +428,7 @@ class _ScoreCard extends StatelessWidget {
                       label: l10n.ratingTick(n),
                       excludeSemantics: true,
                       child: Material(
-                        color: n == score ? AppColors.ink : Colors.transparent,
+                        color: n == score ? context.colors.strong : Colors.transparent,
                         borderRadius: BorderRadius.circular(10),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(10),
@@ -441,7 +441,7 @@ class _ScoreCard extends StatelessWidget {
                                 style: AppText.body(
                                   14,
                                   weight: n == score ? FontWeight.w700 : FontWeight.w600,
-                                  color: n == score ? AppColors.lime : AppColors.muted,
+                                  color: n == score ? context.colors.strongAccent : context.colors.muted,
                                 ),
                               ),
                             ),
@@ -489,11 +489,11 @@ class _RingThumb extends SliderComponentShape {
         center + const Offset(0, 2),
         _radius,
         Paint()
-          ..color = AppColors.ink.withValues(alpha: 0.25)
+          ..color = Colors.black.withValues(alpha: 0.25)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
       )
       ..drawCircle(center, _radius, Paint()..color = Colors.white)
-      ..drawCircle(center, _radius - 4, Paint()..color = AppColors.primary);
+      ..drawCircle(center, _radius - 4, Paint()..color = sliderTheme.activeTrackColor ?? Colors.green);
   }
 }
 
@@ -507,7 +507,7 @@ class _BuyAgainToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget segment(bool option, IconData icon, String label, Color activeBg) {
+    Widget segment(bool option, IconData icon, String label, Color activeBg, Color activeFg) {
       final active = value == option;
       return Expanded(
         child: Semantics(
@@ -520,7 +520,13 @@ class _BuyAgainToggle extends StatelessWidget {
               color: active ? activeBg : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               boxShadow: active
-                  ? [BoxShadow(color: AppColors.ink.withValues(alpha: 0.15), blurRadius: 3, offset: const Offset(0, 1))]
+                  ? [
+                      BoxShadow(
+                        color: context.colors.shadow.withValues(alpha: 0.15),
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ]
                   : null,
             ),
             child: InkWell(
@@ -529,14 +535,14 @@ class _BuyAgainToggle extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 18, color: active ? Colors.white : const Color(0xFF3E4A42)),
+                  Icon(icon, size: 18, color: active ? activeFg : context.colors.textSecondary),
                   const SizedBox(width: 6),
                   Text(
                     label,
                     style: AppText.body(
                       15,
                       weight: FontWeight.w700,
-                      color: active ? Colors.white : const Color(0xFF3E4A42),
+                      color: active ? activeFg : context.colors.textSecondary,
                     ),
                   ),
                 ],
@@ -549,12 +555,12 @@ class _BuyAgainToggle extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: context.colors.background, borderRadius: BorderRadius.circular(16)),
       child: Row(
         children: [
-          segment(true, Icons.check_rounded, yesLabel, AppColors.primary),
+          segment(true, Icons.check_rounded, yesLabel, context.colors.primary, Colors.white),
           const SizedBox(width: 8),
-          segment(false, Icons.close_rounded, noLabel, AppColors.ink),
+          segment(false, Icons.close_rounded, noLabel, context.colors.strong, context.colors.onStrong),
         ],
       ),
     );
@@ -578,7 +584,7 @@ class _OptionalLabel extends StatelessWidget {
           ),
           TextSpan(
             text: ' $optional',
-            style: AppText.body(15, weight: FontWeight.w500, color: AppColors.muted),
+            style: AppText.body(15, weight: FontWeight.w500, color: context.colors.muted),
           ),
         ],
       ),
@@ -598,7 +604,7 @@ class _DashedButton extends StatelessWidget {
       color: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFB9C0B2)),
+        side: BorderSide(color: context.colors.dashed),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -612,7 +618,7 @@ class _DashedButton extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: AppText.body(14, weight: FontWeight.w600, color: const Color(0xFF3E4A42)),
+                style: AppText.body(14, weight: FontWeight.w600, color: context.colors.textSecondary),
               ),
             ],
           ),

@@ -67,10 +67,13 @@ class _CategoryOption extends StatelessWidget {
       button: true,
       selected: selected,
       child: Material(
-        color: AppColors.surface,
+        color: context.colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: selected ? AppColors.primary : AppColors.borderSoft, width: selected ? 2 : 1),
+          side: BorderSide(
+            color: selected ? context.colors.primary : context.colors.borderSoft,
+            width: selected ? 2 : 1,
+          ),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),

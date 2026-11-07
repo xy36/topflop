@@ -258,15 +258,17 @@ class _SearchField extends StatelessWidget {
     return Container(
       height: 52,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [BoxShadow(color: AppColors.ink.withValues(alpha: 0.04), blurRadius: 2, offset: const Offset(0, 1))],
+        border: Border.all(color: context.colors.border),
+        boxShadow: [
+          BoxShadow(color: context.colors.shadow.withValues(alpha: 0.04), blurRadius: 2, offset: const Offset(0, 1)),
+        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          const Icon(Icons.search_rounded, color: AppColors.muted, size: 22),
+          Icon(Icons.search_rounded, color: context.colors.muted, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: Semantics(
@@ -289,7 +291,7 @@ class _SearchField extends StatelessWidget {
           ),
           if (controller.text.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.muted),
+              icon: Icon(Icons.close_rounded, size: 20, color: context.colors.muted),
               tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
               onPressed: () {
                 controller.clear();
@@ -317,7 +319,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFCBD1C4), width: 1.5),
+        border: Border.all(color: context.colors.dashed, width: 1.5),
       ),
       child: Column(
         children: [
@@ -325,7 +327,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             body,
-            style: AppText.body(14, color: AppColors.muted).copyWith(height: 1.45),
+            style: AppText.body(14, color: context.colors.muted).copyWith(height: 1.45),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -367,7 +369,7 @@ class _RemovableChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Material(
-      color: AppColors.ink,
+      color: context.colors.strong,
       shape: const StadiumBorder(),
       child: InkWell(
         customBorder: const StadiumBorder(),
@@ -384,10 +386,10 @@ class _RemovableChip extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: AppText.body(14, weight: FontWeight.w700, color: Colors.white),
+                  style: AppText.body(14, weight: FontWeight.w700, color: context.colors.onStrong),
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.close_rounded, size: 16, color: AppColors.lime),
+                Icon(Icons.close_rounded, size: 16, color: context.colors.strongAccent),
               ],
             ),
           ),
@@ -414,8 +416,8 @@ class _FilterButton extends StatelessWidget {
         SquareIconButton(
           icon: Icons.tune_rounded,
           tooltip: tooltip,
-          background: active ? AppColors.ink : AppColors.surface,
-          foreground: active ? AppColors.lime : AppColors.ink,
+          background: active ? context.colors.strong : context.colors.surface,
+          foreground: active ? context.colors.strongAccent : context.colors.ink,
           bordered: !active,
           onPressed: onPressed,
         ),
@@ -431,9 +433,12 @@ class _FilterButton extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.lime,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.background, width: 2),
+                  border: Border.all(color: context.colors.background, width: 2),
                 ),
-                child: Text('$activeCount', style: AppText.body(11, weight: FontWeight.w800)),
+                child: Text(
+                  '$activeCount',
+                  style: AppText.body(11, weight: FontWeight.w800, color: AppColors.onLime),
+                ),
               ),
             ),
           ),
@@ -484,10 +489,12 @@ class _HomeHeader {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: context.colors.background,
         boxShadow: [
           BoxShadow(
-            color: AppColors.ink.withValues(alpha: scrolledUnder ? 0.08 : 0.08 * collapsed),
+            color: context.colors.shadow.withValues(
+              alpha: (scrolledUnder ? 0.08 : 0.08 * collapsed) * (context.colors.isDark ? 3 : 1),
+            ),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -549,7 +556,7 @@ class _HomeHeader {
               top: 0,
               height: _bar,
               child: ColoredBox(
-                color: AppColors.background,
+                color: context.colors.background,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                   child: Row(
@@ -594,7 +601,7 @@ class _HomeHeader {
                           onPressed: () => context.push('/settings'),
                           tooltip: settingsTooltip,
                           padding: EdgeInsets.zero,
-                          icon: const Icon(Icons.settings_outlined, size: 22, color: AppColors.muted),
+                          icon: Icon(Icons.settings_outlined, size: 22, color: context.colors.muted),
                         ),
                       ),
                     ],

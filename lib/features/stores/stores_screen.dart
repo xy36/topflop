@@ -36,8 +36,8 @@ class StoresScreen extends ConsumerWidget {
             action: SquareIconButton(
               icon: Icons.add_rounded,
               tooltip: l10n.storesAdd,
-              background: AppColors.ink,
-              foreground: AppColors.lime,
+              background: context.colors.strong,
+              foreground: context.colors.strongAccent,
               bordered: false,
               onPressed: () => showStoreForm(context),
             ),
@@ -47,7 +47,10 @@ class StoresScreen extends ConsumerWidget {
           const SizedBox(height: 10),
           if (stores.isEmpty)
             AppCard(
-              child: Text(l10n.storesEmpty, style: AppText.body(14, color: AppColors.muted).copyWith(height: 1.45)),
+              child: Text(
+                l10n.storesEmpty,
+                style: AppText.body(14, color: context.colors.muted).copyWith(height: 1.45),
+              ),
             )
           else
             for (final summary in stores) ...[
@@ -73,10 +76,10 @@ class _StoreCard extends StatelessWidget {
     final meta = l10n.storesRatedCount(summary.ratedCount);
 
     return Material(
-      color: AppColors.surface,
+      color: context.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.borderSoft),
+        side: BorderSide(color: context.colors.borderSoft),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -88,8 +91,8 @@ class _StoreCard extends StatelessWidget {
               Container(
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(color: AppColors.primaryTint, borderRadius: BorderRadius.circular(14)),
-                child: const Icon(Icons.storefront_outlined, color: AppColors.primary),
+                decoration: BoxDecoration(color: context.colors.primaryTint, borderRadius: BorderRadius.circular(14)),
+                child: Icon(Icons.storefront_outlined, color: context.colors.primary),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -98,20 +101,20 @@ class _StoreCard extends StatelessWidget {
                   children: [
                     Text(summary.store.name, style: AppText.body(16, weight: FontWeight.w600)),
                     const SizedBox(height: 3),
-                    Text(meta, style: AppText.body(13, color: AppColors.muted)),
+                    Text(meta, style: AppText.body(13, color: context.colors.muted)),
                     if (top != null && top.score != null) ...[
                       const SizedBox(height: 3),
                       Text(
                         l10n.storesTop('${Score.emoji(top.score!)} ${top.product.name} · ${top.score}'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppText.body(13, color: AppColors.inkSoft),
+                        style: AppText.body(13, color: context.colors.inkSoft),
                       ),
                     ],
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFF8A948C)),
+              Icon(Icons.chevron_right_rounded, color: context.colors.faint),
             ],
           ),
         ),

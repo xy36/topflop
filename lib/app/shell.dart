@@ -34,10 +34,10 @@ class AppShell extends StatelessWidget {
               right: 0,
               bottom: 0,
               height: _barHeight + bottomInset,
-              child: const DecoratedBox(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border(top: BorderSide(color: AppColors.borderSoft)),
+                  color: context.colors.surface,
+                  border: Border(top: BorderSide(color: context.colors.borderSoft)),
                 ),
               ),
             ),
@@ -90,7 +90,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : AppColors.muted;
+    final color = selected ? context.colors.primary : context.colors.muted;
     return Semantics(
       selected: selected,
       button: true,
@@ -141,12 +141,16 @@ class _ScanButton extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: context.colors.primary,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppColors.surface, width: 5, strokeAlign: BorderSide.strokeAlignOutside),
+                  border: Border.all(
+                    color: context.colors.surface,
+                    width: 5,
+                    strokeAlign: BorderSide.strokeAlignOutside,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.32),
+                      color: context.colors.primary.withValues(alpha: 0.32),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),

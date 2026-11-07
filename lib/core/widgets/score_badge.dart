@@ -22,7 +22,7 @@ class ScoreBadge extends StatelessWidget {
         constraints: BoxConstraints(minWidth: vertical ? 48 : 54, minHeight: vertical ? 48 : 34),
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: AppColors.scoreBackground(score),
+          color: context.colors.scoreBackground(score),
           borderRadius: BorderRadius.circular(vertical ? 14 : 12),
         ),
         child: vertical

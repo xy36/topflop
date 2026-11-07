@@ -103,6 +103,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: 20),
             Text(l10n.settings, style: AppText.display(32)),
             const SizedBox(height: 24),
+            SectionHeader(l10n.settingsAppearance),
+            const SizedBox(height: 10),
+            _ThemeModePicker(value: ref.watch(themeModeProvider), onChanged: ref.read(themeModeProvider.notifier).set),
+            const SizedBox(height: 24),
             SectionHeader(l10n.settingsBackup),
             const SizedBox(height: 10),
             AppCard(
@@ -111,25 +115,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   Text(
                     l10n.settingsBackupInfo,
-                    style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45),
+                    style: AppText.body(14, color: context.colors.inkSoft).copyWith(height: 1.45),
                   ),
                   const SizedBox(height: 14),
                   Text(
                     lastExport == null
                         ? l10n.settingsNeverExported
                         : l10n.settingsLastExport(DateFormat.yMMMMd(locale).format(lastExport)),
-                    style: AppText.body(13, weight: FontWeight.w600, color: AppColors.muted),
+                    style: AppText.body(13, weight: FontWeight.w600, color: context.colors.muted),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     l10n.settingsDbSize(_formatBytes(size, locale)),
-                    style: AppText.body(13, color: AppColors.muted),
+                    style: AppText.body(13, color: context.colors.muted),
                   ),
                   if (size >= BackupService.sizeWarningBytes) ...[
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: AppColors.scoreLow, borderRadius: BorderRadius.circular(14)),
+                      decoration: BoxDecoration(
+                        color: context.colors.scoreLow,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                       child: Text(l10n.settingsSizeWarning, style: AppText.body(13, weight: FontWeight.w600)),
                     ),
                   ],
@@ -154,7 +161,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             AppCard(
               child: Text(
                 l10n.settingsAboutBody,
-                style: AppText.body(14, color: AppColors.inkSoft).copyWith(height: 1.45),
+                style: AppText.body(14, color: context.colors.inkSoft).copyWith(height: 1.45),
               ),
             ),
           ],
@@ -166,5 +173,69 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   static String _formatBytes(int bytes, String locale) {
     if (bytes < 1024 * 1024) return '${NumberFormat('0', locale).format(bytes / 1024)} KB';
     return '${NumberFormat('0.0', locale).format(bytes / (1024 * 1024))} MB';
+  }
+}
+
+/// System · Hell · Dunkel als Segment-Umschalter.
+class _ThemeModePicker extends StatelessWidget {
+  const _ThemeModePicker({required this.value, required this.onChanged});
+
+  final ThemeMode value;
+  final ValueChanged<ThemeMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final c = context.colors;
+    final options = [
+      (ThemeMode.system, Icons.brightness_auto_outlined, l10n.themeSystem),
+      (ThemeMode.light, Icons.light_mode_outlined, l10n.themeLight),
+      (ThemeMode.dark, Icons.dark_mode_outlined, l10n.themeDark),
+    ];
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: c.borderSoft),
+      ),
+      child: Row(
+        children: [
+          for (final (mode, icon, label) in options)
+            Expanded(
+              child: Semantics(
+                button: true,
+                selected: mode == value,
+                child: GestureDetector(
+                  onTap: () => onChanged(mode),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 160),
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: mode == value ? c.strong : Colors.transparent,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(icon, size: 22, color: mode == value ? c.strongAccent : c.muted),
+                        const SizedBox(height: 4),
+                        Text(
+                          label,
+                          style: AppText.body(
+                            13,
+                            weight: FontWeight.w700,
+                            color: mode == value ? c.onStrong : c.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

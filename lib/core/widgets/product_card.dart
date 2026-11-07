@@ -22,10 +22,10 @@ class ProductCard extends StatelessWidget {
     final score = summary.score;
 
     return Material(
-      color: AppColors.surface,
+      color: context.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.borderSoft),
+        side: BorderSide(color: context.colors.borderSoft),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -52,17 +52,20 @@ class ProductCard extends StatelessWidget {
                         meta,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppText.body(13, color: AppColors.muted),
+                        style: AppText.body(13, color: context.colors.muted),
                       ),
                     ],
                     if (summary.wouldBuyAgain == false) ...[
                       const SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: AppColors.subtle, borderRadius: BorderRadius.circular(99)),
+                        decoration: BoxDecoration(
+                          color: context.colors.subtle,
+                          borderRadius: BorderRadius.circular(99),
+                        ),
                         child: Text(
                           l10n.notBuyAgain,
-                          style: AppText.body(12, weight: FontWeight.w600, color: AppColors.muted),
+                          style: AppText.body(12, weight: FontWeight.w600, color: context.colors.muted),
                         ),
                       ),
                     ],
@@ -76,7 +79,7 @@ class ProductCard extends StatelessWidget {
                   if (score != null) ScoreBadge(score: score),
                   if (p.isFavorite) ...[
                     const SizedBox(height: 4),
-                    Icon(Icons.favorite_rounded, size: 16, color: AppColors.primary, semanticLabel: l10n.favorite),
+                    Icon(Icons.favorite_rounded, size: 16, color: context.colors.primary, semanticLabel: l10n.favorite),
                   ],
                 ],
               ),

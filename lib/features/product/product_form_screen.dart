@@ -76,7 +76,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 const SizedBox(height: 12),
                 Text(
                   l10n.scanDetected(widget.barcode!),
-                  style: AppText.body(13, weight: FontWeight.w600, color: AppColors.muted),
+                  style: AppText.body(13, weight: FontWeight.w600, color: context.colors.muted),
                 ),
               ],
               const SizedBox(height: 20),
@@ -113,9 +113,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-          border: Border(top: BorderSide(color: AppColors.border)),
+        decoration: BoxDecoration(
+          color: context.colors.background,
+          border: Border(top: BorderSide(color: context.colors.border)),
         ),
         padding: EdgeInsets.fromLTRB(
           20,

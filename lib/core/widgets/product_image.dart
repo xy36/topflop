@@ -54,14 +54,15 @@ class CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
     return ColoredBox(
-      color: category.tile,
+      color: category.tileFor(brightness),
       child: Center(
         child: SvgPicture.string(
           category.svg(strokeWidth: strokeWidth),
           width: iconSize,
           height: iconSize,
-          colorFilter: ColorFilter.mode(category.ink, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(category.inkFor(brightness), BlendMode.srcIn),
         ),
       ),
     );

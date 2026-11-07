@@ -75,8 +75,8 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                   child: Transform.translate(
                     offset: const Offset(0, -24),
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: AppColors.background,
+                      decoration: BoxDecoration(
+                        color: context.colors.background,
                         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                       ),
                       padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
@@ -95,9 +95,11 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
               height: topInset + _barHeight,
               padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 12),
               decoration: BoxDecoration(
-                color: collapsed ? AppColors.background : AppColors.background.withValues(alpha: 0),
+                color: collapsed ? context.colors.background : context.colors.background.withValues(alpha: 0),
                 border: Border(
-                  bottom: BorderSide(color: collapsed ? AppColors.border : AppColors.border.withValues(alpha: 0)),
+                  bottom: BorderSide(
+                    color: collapsed ? context.colors.border : context.colors.border.withValues(alpha: 0),
+                  ),
                 ),
               ),
               child: Row(
@@ -126,7 +128,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                   SquareIconButton(
                     icon: p.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                     tooltip: l10n.favorite,
-                    foreground: AppColors.primary,
+                    foreground: context.colors.primary,
                     bordered: false,
                     elevated: !collapsed,
                     onPressed: () => repo.setFavorite(p.id, !p.isFavorite),
@@ -160,9 +162,9 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
         ],
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-          border: Border(top: BorderSide(color: AppColors.border)),
+        decoration: BoxDecoration(
+          color: context.colors.background,
+          border: Border(top: BorderSide(color: context.colors.border)),
         ),
         padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.paddingOf(context).bottom + 16),
         child: FilledButton.icon(
@@ -225,7 +227,7 @@ class _Body extends ConsumerWidget {
         if (subtitle.isNotEmpty)
           Text(
             subtitle,
-            style: AppText.body(14, weight: FontWeight.w600, color: AppColors.muted),
+            style: AppText.body(14, weight: FontWeight.w600, color: context.colors.muted),
           ),
         const SizedBox(height: 6),
         Text(p.name, style: AppText.display(32)),
@@ -245,9 +247,9 @@ class _Body extends ConsumerWidget {
               Expanded(
                 child: _Stat(
                   label: l10n.productScore,
-                  background: AppColors.ink,
-                  foreground: Colors.white,
-                  labelColor: Colors.white.withValues(alpha: 0.72),
+                  background: context.colors.strong,
+                  foreground: context.colors.onStrong,
+                  labelColor: context.colors.onStrong.withValues(alpha: 0.72),
                   value: '${rating.score}',
                   emoji: Score.emoji(rating.score),
                 ),
@@ -256,8 +258,9 @@ class _Body extends ConsumerWidget {
               Expanded(
                 child: _Stat(
                   label: l10n.productBuyAgain,
-                  background: rating.wouldBuyAgain ? AppColors.lime : AppColors.scoreLow,
-                  labelColor: const Color(0xFF2E3A16),
+                  background: rating.wouldBuyAgain ? AppColors.lime : context.colors.scoreLow,
+                  foreground: rating.wouldBuyAgain ? AppColors.onLime : null,
+                  labelColor: rating.wouldBuyAgain ? const Color(0xFF2E3A16) : null,
                   value: rating.wouldBuyAgain ? l10n.yes : l10n.no,
                 ),
               ),
@@ -265,7 +268,7 @@ class _Body extends ConsumerWidget {
               Expanded(
                 child: _Stat(
                   label: l10n.ratingPrice,
-                  background: AppColors.surface,
+                  background: context.colors.surface,
                   bordered: true,
                   value: rating.priceCents == null ? '–' : formatPrice(rating.priceCents!, locale),
                 ),
@@ -275,7 +278,7 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: 10),
           Text(
             l10n.productRatedOn(DateFormat.yMMMMd(locale).format(rating.ratedAt)),
-            style: AppText.body(13, color: AppColors.muted),
+            style: AppText.body(13, color: context.colors.muted),
           ),
           if (rating.note != null && rating.note!.isNotEmpty) ...[
             const SizedBox(height: 20),
@@ -283,12 +286,12 @@ class _Body extends ConsumerWidget {
             const SizedBox(height: 10),
             AppCard(
               radius: 20,
-              child: Text(rating.note!, style: AppText.body(15, color: AppColors.inkSoft).copyWith(height: 1.45)),
+              child: Text(rating.note!, style: AppText.body(15, color: context.colors.inkSoft).copyWith(height: 1.45)),
             ),
           ],
         ] else
           AppCard(
-            child: Text(l10n.productNoRatings, style: AppText.body(15, color: AppColors.muted)),
+            child: Text(l10n.productNoRatings, style: AppText.body(15, color: context.colors.muted)),
           ),
         if (summary.stores.isNotEmpty) ...[
           const SizedBox(height: 20),
@@ -300,11 +303,11 @@ class _Body extends ConsumerWidget {
             children: [
               for (final store in summary.stores)
                 ActionChip(
-                  avatar: const Icon(Icons.place_outlined, size: 16, color: AppColors.primary),
+                  avatar: Icon(Icons.place_outlined, size: 16, color: context.colors.primary),
                   label: Text(store.name),
                   labelStyle: AppText.body(14, weight: FontWeight.w600),
-                  backgroundColor: AppColors.surface,
-                  side: const BorderSide(color: AppColors.border),
+                  backgroundColor: context.colors.surface,
+                  side: BorderSide(color: context.colors.border),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   onPressed: () => context.push('/store/${store.id}'),
                 ),
@@ -317,7 +320,7 @@ class _Body extends ConsumerWidget {
           Text(
             l10n.dataSourceOff,
             textAlign: TextAlign.center,
-            style: AppText.body(12, color: AppColors.muted),
+            style: AppText.body(12, color: context.colors.muted),
           ),
       ],
     );
@@ -335,16 +338,16 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.colors.surface,
         borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: context.colors.border),
       ),
       child: Text(
         label,
         style: AppText.body(
           12,
           weight: bold ? FontWeight.w700 : FontWeight.w600,
-          color: bold ? AppColors.ink : const Color(0xFF3E4A42),
+          color: bold ? context.colors.ink : context.colors.textSecondary,
         ),
       ),
     );
@@ -356,8 +359,8 @@ class _Stat extends StatelessWidget {
     required this.label,
     required this.value,
     required this.background,
-    this.foreground = AppColors.ink,
-    this.labelColor = AppColors.muted,
+    this.foreground,
+    this.labelColor,
     this.emoji,
     this.bordered = false,
   });
@@ -366,8 +369,8 @@ class _Stat extends StatelessWidget {
   final String value;
   final String? emoji;
   final Color background;
-  final Color foreground;
-  final Color labelColor;
+  final Color? foreground;
+  final Color? labelColor;
   final bool bordered;
 
   @override
@@ -377,7 +380,7 @@ class _Stat extends StatelessWidget {
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(20),
-        border: bordered ? Border.all(color: AppColors.border) : null,
+        border: bordered ? Border.all(color: context.colors.border) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,7 +389,7 @@ class _Stat extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppText.body(12, weight: FontWeight.w600, color: labelColor),
+            style: AppText.body(12, weight: FontWeight.w600, color: labelColor ?? context.colors.muted),
           ),
           const SizedBox(height: 6),
           FittedBox(
@@ -398,7 +401,7 @@ class _Stat extends StatelessWidget {
                   Text(emoji!, style: const TextStyle(fontSize: 22, height: 1)),
                   const SizedBox(width: 6),
                 ],
-                Text(value, style: AppText.display(26, color: foreground)),
+                Text(value, style: AppText.display(26, color: foreground ?? context.colors.ink)),
               ],
             ),
           ),

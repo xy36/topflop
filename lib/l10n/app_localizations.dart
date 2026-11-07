@@ -821,7 +821,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAboutBody.
   ///
   /// In de, this message translates to:
-  /// **'Produktdaten und Bilder stammen von Open Food Facts (ODbL), Kartendaten von OpenStreetMap.'**
+  /// **'Produktdaten und Bilder stammen von Open Food Facts (ODbL).'**
   String get settingsAboutBody;
 
   /// No description provided for @backupShareText.
@@ -1013,8 +1013,32 @@ abstract class AppLocalizations {
   /// No description provided for @deleteStoreBody.
   ///
   /// In de, this message translates to:
-  /// **'Der Laden wird mit allen Filialen gelöscht. Deine Bewertungen bleiben erhalten.'**
+  /// **'Der Laden wird gelöscht. Deine Bewertungen bleiben erhalten.'**
   String get deleteStoreBody;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In de, this message translates to:
+  /// **'Darstellung'**
+  String get settingsAppearance;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In de, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In de, this message translates to:
+  /// **'Hell'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In de, this message translates to:
+  /// **'Dunkel'**
+  String get themeDark;
 }
 
 class _AppLocalizationsDelegate

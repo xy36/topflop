@@ -36,7 +36,7 @@ class TabHeader extends StatelessWidget {
                   onPressed: () => context.push('/settings'),
                   tooltip: l10n.settings,
                   padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.settings_outlined, size: 22, color: AppColors.muted),
+                  icon: Icon(Icons.settings_outlined, size: 22, color: context.colors.muted),
                 ),
               ),
             ],

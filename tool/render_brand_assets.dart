@@ -21,7 +21,7 @@ void main() {
     final dir = Directory('assets/brand')..createSync(recursive: true);
 
     // iOS / Legacy-Android: vollflächig, ohne Transparenz.
-    await _render('${dir.path}/icon.png', 1024, background: AppColors.primary, tagScale: 0.62);
+    await _render('${dir.path}/icon.png', 1024, background: AppPalette.light.primary, tagScale: 0.62);
     // Android Adaptive Icon: flutter_launcher_icons legt 16 % Rand herum,
     // damit landet das Schild im sicheren Bereich (mittlere 66 %).
     await _render('${dir.path}/icon_foreground.png', 1024, tagScale: 0.62);

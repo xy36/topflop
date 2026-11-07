@@ -19,7 +19,7 @@ class SectionHeader extends StatelessWidget {
         textBaseline: TextBaseline.alphabetic,
         children: [
           Expanded(child: Text(title.toUpperCase(), style: AppText.overline())),
-          if (trailing != null) Text(trailing!, style: AppText.body(13, color: AppColors.muted)),
+          if (trailing != null) Text(trailing!, style: AppText.body(13, color: context.colors.muted)),
         ],
       ),
     );
@@ -33,8 +33,8 @@ class SquareIconButton extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
-    this.background = AppColors.surface,
-    this.foreground = AppColors.ink,
+    this.background,
+    this.foreground,
     this.bordered = true,
     this.elevated = false,
   });
@@ -42,8 +42,8 @@ class SquareIconButton extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback? onPressed;
-  final Color background;
-  final Color foreground;
+  final Color? background;
+  final Color? foreground;
   final bool bordered;
   final bool elevated;
 
@@ -52,17 +52,17 @@ class SquareIconButton extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: background,
+        color: background ?? context.colors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: bordered ? const BorderSide(color: AppColors.border) : BorderSide.none,
+          side: bordered ? BorderSide(color: context.colors.border) : BorderSide.none,
         ),
         elevation: elevated ? 2 : 0,
-        shadowColor: AppColors.ink.withValues(alpha: 0.2),
+        shadowColor: context.colors.shadow.withValues(alpha: 0.2),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: onPressed,
-          child: SizedBox.square(dimension: 44, child: Icon(icon, size: 21, color: foreground)),
+          child: SizedBox.square(dimension: 44, child: Icon(icon, size: 21, color: foreground ?? context.colors.ink)),
         ),
       ),
     );
@@ -81,7 +81,7 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: padding,
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(radius)),
+      decoration: BoxDecoration(color: context.colors.surface, borderRadius: BorderRadius.circular(radius)),
       child: child,
     );
   }
@@ -113,20 +113,20 @@ class PillChip extends StatelessWidget {
     final Color trailingColor;
     final BorderSide side;
     if (!selected) {
-      bg = AppColors.surface;
-      fg = AppColors.ink;
-      trailingColor = AppColors.muted;
-      side = const BorderSide(color: AppColors.chipBorder);
+      bg = context.colors.surface;
+      fg = context.colors.ink;
+      trailingColor = context.colors.muted;
+      side = BorderSide(color: context.colors.chipBorder);
     } else if (dark) {
-      bg = AppColors.ink;
-      fg = Colors.white;
-      trailingColor = AppColors.lime;
-      side = const BorderSide(color: AppColors.ink);
+      bg = context.colors.strong;
+      fg = context.colors.onStrong;
+      trailingColor = context.colors.strongAccent;
+      side = BorderSide(color: context.colors.strong);
     } else {
-      bg = AppColors.primaryTint;
-      fg = AppColors.primary;
-      trailingColor = const Color(0xFF3E6B53);
-      side = const BorderSide(color: AppColors.primary, width: 1.5);
+      bg = context.colors.primaryTint;
+      fg = context.colors.primary;
+      trailingColor = context.colors.onPrimaryTint.withValues(alpha: 0.8);
+      side = BorderSide(color: context.colors.primary, width: 1.5);
     }
     return Semantics(
       selected: selected,

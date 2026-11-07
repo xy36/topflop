@@ -408,7 +408,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsAboutBody =>
-      'Produktdaten und Bilder stammen von Open Food Facts (ODbL), Kartendaten von OpenStreetMap.';
+      'Produktdaten und Bilder stammen von Open Food Facts (ODbL).';
 
   @override
   String get backupShareText => 'TopFlop-Datensicherung';
@@ -520,5 +520,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deleteStoreBody =>
-      'Der Laden wird mit allen Filialen gelöscht. Deine Bewertungen bleiben erhalten.';
+      'Der Laden wird gelöscht. Deine Bewertungen bleiben erhalten.';
+
+  @override
+  String get settingsAppearance => 'Darstellung';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeLight => 'Hell';
+
+  @override
+  String get themeDark => 'Dunkel';
 }

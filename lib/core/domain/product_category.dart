@@ -68,6 +68,13 @@ enum ProductCategory {
   final Color tile;
   final Color ink;
 
+  /// Kachelfarbe: hell pastell, dunkel eine gedämpfte Variante.
+  Color tileFor(Brightness b) =>
+      b == Brightness.dark ? Color.alphaBlend(ink.withValues(alpha: 0.55), const Color(0xFF19201B)) : tile;
+
+  /// Symbolfarbe auf [tileFor].
+  Color inkFor(Brightness b) => b == Brightness.dark ? tile : ink;
+
   /// SVG-Pfade (viewBox 0 0 24 24, Strichgrafik).
   final String icon;
 

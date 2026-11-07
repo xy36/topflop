@@ -296,7 +296,7 @@ class _ResultSheet extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             offline ? l10n.scanOffline : l10n.scanNotFoundBody,
-            style: AppText.body(14, color: AppColors.muted).copyWith(height: 1.4),
+            style: AppText.body(14, color: context.colors.muted).copyWith(height: 1.4),
           ),
           const SizedBox(height: 16),
           Row(
@@ -322,8 +322,8 @@ class _ResultSheet extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
+      decoration: BoxDecoration(
+        color: context.colors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.fromLTRB(20, 12, 20, bottom + 20),
@@ -337,7 +337,7 @@ class _ResultSheet extends StatelessWidget {
               child: Container(
                 width: 40,
                 height: 5,
-                decoration: BoxDecoration(color: AppColors.chipBorder, borderRadius: BorderRadius.circular(3)),
+                decoration: BoxDecoration(color: context.colors.chipBorder, borderRadius: BorderRadius.circular(3)),
               ),
             ),
           ),
@@ -355,7 +355,7 @@ class _ResultSheet extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 l10n.scanDetected(state.code),
-                style: AppText.body(13, weight: FontWeight.w600, color: AppColors.muted),
+                style: AppText.body(13, weight: FontWeight.w600, color: context.colors.muted),
               ),
             ],
           ),
@@ -405,7 +405,7 @@ class _ProductResult extends StatelessWidget {
                   Text(name, maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.display(22)),
                   if (subtitle.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text(subtitle, style: AppText.body(14, color: AppColors.muted)),
+                    Text(subtitle, style: AppText.body(14, color: context.colors.muted)),
                   ],
                 ],
               ),
@@ -435,7 +435,7 @@ class _ProductResult extends StatelessWidget {
         Text(
           l10n.dataSourceOff,
           textAlign: TextAlign.center,
-          style: AppText.body(12, color: AppColors.muted),
+          style: AppText.body(12, color: context.colors.muted),
         ),
       ],
     );
@@ -457,7 +457,7 @@ class _Verdict extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: summary.wouldBuyAgain == true ? AppColors.limeSoft : AppColors.scoreLow,
+        color: summary.wouldBuyAgain == true ? context.colors.limeSoft : context.colors.scoreLow,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -472,13 +472,13 @@ class _Verdict extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   store == null ? again : '$again · ${l10n.scanLastAt(store)}',
-                  style: AppText.body(13, color: const Color(0xFF3E4A42)),
+                  style: AppText.body(13, color: context.colors.textSecondary),
                 ),
               ],
             ),
           ),
           if (summary.product.isFavorite)
-            Icon(Icons.favorite_rounded, color: AppColors.primary, size: 22, semanticLabel: l10n.favorite),
+            Icon(Icons.favorite_rounded, color: context.colors.primary, size: 22, semanticLabel: l10n.favorite),
         ],
       ),
     );
@@ -505,7 +505,7 @@ class _GlassButton extends StatelessWidget {
           onTap: onPressed,
           child: SizedBox.square(
             dimension: 44,
-            child: Icon(icon, color: active ? AppColors.ink : Colors.white, size: 21),
+            child: Icon(icon, color: active ? AppColors.onLime : Colors.white, size: 21),
           ),
         ),
       ),
