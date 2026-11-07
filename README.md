@@ -61,6 +61,24 @@ flutter build ios
 
 Falls `mobile_scanner` beim ersten Build eine höhere Mindestversion verlangt, setzt du das Deployment Target in Xcode (Runner → General → Minimum Deployments) entsprechend hoch.
 
+## Releases
+
+Releases laufen über [release-please](https://github.com/googleapis/release-please)
+(`.github/workflows/release-please.yml`). Dafür brauchen Commit-Nachrichten auf
+`main` das Format [Conventional Commits](https://www.conventionalcommits.org/de/):
+
+| Präfix | Wirkung |
+| --- | --- |
+| `feat: …` | neue Funktion, erhöht die Minor-Version (1.1.0 → 1.2.0) |
+| `fix: …` | Fehlerbehebung, erhöht die Patch-Version (1.1.0 → 1.1.1) |
+| `feat!: …` oder `BREAKING CHANGE:` im Text | erhöht die Major-Version |
+| `docs:`, `refactor:`, `test:`, `build:`, `ci:`, `chore:` | kein neues Release, nicht im Changelog |
+
+release-please hält danach einen Release-PR offen, der `CHANGELOG.md` und die
+Version in `pubspec.yaml` fortschreibt. Die Build-Nummer hinter dem `+` zählt dabei
+automatisch hoch, wie es der Play Store verlangt. Wird der PR gemergt, entstehen
+Tag und GitHub-Release.
+
 ## Datenquellen
 
 - Produktdaten und Bilder: Open Food Facts, lizenziert unter der Open Database License (ODbL).

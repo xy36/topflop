@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "a1b8b1d9348bb11c9b4c2fc044219ad48c4e3ed9",
+  "packages": {
+    ".": {
+      "release-type": "dart",
+      "package-name": "topflop",
+      "include-component-in-tag": false,
+      "changelog-path": "CHANGELOG.md",
+      "changelog-sections": [
+        { "type": "feat", "section": "Neue Funktionen" },
+        { "type": "fix", "section": "Fehlerbehebungen" },
+        { "type": "perf", "section": "Schneller" },
+        { "type": "revert", "section": "Zurückgenommen" },
+        { "type": "deps", "section": "Abhängigkeiten" },
+        { "type": "docs", "section": "Dokumentation", "hidden": true },
+        { "type": "refactor", "section": "Umbau", "hidden": true },
+        { "type": "test", "section": "Tests", "hidden": true },
+        { "type": "build", "section": "Build", "hidden": true },
+        { "type": "ci", "section": "CI", "hidden": true },
+        { "type": "chore", "section": "Sonstiges", "hidden": true }
+      ]
+    }
+  }
+}
