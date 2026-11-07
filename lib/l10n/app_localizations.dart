@@ -143,7 +143,7 @@ abstract class AppLocalizations {
   /// No description provided for @filterAll.
   ///
   /// In de, this message translates to:
-  /// **'Alle'**
+  /// **'Alle Läden'**
   String get filterAll;
 
   /// No description provided for @filterFavorites.
@@ -979,12 +979,6 @@ abstract class AppLocalizations {
   /// In de, this message translates to:
   /// **'Kategorien'**
   String get filterCategories;
-
-  /// No description provided for @filterStoresCount.
-  ///
-  /// In de, this message translates to:
-  /// **'{count, plural, =1{1 Laden} other{{count} Läden}}'**
-  String filterStoresCount(int count);
 
   /// No description provided for @filterCategoriesCount.
   ///

@@ -31,7 +31,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSearchLabel => 'Search products';
 
   @override
-  String get filterAll => 'All';
+  String get filterAll => 'All stores';
 
   @override
   String get filterFavorites => 'Favorites';
@@ -496,17 +496,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filterCategories => 'Categories';
-
-  @override
-  String filterStoresCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count stores',
-      one: '1 store',
-    );
-    return '$_temp0';
-  }
 
   @override
   String filterCategoriesCount(int count) {

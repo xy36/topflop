@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/tab_header.dart';
 import '../../core/widgets/product_card.dart';
+import '../../data/db/database.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/models.dart';
 import '../../l10n/app_localizations.dart';
@@ -54,8 +55,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final query = _search.text.trim();
 
     int countWith(ProductFilter f) => matching.where(f.matches).length;
-    final favoritesFilter = filter.copyWith(favoritesOnly: !filter.favoritesOnly);
-    final buyAgainFilter = filter.copyWith(buyAgain: () => filter.buyAgain == true ? null : true);
+
+    // Läden als Schnellfilter: die, in denen du am meisten bewertet hast, zuerst.
+    final storeCounts = <int, (Store, int)>{};
+    for (final s in all) {
+      for (final st in s.stores) {
+        storeCounts[st.id] = (st, (storeCounts[st.id]?.$2 ?? 0) + 1);
+      }
+    }
+    final quickStores = storeCounts.values.toList()
+      ..sort((a, b) {
+        final byCount = b.$2.compareTo(a.$2);
+        return byCount != 0 ? byCount : a.$1.name.toLowerCase().compareTo(b.$1.name.toLowerCase());
+      });
+    void toggleStore(int id) {
+      final ids = {...filter.storeIds};
+      if (!ids.remove(id)) ids.add(id);
+      filterNotifier.set(filter.copyWith(storeIds: ids));
+    }
 
     final String sectionTitle;
     if (query.isNotEmpty || filter.isActive) {
@@ -68,104 +85,109 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return SafeArea(
       bottom: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TabHeader(
-                  title: l10n.homeTitle,
-                  action: _FilterButton(
-                    activeCount: filter.activeCount,
-                    tooltip: l10n.filterTitle,
-                    onPressed: () => showFilterSheet(context),
+      child: CustomScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        slivers: [
+          // Kopfbereich verschwindet beim Runterscrollen und kommt beim
+          // Hochscrollen sofort wieder.
+          SliverFloatingHeader(
+            child: Container(
+              color: AppColors.background,
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TabHeader(
+                    title: l10n.homeTitle,
+                    action: _FilterButton(
+                      activeCount: filter.activeCount,
+                      tooltip: l10n.filterTitle,
+                      onPressed: () => showFilterSheet(context),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                _SearchField(
-                  controller: _search,
-                  hint: l10n.homeSearchHint,
-                  label: l10n.homeSearchLabel,
-                  onChanged: () => setState(() {}),
-                ),
-                const SizedBox(height: 16),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  clipBehavior: Clip.none,
-                  child: Row(
-                    children: [
-                      PillChip(
-                        label: l10n.filterAll,
-                        trailing: '${matching.length}',
-                        selected: !filter.isActive,
-                        onTap: filterNotifier.clear,
-                      ),
-                      const SizedBox(width: 8),
-                      PillChip(
-                        label: l10n.filterFavorites,
-                        trailing: '${countWith(filter.copyWith(favoritesOnly: true))}',
-                        selected: filter.favoritesOnly,
-                        onTap: () => filterNotifier.set(favoritesFilter),
-                      ),
-                      const SizedBox(width: 8),
-                      PillChip(
-                        label: l10n.filterBuyAgain,
-                        trailing: '${countWith(filter.copyWith(buyAgain: () => true))}',
-                        selected: filter.buyAgain == true,
-                        onTap: () => filterNotifier.set(buyAgainFilter),
-                      ),
-                      // Weitere aktive Filter aus dem Filter-Panel, einzeln entfernbar.
-                      for (final (label, remove) in _extraFilterChips(l10n, filter)) ...[
-                        const SizedBox(width: 8),
-                        _RemovableChip(label: label, onRemove: () => filterNotifier.set(remove)),
-                      ],
-                    ],
+                  const SizedBox(height: 16),
+                  _SearchField(
+                    controller: _search,
+                    hint: l10n.homeSearchHint,
+                    label: l10n.homeSearchLabel,
+                    onChanged: () => setState(() {}),
                   ),
-                ),
-              ],
+                  if (quickStores.isNotEmpty || filter.isActive) ...[
+                    const SizedBox(height: 16),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      clipBehavior: Clip.none,
+                      child: Row(
+                        children: [
+                          // Aktive Filter aus dem Filter-Panel zuerst, einzeln entfernbar.
+                          for (final (label, remove) in _extraFilterChips(l10n, filter)) ...[
+                            _RemovableChip(label: label, onRemove: () => filterNotifier.set(remove)),
+                            const SizedBox(width: 8),
+                          ],
+                          if (quickStores.isNotEmpty) ...[
+                            PillChip(
+                              label: l10n.filterAll,
+                              trailing: '${countWith(filter.copyWith(storeIds: const {}))}',
+                              selected: filter.storeIds.isEmpty,
+                              onTap: () => filterNotifier.set(filter.copyWith(storeIds: const {})),
+                            ),
+                            for (final (store, _) in quickStores) ...[
+                              const SizedBox(width: 8),
+                              PillChip(
+                                label: store.name,
+                                trailing: '${countWith(filter.copyWith(storeIds: {store.id}))}',
+                                selected: filter.storeIds.contains(store.id),
+                                onTap: () => toggleStore(store.id),
+                              ),
+                            ],
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
-          Expanded(
-            child: summaries.isLoading && summaries.value == null
-                ? const Center(child: CircularProgressIndicator())
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                    children: [
-                      if (all.isEmpty)
-                        _EmptyState(
-                          title: l10n.homeEmptyTitle,
-                          body: l10n.homeEmptyBody,
-                          action: l10n.scanNow,
-                          onAction: () => context.push('/scan'),
-                        )
-                      else if (visible.isEmpty && filter.isActive)
-                        _EmptyState(
-                          title: l10n.homeNoMatchTitle,
-                          body: l10n.filterNoMatchBody,
-                          action: l10n.filterReset,
-                          onAction: filterNotifier.clear,
-                        )
-                      else if (visible.isEmpty)
-                        _EmptyState(
-                          title: l10n.homeNoMatchTitle,
-                          body: l10n.homeNoMatchBody(query),
-                          action: l10n.scanNow,
-                          onAction: () => context.push('/scan'),
-                        )
-                      else ...[
-                        SectionHeader(sectionTitle, trailing: l10n.productCount(visible.length)),
-                        const SizedBox(height: 10),
-                        for (final s in visible) ...[
-                          ProductCard(summary: s, onTap: () => context.push('/product/${s.product.id}')),
-                          const SizedBox(height: 10),
-                        ],
-                      ],
+          if (summaries.isLoading && summaries.value == null)
+            const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator()))
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              sliver: SliverList.list(
+                children: [
+                  if (all.isEmpty)
+                    _EmptyState(
+                      title: l10n.homeEmptyTitle,
+                      body: l10n.homeEmptyBody,
+                      action: l10n.scanNow,
+                      onAction: () => context.push('/scan'),
+                    )
+                  else if (visible.isEmpty && filter.isActive)
+                    _EmptyState(
+                      title: l10n.homeNoMatchTitle,
+                      body: l10n.filterNoMatchBody,
+                      action: l10n.filterReset,
+                      onAction: filterNotifier.clear,
+                    )
+                  else if (visible.isEmpty)
+                    _EmptyState(
+                      title: l10n.homeNoMatchTitle,
+                      body: l10n.homeNoMatchBody(query),
+                      action: l10n.scanNow,
+                      onAction: () => context.push('/scan'),
+                    )
+                  else ...[
+                    SectionHeader(sectionTitle, trailing: l10n.productCount(visible.length)),
+                    const SizedBox(height: 10),
+                    for (final s in visible) ...[
+                      ProductCard(summary: s, onTap: () => context.push('/product/${s.product.id}')),
+                      const SizedBox(height: 10),
                     ],
-                  ),
-          ),
+                  ],
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -270,13 +292,14 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-/// Chips für Filter, die nicht schon als Schnellfilter sichtbar sind:
-/// jeweils Beschriftung und der Filter ohne diese Einschränkung.
+/// Chips für aktive Filter, die nicht schon als Laden-Schnellfilter sichtbar
+/// sind: jeweils Beschriftung und der Filter ohne diese Einschränkung.
 List<(String, ProductFilter)> _extraFilterChips(AppLocalizations l10n, ProductFilter f) => [
+  if (f.favoritesOnly) (l10n.filterFavorites, f.copyWith(favoritesOnly: false)),
+  if (f.buyAgain == true) (l10n.filterBuyAgain, f.copyWith(buyAgain: () => null)),
+  if (f.buyAgain == false) (l10n.notBuyAgain, f.copyWith(buyAgain: () => null)),
   if (f.scoreActive)
     ('${Score.emoji(f.minScore)} ${f.minScore}–${f.maxScore}', f.copyWith(minScore: Score.min, maxScore: Score.max)),
-  if (f.buyAgain == false) (l10n.notBuyAgain, f.copyWith(buyAgain: () => null)),
-  if (f.storeIds.isNotEmpty) (l10n.filterStoresCount(f.storeIds.length), f.copyWith(storeIds: const {})),
   if (f.categories.length == 1)
     (f.categories.first.label(l10n), f.copyWith(categories: const {}))
   else if (f.categories.length > 1)
