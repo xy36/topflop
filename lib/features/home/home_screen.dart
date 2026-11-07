@@ -186,7 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                   const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator()))
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                    padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + MediaQuery.paddingOf(context).bottom),
                     sliver: SliverList.list(
                       children: [
                         if (all.isEmpty)

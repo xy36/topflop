@@ -18,6 +18,9 @@ class AppShell extends StatelessWidget {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
+      // Die Listen laufen bis unter die Leiste; links und rechts vom
+      // Scan-Knopf sieht man den Inhalt, der Knopf steht darüber.
+      extendBody: true,
       body: navigationShell,
       // Der Scan-Knopf ragt über die Leiste hinaus. Damit er vollständig
       // antippbar bleibt, liegt er innerhalb der (höheren) Navigationsfläche
@@ -140,7 +143,7 @@ class _ScanButton extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppColors.background, width: 5, strokeAlign: BorderSide.strokeAlignOutside),
+                  border: Border.all(color: AppColors.surface, width: 5, strokeAlign: BorderSide.strokeAlignOutside),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.primary.withValues(alpha: 0.32),

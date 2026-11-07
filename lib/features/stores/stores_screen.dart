@@ -38,7 +38,8 @@ class StoresScreen extends ConsumerWidget {
           await ref.read(nearbySuggestionsProvider.future);
         },
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          // Die Liste läuft unter der Navigation durch; unten Platz dafür lassen.
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + MediaQuery.paddingOf(context).bottom),
           children: [
             TabHeader(
               title: l10n.storesTitle,
