@@ -6,7 +6,7 @@ import '../core/theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 
 /// Grundgerüst mit unterer Navigation: Übersicht · Scannen · Läden.
-/// Die Einstellungen erreicht man über das Zahnrad in der Kopfzeile ([TabHeader]).
+/// Die Einstellungen erreicht man über das Zahnrad im Kopf ([CollapsingTabPage]).
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
 

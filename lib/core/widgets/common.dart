@@ -18,7 +18,9 @@ class SectionHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.baseline,
         textBaseline: TextBaseline.alphabetic,
         children: [
-          Expanded(child: Text(title.toUpperCase(), style: AppText.overline())),
+          Expanded(
+            child: Text(title.toUpperCase(), style: AppText.overline(color: context.colors.muted)),
+          ),
           if (trailing != null) Text(trailing!, style: AppText.body(13, color: context.colors.muted)),
         ],
       ),

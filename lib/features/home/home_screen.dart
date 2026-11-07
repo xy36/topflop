@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/domain/score.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/collapsing_tab_page.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/product_card.dart';
 import '../../data/db/database.dart';
@@ -21,51 +22,13 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _search = TextEditingController();
-
-  /// Wie viele Pixel des Kopfbereichs gerade weggeklappt sind.
-  late final _hidden = AnimationController.unbounded(vsync: this);
-
-  /// Maximal wegklappbare Höhe (alles außer der oberen Leiste).
-  double _range = 0;
-  double _gestureStart = 0;
-
-  /// Scrollposition der Liste; liegt Inhalt unter dem Kopf, bekommt er einen Schatten.
-  double _pixels = 0;
 
   @override
   void dispose() {
     _search.dispose();
-    _hidden.dispose();
     super.dispose();
-  }
-
-  /// „Quick Return“: Der Kopf folgt dem Scrollen pixelgenau (runter = weg,
-  /// hoch = sofort wieder da). Endet die Bewegung mittendrin, rastet er je
-  /// nach Gesamtrichtung der Geste ganz aus oder ganz ein.
-  bool _onScroll(ScrollNotification n) {
-    if (n.depth != 0 || n.metrics.axis != Axis.vertical) return false;
-    final pixels = n.metrics.pixels;
-    _pixels = pixels;
-    final limit = pixels.clamp(0.0, _range);
-    if (n is ScrollStartNotification) {
-      _hidden.stop();
-      _gestureStart = pixels;
-    } else if (n is ScrollUpdateNotification) {
-      _hidden.value = (_hidden.value + (n.scrollDelta ?? 0)).clamp(0.0, limit);
-    } else if (n is ScrollEndNotification) {
-      final value = _hidden.value;
-      if (value > 0 && value < limit) {
-        final scrolledUp = pixels < _gestureStart;
-        _hidden.animateTo(
-          scrolledUp ? 0 : limit,
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-        );
-      }
-    }
-    return false;
   }
 
   bool _matchesQuery(ProductSummary s) {
@@ -120,127 +83,102 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       sectionTitle = l10n.homeAllProducts;
     }
 
-    // Großer Titel, Suche und Chips klappen beim Runterscrollen unter eine
-    // schmale Leiste; schon ein kurzes Hochscrollen holt alles zurück.
-    final header = _HomeHeader(
+    final chips = quickStores.isEmpty && !filter.isActive
+        ? null
+        : SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                // Aktive Filter aus dem Filter-Panel zuerst, einzeln entfernbar.
+                for (final (label, remove) in _extraFilterChips(l10n, filter)) ...[
+                  _RemovableChip(label: label, onRemove: () => filterNotifier.set(remove)),
+                  const SizedBox(width: 8),
+                ],
+                if (quickStores.isNotEmpty) ...[
+                  PillChip(
+                    label: l10n.filterAll,
+                    trailing: '${countWith(filter.copyWith(storeIds: const {}))}',
+                    selected: filter.storeIds.isEmpty,
+                    onTap: () => filterNotifier.set(filter.copyWith(storeIds: const {})),
+                  ),
+                  for (final (store, _) in quickStores) ...[
+                    const SizedBox(width: 8),
+                    PillChip(
+                      label: store.name,
+                      trailing: '${countWith(filter.copyWith(storeIds: {store.id}))}',
+                      selected: filter.storeIds.contains(store.id),
+                      onTap: () => toggleStore(store.id),
+                    ),
+                  ],
+                ],
+              ],
+            ),
+          );
+
+    return CollapsingTabPage(
       title: l10n.homeTitle,
-      appName: l10n.appName.toUpperCase(),
-      settingsTooltip: l10n.settings,
-      filterButton: _FilterButton(
+      action: _FilterButton(
         activeCount: filter.activeCount,
         tooltip: l10n.filterTitle,
         onPressed: () => showFilterSheet(context),
       ),
-      search: _SearchField(
-        controller: _search,
-        hint: l10n.homeSearchHint,
-        label: l10n.homeSearchLabel,
-        onChanged: () => setState(() {}),
-      ),
-      chips: quickStores.isEmpty && !filter.isActive
-          ? null
-          : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  // Aktive Filter aus dem Filter-Panel zuerst, einzeln entfernbar.
-                  for (final (label, remove) in _extraFilterChips(l10n, filter)) ...[
-                    _RemovableChip(label: label, onRemove: () => filterNotifier.set(remove)),
-                    const SizedBox(width: 8),
-                  ],
-                  if (quickStores.isNotEmpty) ...[
-                    PillChip(
-                      label: l10n.filterAll,
-                      trailing: '${countWith(filter.copyWith(storeIds: const {}))}',
-                      selected: filter.storeIds.isEmpty,
-                      onTap: () => filterNotifier.set(filter.copyWith(storeIds: const {})),
-                    ),
-                    for (final (store, _) in quickStores) ...[
-                      const SizedBox(width: 8),
-                      PillChip(
-                        label: store.name,
-                        trailing: '${countWith(filter.copyWith(storeIds: {store.id}))}',
-                        selected: filter.storeIds.contains(store.id),
-                        onTap: () => toggleStore(store.id),
-                      ),
-                    ],
+      below: [
+        (
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _SearchField(
+              controller: _search,
+              hint: l10n.homeSearchHint,
+              label: l10n.homeSearchLabel,
+              onChanged: () => setState(() {}),
+            ),
+          ),
+          52,
+        ),
+        if (chips != null) (Align(alignment: Alignment.centerLeft, child: chips), 40),
+      ],
+      slivers: [
+        if (summaries.isLoading && summaries.value == null)
+          const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator()))
+        else
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + MediaQuery.paddingOf(context).bottom),
+            sliver: SliverList.list(
+              children: [
+                if (all.isEmpty)
+                  _EmptyState(
+                    title: l10n.homeEmptyTitle,
+                    body: l10n.homeEmptyBody,
+                    action: l10n.scanNow,
+                    onAction: () => context.push('/scan'),
+                  )
+                else if (visible.isEmpty && filter.isActive)
+                  _EmptyState(
+                    title: l10n.homeNoMatchTitle,
+                    body: l10n.filterNoMatchBody,
+                    action: l10n.filterReset,
+                    onAction: filterNotifier.clear,
+                  )
+                else if (visible.isEmpty)
+                  _EmptyState(
+                    title: l10n.homeNoMatchTitle,
+                    body: l10n.homeNoMatchBody(query),
+                    action: l10n.scanNow,
+                    onAction: () => context.push('/scan'),
+                  )
+                else ...[
+                  SectionHeader(sectionTitle, trailing: l10n.productCount(visible.length)),
+                  const SizedBox(height: 10),
+                  for (final s in visible) ...[
+                    ProductCard(summary: s, onTap: () => context.push('/product/${s.product.id}')),
+                    const SizedBox(height: 10),
                   ],
                 ],
-              ),
-            ),
-    );
-    _range = header.maxExtent - header.minExtent;
-
-    return SafeArea(
-      bottom: false,
-      child: Stack(
-        children: [
-          NotificationListener<ScrollNotification>(
-            onNotification: _onScroll,
-            child: CustomScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              slivers: [
-                SliverToBoxAdapter(child: SizedBox(height: header.maxExtent)),
-                if (summaries.isLoading && summaries.value == null)
-                  const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator()))
-                else
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + MediaQuery.paddingOf(context).bottom),
-                    sliver: SliverList.list(
-                      children: [
-                        if (all.isEmpty)
-                          _EmptyState(
-                            title: l10n.homeEmptyTitle,
-                            body: l10n.homeEmptyBody,
-                            action: l10n.scanNow,
-                            onAction: () => context.push('/scan'),
-                          )
-                        else if (visible.isEmpty && filter.isActive)
-                          _EmptyState(
-                            title: l10n.homeNoMatchTitle,
-                            body: l10n.filterNoMatchBody,
-                            action: l10n.filterReset,
-                            onAction: filterNotifier.clear,
-                          )
-                        else if (visible.isEmpty)
-                          _EmptyState(
-                            title: l10n.homeNoMatchTitle,
-                            body: l10n.homeNoMatchBody(query),
-                            action: l10n.scanNow,
-                            onAction: () => context.push('/scan'),
-                          )
-                        else ...[
-                          SectionHeader(sectionTitle, trailing: l10n.productCount(visible.length)),
-                          const SizedBox(height: 10),
-                          for (final s in visible) ...[
-                            ProductCard(summary: s, onTap: () => context.push('/product/${s.product.id}')),
-                            const SizedBox(height: 10),
-                          ],
-                        ],
-                      ],
-                    ),
-                  ),
               ],
             ),
           ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: AnimatedBuilder(
-              animation: _hidden,
-              builder: (context, _) {
-                final hidden = _hidden.value.clamp(0.0, _range);
-                return SizedBox(
-                  height: header.maxExtent - hidden,
-                  child: header.build(context, hidden, scrolledUnder: _pixels > hidden + 1),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -443,175 +381,6 @@ class _FilterButton extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-/// Kopf der Übersicht. Ausgeklappt: App-Name mit Zahnrad, großer Titel mit
-/// Filterknopf, Suche und Chips. Beim Runterscrollen schiebt sich alles unter
-/// die obere Leiste, in die dann ein kleiner Titel und der Filterknopf
-/// einblenden. Beim Hochscrollen fährt der Kopf sofort wieder aus und rastet
-/// am Ende ganz ein oder ganz aus.
-class _HomeHeader {
-  _HomeHeader({
-    required this.title,
-    required this.appName,
-    required this.settingsTooltip,
-    required this.filterButton,
-    required this.search,
-    required this.chips,
-  });
-
-  final String title;
-  final String appName;
-  final String settingsTooltip;
-  final Widget filterButton;
-  final Widget search;
-  final Widget? chips;
-
-  static const _bar = 52.0; // 8 Abstand + 44 Leiste
-  static const _titleRow = 56.0;
-  static const _search = 52.0;
-  static const _chips = 40.0;
-  static const _gap = 16.0;
-  static const _bottom = 8.0;
-
-  double get _body => _titleRow + _gap + _search + (chips == null ? 0 : _gap + _chips) + _bottom;
-
-  double get maxExtent => _bar + _body;
-
-  double get minExtent => _bar + _bottom;
-
-  Widget build(BuildContext context, double shrinkOffset, {bool scrolledUnder = false}) {
-    // 0 = großer Titel sichtbar, 1 = Titel ist unter der Leiste verschwunden.
-    final t = Curves.easeOut.transform((shrinkOffset / (_titleRow * 0.8)).clamp(0.0, 1.0));
-    final collapsed = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.colors.background,
-        boxShadow: [
-          BoxShadow(
-            color: context.colors.shadow.withValues(
-              alpha: (scrolledUnder ? 0.08 : 0.08 * collapsed) * (context.colors.isDark ? 3 : 1),
-            ),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRect(
-        child: Stack(
-          children: [
-            // Inhalt schiebt sich, unten verankert, unter die Leiste.
-            Positioned(
-              left: 0,
-              right: 0,
-              top: _bar - shrinkOffset,
-              height: _body,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    height: _titleRow,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Opacity(
-                        opacity: 1 - t,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                title,
-                                style: AppText.display(32),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            IgnorePointer(ignoring: t > 0.5, child: filterButton),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: _gap),
-                  SizedBox(
-                    height: _search,
-                    child: Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: search),
-                  ),
-                  if (chips != null) ...[
-                    const SizedBox(height: _gap),
-                    SizedBox(
-                      height: _chips,
-                      child: Align(alignment: Alignment.centerLeft, child: chips),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            // Obere Leiste, immer sichtbar.
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              height: _bar,
-              child: ColoredBox(
-                color: context.colors.background,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            Opacity(
-                              opacity: 1 - t,
-                              child: Text(
-                                appName,
-                                style: AppText.overline().copyWith(fontSize: 12, letterSpacing: 1.4),
-                              ),
-                            ),
-                            Opacity(
-                              opacity: t,
-                              child: Transform.translate(
-                                offset: Offset(0, 8 * (1 - t)),
-                                child: Text(
-                                  title,
-                                  style: AppText.display(20),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IgnorePointer(
-                        ignoring: t < 0.5,
-                        child: Opacity(
-                          opacity: t,
-                          child: Transform.scale(scale: 0.85 + 0.15 * t, child: filterButton),
-                        ),
-                      ),
-                      SizedBox(width: 8 * t),
-                      SizedBox(
-                        width: 44,
-                        child: IconButton(
-                          onPressed: () => context.push('/settings'),
-                          tooltip: settingsTooltip,
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.settings_outlined, size: 22, color: context.colors.muted),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/domain/score.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/collapsing_tab_page.dart';
 import '../../core/widgets/common.dart';
-import '../../core/widgets/tab_header.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/models.dart';
 import '../../l10n/app_localizations.dart';
@@ -25,40 +25,40 @@ class StoresScreen extends ConsumerWidget {
         return byCount != 0 ? byCount : a.store.name.toLowerCase().compareTo(b.store.name.toLowerCase());
       });
 
-    return SafeArea(
-      bottom: false,
-      child: ListView(
-        // Die Liste läuft unter der Navigation durch; unten Platz dafür lassen.
-        padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + MediaQuery.paddingOf(context).bottom),
-        children: [
-          TabHeader(
-            title: l10n.storesTitle,
-            action: SquareIconButton(
-              icon: Icons.add_rounded,
-              tooltip: l10n.storesAdd,
-              background: context.colors.strong,
-              foreground: context.colors.strongAccent,
-              bordered: false,
-              onPressed: () => showStoreForm(context),
-            ),
-          ),
-          const SizedBox(height: 20),
-          SectionHeader(l10n.storesAll, trailing: stores.isEmpty ? null : '${stores.length}'),
-          const SizedBox(height: 10),
-          if (stores.isEmpty)
-            AppCard(
-              child: Text(
-                l10n.storesEmpty,
-                style: AppText.body(14, color: context.colors.muted).copyWith(height: 1.45),
-              ),
-            )
-          else
-            for (final summary in stores) ...[
-              _StoreCard(summary: summary, onTap: () => context.push('/store/${summary.store.id}')),
-              const SizedBox(height: 10),
-            ],
-        ],
+    return CollapsingTabPage(
+      title: l10n.storesTitle,
+      action: SquareIconButton(
+        icon: Icons.add_rounded,
+        tooltip: l10n.storesAdd,
+        background: context.colors.strong,
+        foreground: context.colors.strongAccent,
+        bordered: false,
+        onPressed: () => showStoreForm(context),
       ),
+      slivers: [
+        SliverPadding(
+          // Die Liste läuft unter der Navigation durch; unten Platz dafür lassen.
+          padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + MediaQuery.paddingOf(context).bottom),
+          sliver: SliverList.list(
+            children: [
+              SectionHeader(l10n.storesAll, trailing: stores.isEmpty ? null : '${stores.length}'),
+              const SizedBox(height: 10),
+              if (stores.isEmpty)
+                AppCard(
+                  child: Text(
+                    l10n.storesEmpty,
+                    style: AppText.body(14, color: context.colors.muted).copyWith(height: 1.45),
+                  ),
+                )
+              else
+                for (final summary in stores) ...[
+                  _StoreCard(summary: summary, onTap: () => context.push('/store/${summary.store.id}')),
+                  const SizedBox(height: 10),
+                ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
