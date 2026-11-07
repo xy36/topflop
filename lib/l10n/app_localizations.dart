@@ -488,11 +488,11 @@ abstract class AppLocalizations {
   /// **'Wo gibt es das?'**
   String get ratingWhere;
 
-  /// No description provided for @ratingLocationFound.
+  /// No description provided for @ratingLastStores.
   ///
   /// In de, this message translates to:
-  /// **'Standort erkannt'**
-  String get ratingLocationFound;
+  /// **'Wie zuletzt'**
+  String get ratingLastStores;
 
   /// No description provided for @ratingOtherStore.
   ///
@@ -692,23 +692,11 @@ abstract class AppLocalizations {
   /// **'Meine Läden'**
   String get storesTitle;
 
-  /// No description provided for @storesNearby.
-  ///
-  /// In de, this message translates to:
-  /// **'In deiner Nähe'**
-  String get storesNearby;
-
   /// No description provided for @storesAll.
   ///
   /// In de, this message translates to:
   /// **'Alle Läden'**
   String get storesAll;
-
-  /// No description provided for @storesByDistance.
-  ///
-  /// In de, this message translates to:
-  /// **'nach Entfernung'**
-  String get storesByDistance;
 
   /// No description provided for @storesRatedCount.
   ///
@@ -728,59 +716,17 @@ abstract class AppLocalizations {
   /// **'Noch keine Läden. Lege deinen Supermarkt an, damit du später weißt, wo es was gab.'**
   String get storesEmpty;
 
-  /// No description provided for @storesSuggestion.
-  ///
-  /// In de, this message translates to:
-  /// **'Vorschlag in der Nähe'**
-  String get storesSuggestion;
-
   /// No description provided for @storesAdd.
   ///
   /// In de, this message translates to:
   /// **'Laden hinzufügen'**
   String get storesAdd;
 
-  /// No description provided for @storesAddAction.
-  ///
-  /// In de, this message translates to:
-  /// **'Hinzufügen'**
-  String get storesAddAction;
-
-  /// No description provided for @storesYouAreHere.
-  ///
-  /// In de, this message translates to:
-  /// **'Du bist hier'**
-  String get storesYouAreHere;
-
-  /// No description provided for @storesMapAttribution.
-  ///
-  /// In de, this message translates to:
-  /// **'Kartendaten © OpenStreetMap-Mitwirkende'**
-  String get storesMapAttribution;
-
-  /// No description provided for @storesLocationOff.
-  ///
-  /// In de, this message translates to:
-  /// **'Standort nicht verfügbar'**
-  String get storesLocationOff;
-
   /// No description provided for @storeFormName.
   ///
   /// In de, this message translates to:
   /// **'Laden / Kette'**
   String get storeFormName;
-
-  /// No description provided for @storeFormAddress.
-  ///
-  /// In de, this message translates to:
-  /// **'Adresse (optional)'**
-  String get storeFormAddress;
-
-  /// No description provided for @storeFormUseLocation.
-  ///
-  /// In de, this message translates to:
-  /// **'Aktuellen Standort als Filiale speichern'**
-  String get storeFormUseLocation;
 
   /// No description provided for @storeProducts.
   ///
@@ -1010,65 +956,11 @@ abstract class AppLocalizations {
   /// **'z. B. Lidl'**
   String get storeFormNameHint;
 
-  /// No description provided for @storeFormBranchOf.
+  /// No description provided for @storeFormExists.
   ///
   /// In de, this message translates to:
-  /// **'Wird als weitere Filiale von {name} gespeichert'**
-  String storeFormBranchOf(String name);
-
-  /// No description provided for @storeFormAddBranch.
-  ///
-  /// In de, this message translates to:
-  /// **'Aktuellen Standort als weitere Filiale speichern'**
-  String get storeFormAddBranch;
-
-  /// No description provided for @storeBranchCount.
-  ///
-  /// In de, this message translates to:
-  /// **'{count, plural, =0{Noch keine Filiale} =1{1 Filiale} other{{count} Filialen}}'**
-  String storeBranchCount(int count);
-
-  /// No description provided for @storeBranches.
-  ///
-  /// In de, this message translates to:
-  /// **'Filialen'**
-  String get storeBranches;
-
-  /// No description provided for @storeNoBranches.
-  ///
-  /// In de, this message translates to:
-  /// **'Noch keine Filiale gespeichert. Füge eine über „Bearbeiten“ hinzu, wenn du im Laden bist.'**
-  String get storeNoBranches;
-
-  /// No description provided for @storeBranchUnnamed.
-  ///
-  /// In de, this message translates to:
-  /// **'Filiale ohne Adresse'**
-  String get storeBranchUnnamed;
-
-  /// No description provided for @storeBranchRemove.
-  ///
-  /// In de, this message translates to:
-  /// **'Filiale entfernen'**
-  String get storeBranchRemove;
-
-  /// No description provided for @storeBranchRemoveTitle.
-  ///
-  /// In de, this message translates to:
-  /// **'Filiale entfernen?'**
-  String get storeBranchRemoveTitle;
-
-  /// No description provided for @storeBranchAdded.
-  ///
-  /// In de, this message translates to:
-  /// **'Als Filiale von {name} gespeichert'**
-  String storeBranchAdded(String name);
-
-  /// No description provided for @storesSuggestionBranch.
-  ///
-  /// In de, this message translates to:
-  /// **'Neue Filiale von {name}'**
-  String storesSuggestionBranch(String name);
+  /// **'{name} gibt es schon – wird ausgewählt'**
+  String storeFormExists(String name);
 
   /// No description provided for @ratingChange.
   ///

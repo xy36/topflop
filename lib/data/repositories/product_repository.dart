@@ -126,7 +126,23 @@ class ProductRepository {
       await (_db.update(_db.ratings)..where((r) => r.id.equals(existing.id))).write(values);
     }
     await setStores(productId, storeIds);
+    // Merken für die nächste Bewertung: im Laden scannt man meist mehrere
+    // Produkte hintereinander.
+    await _db
+        .into(_db.settings)
+        .insertOnConflictUpdate(SettingsCompanion.insert(key: _lastStoresKey, value: storeIds.join(',')));
   });
+
+  static const _lastStoresKey = 'last_store_ids';
+
+  /// Läden der zuletzt gespeicherten Bewertung (nur noch vorhandene).
+  Future<Set<int>> lastUsedStoreIds() async {
+    final row = await (_db.select(_db.settings)..where((s) => s.key.equals(_lastStoresKey))).getSingleOrNull();
+    final ids = (row?.value ?? '').split(',').map(int.tryParse).whereType<int>().toSet();
+    if (ids.isEmpty) return const {};
+    final existing = await (_db.select(_db.stores)..where((s) => s.id.isIn(ids))).get();
+    return existing.map((s) => s.id).toSet();
+  }
 
   Future<void> setStores(int productId, Set<int> storeIds) => _db.transaction(() async {
     await (_db.delete(_db.productStores)..where((ps) => ps.productId.equals(productId))).go();

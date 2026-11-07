@@ -17,7 +17,8 @@ class BackupService {
   /// 1: mehrere Bewertungen pro Produkt mit `storeId`.
   /// 2: eine Bewertung pro Produkt, Läden in `productStores`.
   /// 3: Läden sind Ketten, Filialen in `storeLocations`.
-  static const formatVersion = 3;
+  /// 4: keine Filialen/Standorte mehr.
+  static const formatVersion = 4;
   static const _lastExportKey = 'last_export';
 
   /// Android Auto Backup sichert maximal 25 MB pro App. Ab hier warnen wir.
@@ -31,7 +32,6 @@ class BackupService {
       'exportedAt': DateTime.now().toUtc().toIso8601String(),
       'products': [for (final p in await _db.select(_db.products).get()) p.toJson()],
       'stores': [for (final s in await _db.select(_db.stores).get()) s.toJson()],
-      'storeLocations': [for (final l in await _db.select(_db.storeLocations).get()) l.toJson()],
       'ratings': [for (final r in await _db.select(_db.ratings).get()) r.toJson()],
       'productStores': [for (final ps in await _db.select(_db.productStores).get()) ps.toJson()],
     };
@@ -73,11 +73,11 @@ class BackupService {
     final rawStores = list('stores');
     final rawRatings = list('ratings');
 
-    // Bis Version 2 war ein Laden eine Filiale mit Koordinaten. Daraus werden
-    // Ketten (gleiche Namen zusammengeführt) mit je einer Filiale.
+    // Bis Version 2 war ein Laden eine Filiale: gleiche Namen werden zu
+    // einem Laden zusammengeführt. Koordinaten und Filialen (Version 3)
+    // werden nicht mehr übernommen.
     final List<Store> stores;
-    final List<StoreLocation> locations;
-    var storeIdMap = <int, int>{};
+    final storeIdMap = <int, int>{};
     if (version < 3) {
       final chainByName = <String, Map<String, dynamic>>{};
       for (final s in rawStores) {
@@ -86,22 +86,8 @@ class BackupService {
         storeIdMap[s['id'] as int] = chain['id'] as int;
       }
       stores = chainByName.values.map(Store.fromJson).toList();
-      locations = [
-        for (final s in rawStores)
-          if (s['latitude'] != null && s['longitude'] != null)
-            StoreLocation(
-              id: s['id'] as int,
-              storeId: storeIdMap[s['id']]!,
-              address: s['address'] as String?,
-              latitude: (s['latitude'] as num).toDouble(),
-              longitude: (s['longitude'] as num).toDouble(),
-              createdAt: DateTime.fromMillisecondsSinceEpoch(s['createdAt'] as int),
-            ),
-      ];
     } else {
       stores = rawStores.map(Store.fromJson).toList();
-      locations = list('storeLocations').map(StoreLocation.fromJson).toList();
-      storeIdMap = {for (final s in stores) s.id: s.id};
     }
 
     List<ProductStore> productStores;
@@ -130,14 +116,12 @@ class BackupService {
 
     await _db.transaction(() async {
       await _db.delete(_db.productStores).go();
-      await _db.delete(_db.storeLocations).go();
       await _db.delete(_db.ratings).go();
       await _db.delete(_db.products).go();
       await _db.delete(_db.stores).go();
       await _db.batch((b) {
         b.insertAll(_db.products, products);
         b.insertAll(_db.stores, stores);
-        b.insertAll(_db.storeLocations, locations);
         b.insertAll(_db.ratings, ratings);
         b.insertAll(_db.productStores, productStores);
       });

@@ -23,7 +23,6 @@ abstract final class AppColors {
   static const scoreLow = Color(0xFFF6E3DC);
 
   static const scannerBackground = Color(0xFF0F1512);
-  static const locationBlue = Color(0xFF2F6FD6);
 
   static Color scoreBackground(int score) {
     if (score >= 8) return scoreHigh;

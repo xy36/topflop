@@ -10,49 +10,28 @@ import '../../data/repositories/store_repository.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Öffnet das Formular für einen neuen Laden – oder, mit [existing], zum
-/// Umbenennen einer Kette. Gibt es die Kette schon, wird nur eine weitere
-/// Filiale gespeichert. Liefert die ID der Kette oder `null`.
-Future<int?> showStoreForm(
-  BuildContext context, {
-  Store? existing,
-  String? initialName,
-  String? initialAddress,
-  double? latitude,
-  double? longitude,
-}) {
+/// Umbenennen. Gibt es den Laden (die Kette) schon, wird kein zweiter
+/// angelegt. Liefert die ID des Ladens oder `null`.
+Future<int?> showStoreForm(BuildContext context, {Store? existing}) {
   return showModalBottomSheet<int>(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
-    builder: (context) => _StoreForm(
-      existing: existing,
-      initialName: initialName ?? existing?.name,
-      initialAddress: initialAddress,
-      latitude: latitude,
-      longitude: longitude,
-    ),
+    builder: (context) => _StoreForm(existing: existing),
   );
 }
 
 class _StoreForm extends ConsumerStatefulWidget {
-  const _StoreForm({this.existing, this.initialName, this.initialAddress, this.latitude, this.longitude});
+  const _StoreForm({this.existing});
 
   final Store? existing;
-  final String? initialName;
-  final String? initialAddress;
-  final double? latitude;
-  final double? longitude;
 
   @override
   ConsumerState<_StoreForm> createState() => _StoreFormState();
 }
 
 class _StoreFormState extends ConsumerState<_StoreForm> {
-  late final _name = TextEditingController(text: widget.initialName);
-  late final _address = TextEditingController(text: widget.initialAddress);
-
-  /// Neu: Standort als Filiale speichern. Beim Bearbeiten nur auf Wunsch.
-  late bool _useLocation = widget.existing == null;
+  late final _name = TextEditingController(text: widget.existing?.name);
   bool _saving = false;
 
   bool get _editing => widget.existing != null;
@@ -60,7 +39,6 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
   @override
   void dispose() {
     _name.dispose();
-    _address.dispose();
     super.dispose();
   }
 
@@ -69,30 +47,13 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
     if (name.isEmpty) return;
     setState(() => _saving = true);
 
-    var lat = widget.latitude;
-    var lon = widget.longitude;
-    if (_useLocation && lat == null) {
-      final pos = await ref.read(currentPositionProvider.future);
-      lat = pos?.latitude;
-      lon = pos?.longitude;
-    }
-    final address = _address.text.trim().isEmpty ? null : _address.text.trim();
     final repo = ref.read(storeRepositoryProvider);
-
     final int id;
     if (_editing) {
       id = widget.existing!.id;
       await repo.renameStore(id, name);
-      if (_useLocation && lat != null && lon != null) {
-        await repo.addLocation(id, latitude: lat, longitude: lon, address: address);
-      }
     } else {
-      id = await repo.addStore(
-        name: name,
-        address: address,
-        latitude: _useLocation ? lat : null,
-        longitude: _useLocation ? lon : null,
-      );
+      id = await repo.addStore(name: name);
     }
     if (mounted) Navigator.pop(context, id);
   }
@@ -121,7 +82,7 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
           const SizedBox(height: 16),
           TextField(
             controller: _name,
-            autofocus: widget.initialName == null,
+            autofocus: !_editing,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(labelText: l10n.storeFormName, hintText: l10n.storeFormNameHint),
             onChanged: (_) => setState(() {}),
@@ -151,7 +112,7 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    l10n.storeFormBranchOf(matchingChain.name),
+                    l10n.storeFormExists(matchingChain.name),
                     style: AppText.body(13, weight: FontWeight.w600, color: AppColors.primary),
                   ),
                 ),
@@ -159,23 +120,6 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
             ),
           ],
           const SizedBox(height: 10),
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            value: _useLocation,
-            onChanged: (v) => setState(() => _useLocation = v),
-            title: Text(
-              _editing ? l10n.storeFormAddBranch : l10n.storeFormUseLocation,
-              style: AppText.body(15, weight: FontWeight.w600),
-            ),
-          ),
-          if (_useLocation) ...[
-            TextField(
-              controller: _address,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(labelText: l10n.storeFormAddress),
-            ),
-            const SizedBox(height: 10),
-          ],
           const SizedBox(height: 6),
           FilledButton(
             onPressed: _name.text.trim().isEmpty || _saving ? null : _save,

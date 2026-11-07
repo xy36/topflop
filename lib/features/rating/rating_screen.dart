@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +11,6 @@ import '../../core/widgets/category_picker.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/product_image.dart';
 import '../../data/db/database.dart';
-import '../../data/location/location_service.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../stores/store_form_sheet.dart';
@@ -31,9 +28,6 @@ class RatingScreen extends ConsumerStatefulWidget {
 }
 
 class _RatingScreenState extends ConsumerState<RatingScreen> {
-  /// Laden gilt als „hier“, wenn er näher als das ist.
-  static const _nearbyMeters = 300.0;
-
   int _score = 7;
   bool _again = true;
   Set<int> _storeIds = {};
@@ -41,9 +35,10 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   final _note = TextEditingController();
   bool _saving = false;
 
-  LatLon? _position;
-  List<(Store, double?)> _stores = const [];
-  bool _locationMatched = false;
+  List<Store> _stores = const [];
+
+  /// Läden wurden aus der letzten Bewertung übernommen.
+  bool _fromLastTime = false;
 
   /// Es gibt pro Produkt nur eine Bewertung – existiert sie, wird sie geändert.
   bool _editing = false;
@@ -54,8 +49,8 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     _init();
   }
 
-  /// Zuerst eine vorhandene Bewertung laden, damit die Vorauswahl des
-  /// nächsten Ladens die gespeicherten Läden nicht überschreibt.
+  /// Vorhandene Bewertung laden; bei einer neuen Bewertung sind die Läden
+  /// der letzten Bewertung vorausgewählt.
   Future<void> _init() async {
     final existing = await ref.read(productRepositoryProvider).loadProduct(widget.productId);
     if (!mounted) return;
@@ -74,6 +69,14 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
       });
     } else if (existing != null && existing.stores.isNotEmpty) {
       setState(() => _storeIds = {for (final s in existing.stores) s.id});
+    } else {
+      final last = await ref.read(productRepositoryProvider).lastUsedStoreIds();
+      if (mounted && last.isNotEmpty) {
+        setState(() {
+          _storeIds = last;
+          _fromLastTime = true;
+        });
+      }
     }
     await _loadStores();
   }
@@ -85,45 +88,12 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     super.dispose();
   }
 
-  /// Ketten nach Entfernung ihrer nächsten Filiale sortieren und die Kette
-  /// vorauswählen, in deren Filiale man gerade steht.
   Future<void> _loadStores({int? select}) async {
-    final repo = ref.read(storeRepositoryProvider);
-    final stores = await repo.allStores();
-    final locations = await repo.allLocations();
-    if (!mounted) return;
-    // Läden sofort zeigen; der Standort kann (z. B. nach dem Start) dauern.
-    if (_position == null) {
-      setState(() {
-        _stores = [for (final s in stores) (s, null)]..sort((a, b) => a.$1.name.compareTo(b.$1.name));
-        if (select != null) _storeIds = {..._storeIds, select};
-      });
-    }
-    final position = _position ?? await ref.read(currentPositionProvider.future);
-    double? distance(Store s) {
-      if (position == null) return null;
-      final ds = [
-        for (final l in locations)
-          if (l.storeId == s.id) position.distanceTo(l.latitude, l.longitude),
-      ];
-      return ds.isEmpty ? null : ds.reduce(math.min);
-    }
-
-    final sorted = [for (final s in stores) (s, distance(s))]
-      ..sort((a, b) => (a.$2 ?? double.infinity).compareTo(b.$2 ?? double.infinity));
+    final stores = await ref.read(storeRepositoryProvider).allStores();
     if (!mounted) return;
     setState(() {
-      _position = position;
-      _stores = sorted;
-      if (select != null) {
-        _storeIds = {..._storeIds, select};
-      } else if (!_editing &&
-          _storeIds.isEmpty &&
-          sorted.isNotEmpty &&
-          (sorted.first.$2 ?? double.infinity) < _nearbyMeters) {
-        _storeIds = {sorted.first.$1.id};
-        _locationMatched = true;
-      }
+      _stores = stores;
+      if (select != null) _storeIds = {..._storeIds, select};
     });
   }
 
@@ -133,24 +103,8 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     setState(() => _score = value);
   }
 
-  /// Neuer Laden bzw. neue Filiale. Steht man direkt vor einem Geschäft aus
-  /// OpenStreetMap, ist dessen Name schon eingetragen.
   Future<void> _addStore() async {
-    NearbySuggestion? here;
-    try {
-      final suggestions = await ref.read(nearbySuggestionsProvider.future).timeout(const Duration(seconds: 3));
-      here = suggestions.where((s) => s.distance < 150).firstOrNull;
-    } catch (_) {
-      // Ohne Netz oder Standort einfach leer starten.
-    }
-    if (!mounted) return;
-    final id = await showStoreForm(
-      context,
-      initialName: here?.chain?.name ?? here?.shop.name,
-      initialAddress: here?.shop.address,
-      latitude: here?.shop.latitude ?? _position?.latitude,
-      longitude: here?.shop.longitude ?? _position?.longitude,
-    );
+    final id = await showStoreForm(context);
     if (id != null) await _loadStores(select: id);
   }
 
@@ -178,7 +132,6 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
     final product = ref.watch(productProvider(widget.productId)).value?.product;
 
     return Scaffold(
@@ -253,13 +206,13 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                                 ],
                               ),
                             ),
-                            if (_locationMatched)
+                            if (_fromLastTime)
                               Row(
                                 children: [
-                                  const Icon(Icons.place_outlined, size: 14, color: AppColors.primary),
+                                  const Icon(Icons.history_rounded, size: 14, color: AppColors.primary),
                                   const SizedBox(width: 4),
                                   Text(
-                                    l10n.ratingLocationFound,
+                                    l10n.ratingLastStores,
                                     style: AppText.body(12, weight: FontWeight.w600, color: AppColors.primary),
                                   ),
                                 ],
@@ -271,17 +224,17 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
                           spacing: 8,
                           runSpacing: 8,
                           children: [
-                            for (final (store, distance) in _stores)
+                            for (final store in _stores)
                               PillChip(
                                 dark: false,
                                 label: store.name,
-                                trailing: distance == null ? null : formatDistance(distance, locale),
                                 selected: _storeIds.contains(store.id),
-                                onTap: () => setState(
-                                  () => _storeIds = _storeIds.contains(store.id)
+                                onTap: () => setState(() {
+                                  _fromLastTime = false;
+                                  _storeIds = _storeIds.contains(store.id)
                                       ? ({..._storeIds}..remove(store.id))
-                                      : {..._storeIds, store.id},
-                                ),
+                                      : {..._storeIds, store.id};
+                                }),
                               ),
                             _DashedButton(label: '+ ${l10n.ratingOtherStore}', onTap: _addStore),
                           ],

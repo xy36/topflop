@@ -230,7 +230,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get ratingWhere => 'Wo gibt es das?';
 
   @override
-  String get ratingLocationFound => 'Standort erkannt';
+  String get ratingLastStores => 'Wie zuletzt';
 
   @override
   String get ratingOtherStore => 'Anderer Laden';
@@ -332,13 +332,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get storesTitle => 'Meine Läden';
 
   @override
-  String get storesNearby => 'In deiner Nähe';
-
-  @override
   String get storesAll => 'Alle Läden';
-
-  @override
-  String get storesByDistance => 'nach Entfernung';
 
   @override
   String storesRatedCount(int count) {
@@ -355,31 +349,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Noch keine Läden. Lege deinen Supermarkt an, damit du später weißt, wo es was gab.';
 
   @override
-  String get storesSuggestion => 'Vorschlag in der Nähe';
-
-  @override
   String get storesAdd => 'Laden hinzufügen';
 
   @override
-  String get storesAddAction => 'Hinzufügen';
-
-  @override
-  String get storesYouAreHere => 'Du bist hier';
-
-  @override
-  String get storesMapAttribution => 'Kartendaten © OpenStreetMap-Mitwirkende';
-
-  @override
-  String get storesLocationOff => 'Standort nicht verfügbar';
-
-  @override
   String get storeFormName => 'Laden / Kette';
-
-  @override
-  String get storeFormAddress => 'Adresse (optional)';
-
-  @override
-  String get storeFormUseLocation => 'Aktuellen Standort als Filiale speichern';
 
   @override
   String get storeProducts => 'Gibt es hier';
@@ -515,50 +488,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get storeFormNameHint => 'z. B. Lidl';
 
   @override
-  String storeFormBranchOf(String name) {
-    return 'Wird als weitere Filiale von $name gespeichert';
-  }
-
-  @override
-  String get storeFormAddBranch =>
-      'Aktuellen Standort als weitere Filiale speichern';
-
-  @override
-  String storeBranchCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count Filialen',
-      one: '1 Filiale',
-      zero: 'Noch keine Filiale',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get storeBranches => 'Filialen';
-
-  @override
-  String get storeNoBranches =>
-      'Noch keine Filiale gespeichert. Füge eine über „Bearbeiten“ hinzu, wenn du im Laden bist.';
-
-  @override
-  String get storeBranchUnnamed => 'Filiale ohne Adresse';
-
-  @override
-  String get storeBranchRemove => 'Filiale entfernen';
-
-  @override
-  String get storeBranchRemoveTitle => 'Filiale entfernen?';
-
-  @override
-  String storeBranchAdded(String name) {
-    return 'Als Filiale von $name gespeichert';
-  }
-
-  @override
-  String storesSuggestionBranch(String name) {
-    return 'Neue Filiale von $name';
+  String storeFormExists(String name) {
+    return '$name gibt es schon – wird ausgewählt';
   }
 
   @override

@@ -51,8 +51,6 @@
 		<true/>
 		<key>NSCameraUsageDescription</key>
 		<string>TopFlop nutzt die Kamera, um Barcodes von Produkten zu scannen.</string>
-		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>TopFlop nutzt deinen Standort, um den Laden, in dem du gerade bist, automatisch auszuwählen.</string>
 		<key>CFBundleLocalizations</key>
 		<array>
 			<string>de</string>

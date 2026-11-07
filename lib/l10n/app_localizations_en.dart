@@ -230,7 +230,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratingWhere => 'Where can you get it?';
 
   @override
-  String get ratingLocationFound => 'Location found';
+  String get ratingLastStores => 'Same as last time';
 
   @override
   String get ratingOtherStore => 'Other store';
@@ -332,13 +332,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storesTitle => 'My stores';
 
   @override
-  String get storesNearby => 'Near you';
-
-  @override
   String get storesAll => 'All stores';
-
-  @override
-  String get storesByDistance => 'by distance';
 
   @override
   String storesRatedCount(int count) {
@@ -355,31 +349,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No stores yet. Add your supermarket so you remember where you found what.';
 
   @override
-  String get storesSuggestion => 'Suggestion nearby';
-
-  @override
   String get storesAdd => 'Add store';
 
   @override
-  String get storesAddAction => 'Add';
-
-  @override
-  String get storesYouAreHere => 'You are here';
-
-  @override
-  String get storesMapAttribution => 'Map data © OpenStreetMap contributors';
-
-  @override
-  String get storesLocationOff => 'Location unavailable';
-
-  @override
   String get storeFormName => 'Store / chain';
-
-  @override
-  String get storeFormAddress => 'Address (optional)';
-
-  @override
-  String get storeFormUseLocation => 'Save current location as a branch';
 
   @override
   String get storeProducts => 'Available here';
@@ -515,49 +488,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storeFormNameHint => 'e.g. Lidl';
 
   @override
-  String storeFormBranchOf(String name) {
-    return 'Will be saved as another branch of $name';
-  }
-
-  @override
-  String get storeFormAddBranch => 'Save current location as another branch';
-
-  @override
-  String storeBranchCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count branches',
-      one: '1 branch',
-      zero: 'No branch yet',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get storeBranches => 'Branches';
-
-  @override
-  String get storeNoBranches =>
-      'No branch saved yet. Add one via “Edit” when you are in the store.';
-
-  @override
-  String get storeBranchUnnamed => 'Branch without address';
-
-  @override
-  String get storeBranchRemove => 'Remove branch';
-
-  @override
-  String get storeBranchRemoveTitle => 'Remove branch?';
-
-  @override
-  String storeBranchAdded(String name) {
-    return 'Saved as a branch of $name';
-  }
-
-  @override
-  String storesSuggestionBranch(String name) {
-    return 'New branch of $name';
+  String storeFormExists(String name) {
+    return '$name already exists and will be selected';
   }
 
   @override
