@@ -9,9 +9,9 @@ import '../../data/providers.dart';
 import '../../data/repositories/store_repository.dart';
 import '../../l10n/app_localizations.dart';
 
-/// Öffnet das Formular für einen neuen Laden – oder, mit [existing], zum
-/// Umbenennen. Gibt es den Laden (die Kette) schon, wird kein zweiter
-/// angelegt. Liefert die ID des Ladens oder `null`.
+/// Opens the form for a new store – or, with [existing], for renaming.
+/// If the store (chain) already exists, no second one is created.
+/// Returns the store's ID or `null`.
 Future<int?> showStoreForm(BuildContext context, {Store? existing}) {
   return showModalBottomSheet<int>(
     context: context,
@@ -87,7 +87,7 @@ class _StoreFormState extends ConsumerState<_StoreForm> {
             decoration: InputDecoration(labelText: l10n.storeFormName, hintText: l10n.storeFormNameHint),
             onChanged: (_) => setState(() {}),
           ),
-          // Schnellauswahl vorhandener Ketten, damit kein zweiter „Lidl“ entsteht.
+          // Quick selection of existing chains so that no second "Lidl" is created.
           if (!_editing && chains.isNotEmpty) ...[
             const SizedBox(height: 10),
             Wrap(

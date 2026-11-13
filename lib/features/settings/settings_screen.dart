@@ -176,7 +176,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-/// System · Hell · Dunkel als Segment-Umschalter.
+/// System · Light · Dark as a segmented toggle.
 class _ThemeModePicker extends StatelessWidget {
   const _ThemeModePicker({required this.value, required this.onChanged});
 

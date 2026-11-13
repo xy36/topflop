@@ -56,7 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     int countWith(ProductFilter f) => matching.where(f.matches).length;
 
-    // Läden als Schnellfilter: die, in denen du am meisten bewertet hast, zuerst.
+    // Stores as quick filters: the ones where you rated the most come first.
     final storeCounts = <int, (Store, int)>{};
     for (final s in all) {
       for (final st in s.stores) {
@@ -90,7 +90,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
               children: [
-                // Aktive Filter aus dem Filter-Panel zuerst, einzeln entfernbar.
+                // Active filters from the filter panel first, each removable on its own.
                 for (final (label, remove) in _extraFilterChips(l10n, filter)) ...[
                   _RemovableChip(label: label, onRemove: () => filterNotifier.set(remove)),
                   const SizedBox(width: 8),
@@ -283,8 +283,8 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-/// Chips für aktive Filter, die nicht schon als Laden-Schnellfilter sichtbar
-/// sind: jeweils Beschriftung und der Filter ohne diese Einschränkung.
+/// Chips for active filters that are not already visible as store quick
+/// filters: each with its label and the filter without this restriction.
 List<(String, ProductFilter)> _extraFilterChips(AppLocalizations l10n, ProductFilter f) => [
   if (f.favoritesOnly) (l10n.filterFavorites, f.copyWith(favoritesOnly: false)),
   if (f.buyAgain == true) (l10n.filterBuyAgain, f.copyWith(buyAgain: () => null)),
@@ -337,7 +337,7 @@ class _RemovableChip extends StatelessWidget {
   }
 }
 
-/// Filterknopf oben rechts; dunkel mit Zähler, sobald Filter aktiv sind.
+/// Filter button at the top right; dark with a counter once filters are active.
 class _FilterButton extends StatelessWidget {
   const _FilterButton({required this.activeCount, required this.tooltip, required this.onPressed});
 

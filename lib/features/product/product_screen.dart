@@ -28,8 +28,8 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
   static const _heroHeight = 260.0;
   static const _barHeight = 68.0;
 
-  /// Sobald das Bild weggescrollt ist, bekommt die Kopfzeile einen festen
-  /// Hintergrund und zeigt den Produktnamen.
+  /// Once the image has scrolled away, the header gets a solid background
+  /// and shows the product name.
   final _collapsed = ValueNotifier(false);
 
   @override

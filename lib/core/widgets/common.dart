@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
-/// Abschnittstitel in Versalien, optional mit Info rechts.
+/// Section title in capitals, optionally with info on the right.
 class SectionHeader extends StatelessWidget {
   const SectionHeader(this.title, {super.key, this.trailing});
 
@@ -29,7 +29,7 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-/// Quadratischer 44-px-Knopf mit Icon (Einstellungen, Zurück, Favorit …).
+/// Square 44 px button with icon (settings, back, favourite …).
 class SquareIconButton extends StatelessWidget {
   const SquareIconButton({
     super.key,
@@ -72,7 +72,7 @@ class SquareIconButton extends StatelessWidget {
   }
 }
 
-/// Weiße Karte mit großem Radius.
+/// White card with a large radius.
 class AppCard extends StatelessWidget {
   const AppCard({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.radius = 24});
 
@@ -90,7 +90,7 @@ class AppCard extends StatelessWidget {
   }
 }
 
-/// Auswahl-Chip im Stil des Entwurfs.
+/// Selection chip in the style of the design.
 class PillChip extends StatelessWidget {
   const PillChip({
     super.key,
@@ -106,7 +106,7 @@ class PillChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  /// `true`: dunkler Chip (Filter), `false`: grün getönt (Ladenauswahl).
+  /// `true`: dark chip (filters), `false`: green tinted (store selection).
   final bool dark;
 
   @override
@@ -140,8 +140,8 @@ class PillChip extends StatelessWidget {
         child: InkWell(
           customBorder: const StadiumBorder(),
           onTap: onTap,
-          // Kein `alignment` am Container: das würde den Chip in einem Wrap
-          // auf volle Breite ziehen. Höhe und Zentrierung kommen vom Row.
+          // No `alignment` on the Container: inside a Wrap that would stretch the
+          // chip to full width. Height and centring come from the Row.
           child: Container(
             height: dark ? 36 : 40,
             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -172,11 +172,11 @@ class PillChip extends StatelessWidget {
   }
 }
 
-/// Preis in Euro im Format der jeweiligen Sprache, z. B. „2,29 €“ oder „€2.29“.
+/// Price in euros formatted for the current locale, e.g. "2,29 €" or "€2.29".
 String formatPrice(int cents, String locale) =>
     NumberFormat.simpleCurrency(locale: locale, name: 'EUR').format(cents / 100);
 
-/// Parst „3,49“ oder „3.49“ zu Cent.
+/// Parses "3,49" or "3.49" into cents.
 int? parsePriceCents(String input) {
   final normalized = input.trim().replaceAll('€', '').replaceAll(',', '.').trim();
   if (normalized.isEmpty) return null;

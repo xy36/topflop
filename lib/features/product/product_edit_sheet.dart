@@ -9,8 +9,8 @@ import '../../data/db/database.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 
-/// Name, Marke, Menge und Kategorie korrigieren – z. B. wenn Open Food Facts
-/// einen unbrauchbaren Namen liefert.
+/// Correct name, brand, quantity and category – e.g. when Open Food Facts
+/// returns an unusable name.
 Future<void> showProductEditSheet(BuildContext context, Product product) => showModalBottomSheet<void>(
   context: context,
   useRootNavigator: true,

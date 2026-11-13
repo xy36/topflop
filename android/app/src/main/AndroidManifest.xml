@@ -1,12 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Open Food Facts, Google Fonts -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Barcode-Scanner -->
+    <!-- Barcode scanner -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
-    <!-- allowBackup: Android Auto Backup sichert die Datenbank ins Google-Konto
-         (max. 25 MB). Der Bild-Cache liegt im cacheDir und wird automatisch ausgelassen. -->
+    <!-- allowBackup: Android Auto Backup saves the database to the Google account
+         (max. 25 MB). The image cache lives in cacheDir and is excluded automatically. -->
     <application
         android:label="TopFlop"
         android:name="${applicationName}"

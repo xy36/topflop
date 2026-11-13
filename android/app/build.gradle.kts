@@ -7,9 +7,9 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Release-Signierung: Codemagic legt android/key.properties aus den
-// Signing-Einstellungen an (storeFile, storePassword, keyAlias, keyPassword).
-// Lokal kann man die Datei selbst anlegen; sie ist in android/.gitignore.
+// Release signing: Codemagic creates android/key.properties from the
+// signing settings (storeFile, storePassword, keyAlias, keyPassword).
+// Locally you can create the file yourself; it is listed in android/.gitignore.
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
@@ -18,8 +18,8 @@ if (keystorePropertiesFile.exists()) {
 val releaseSigningKeys = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
 val hasReleaseSigning = releaseSigningKeys.all { !keystoreProperties.getProperty(it).isNullOrBlank() }
 
-// Auf dem Build-Server (CI=true) nie still mit dem Debug-Schlüssel signieren –
-// Google Play lehnt so ein Bundle ab.
+// On the build server (CI=true) never silently sign with the debug key –
+// Google Play rejects such a bundle.
 val isCi = System.getenv("CI")?.equals("true", ignoreCase = true) == true
 if (isCi && !hasReleaseSigning && gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }) {
     throw GradleException(
@@ -66,8 +66,8 @@ android {
 
     buildTypes {
         release {
-            // Ohne key.properties (lokal) mit dem Debug-Schlüssel, damit
-            // `flutter run --release` weiter funktioniert.
+            // Without key.properties (local builds) use the debug key so that
+            // `flutter run --release` keeps working.
             signingConfig = signingConfigs.getByName(if (hasReleaseSigning) "release" else "debug")
         }
     }

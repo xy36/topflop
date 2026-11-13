@@ -1,5 +1,5 @@
-# Erzeugt EAN-13-Barcodes echter Produkte als PNG, z. B. fuer die virtuelle
-# Kamera-Szene des Android-Emulators. Prueft jeden Code bei Open Food Facts.
+# Generates EAN-13 barcodes of real products as PNG, e.g. for the virtual
+# camera scene of the Android emulator. Checks every code on Open Food Facts.
 #
 #   powershell -ExecutionPolicy Bypass -File tool\make_test_barcodes.ps1
 

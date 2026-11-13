@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
 
-/// Kategorie eines Produkts. Steuert den Platzhalter, wenn kein Foto vorhanden ist.
+/// Category of a product. Determines the placeholder when there is no photo.
 enum ProductCategory {
   meat(
     tile: Color(0xFFF5DCD4),
@@ -68,17 +68,17 @@ enum ProductCategory {
   final Color tile;
   final Color ink;
 
-  /// Kachelfarbe: hell pastell, dunkel eine gedämpfte Variante.
+  /// Tile colour: light pastel, a muted variant in dark mode.
   Color tileFor(Brightness b) =>
       b == Brightness.dark ? Color.alphaBlend(ink.withValues(alpha: 0.55), const Color(0xFF19201B)) : tile;
 
-  /// Symbolfarbe auf [tileFor].
+  /// Icon colour on [tileFor].
   Color inkFor(Brightness b) => b == Brightness.dark ? tile : ink;
 
-  /// SVG-Pfade (viewBox 0 0 24 24, Strichgrafik).
+  /// SVG paths (viewBox 0 0 24 24, line art).
   final String icon;
 
-  /// Open-Food-Facts-Kategorien (ohne Sprachpräfix), die auf diese Kategorie abbilden.
+  /// Open Food Facts categories (without language prefix) that map to this category.
   final List<String> offTags;
 
   String svg({double strokeWidth = 1.6}) =>
@@ -100,10 +100,10 @@ enum ProductCategory {
   static ProductCategory fromName(String? name) =>
       ProductCategory.values.firstWhere((c) => c.name == name, orElse: () => other);
 
-  /// Wählt die spezifischste passende Kategorie aus den OFF-Tags (z. B. `en:salamis`).
+  /// Picks the most specific matching category from the OFF tags (e.g. `en:salamis`).
   static ProductCategory fromOffTags(List<String> tags) {
     final plain = tags.map((t) => t.contains(':') ? t.split(':').last : t).toList();
-    // Spezifische Tags stehen bei OFF am Ende der Liste.
+    // OFF puts the specific tags at the end of the list.
     for (final tag in plain.reversed) {
       for (final category in ProductCategory.values) {
         if (category.offTags.contains(tag)) return category;

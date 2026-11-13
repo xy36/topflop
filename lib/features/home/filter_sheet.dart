@@ -22,7 +22,7 @@ Future<void> showFilterSheet(BuildContext context) => showModalBottomSheet<void>
   builder: (_) => const _FilterSheet(),
 );
 
-/// Filter werden erst mit „N Produkte anzeigen“ übernommen.
+/// Filters are only applied with "Show N products".
 class _FilterSheet extends ConsumerStatefulWidget {
   const _FilterSheet();
 
@@ -45,7 +45,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
     final stores = ref.watch(storeSummariesProvider).value ?? const <StoreSummary>[];
     final resultCount = products.where(_draft.matches).length;
 
-    // Nur Kategorien zeigen, die es auch gibt – plus bereits gewählte.
+    // Only show categories that actually exist – plus ones already selected.
     final usedCategories = {
       for (final p in products) ProductCategory.fromName(p.product.category),
       ..._draft.categories,
@@ -97,7 +97,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
                     childAspectRatio: 3.1,
-                    // Ohne explizites Padding übernimmt ein GridView den System-Rand.
+                    // Without explicit padding a GridView picks up the system inset.
                     padding: EdgeInsets.zero,
                     children: [
                       for (final (sort, icon, label) in [
@@ -228,7 +228,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
   static Set<T> _toggle<T>(Set<T> set, T value) => set.contains(value) ? ({...set}..remove(value)) : {...set, value};
 }
 
-/// Weiße Karte mit Abschnittstitel, wie auf der Bewertungsseite.
+/// White card with section title, as on the rating page.
 class _Card extends StatelessWidget {
   const _Card({
     required this.child,
@@ -320,7 +320,7 @@ class _SortTile extends StatelessWidget {
   }
 }
 
-/// „😕 5 – 🤩 10“ als kleine Plakette rechts im Kartentitel.
+/// "😕 5 – 🤩 10" as a small badge on the right of the card title.
 class _ScoreRangeLabel extends StatelessWidget {
   const _ScoreRangeLabel({required this.min, required this.max});
 
@@ -357,7 +357,7 @@ class _ScoreRangeLabel extends StatelessWidget {
   }
 }
 
-/// Einrastender Bereichsregler mit Zahlenleiste darunter.
+/// Snapping range slider with a row of numbers below.
 class _ScoreRange extends StatelessWidget {
   const _ScoreRange({required this.min, required this.max, required this.onChanged});
 
@@ -394,7 +394,7 @@ class _ScoreRange extends StatelessWidget {
           ),
         ),
         Padding(
-          // Gleicher Innenabstand wie die Slider-Spur, damit die Zahlen unter den Rastpunkten stehen.
+          // Same padding as the slider track so the numbers sit under the snap points.
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -455,7 +455,7 @@ class _RingRangeThumb extends RangeSliderThumbShape {
   }
 }
 
-/// Segment-Umschalter im Stil von „Wieder kaufen?“ auf der Bewertungsseite.
+/// Segmented toggle in the style of "Buy again?" on the rating page.
 class _Segmented<T> extends StatelessWidget {
   const _Segmented({required this.value, required this.options, required this.onChanged});
 
@@ -521,7 +521,7 @@ class _Segmented<T> extends StatelessWidget {
   }
 }
 
-/// Mehrfachauswahl-Chip; ausgewählt mit Häkchen statt Icon.
+/// Multi-select chip; shows a check mark instead of an icon when selected.
 class _SelectChip extends StatelessWidget {
   const _SelectChip({required this.label, required this.leading, required this.selected, required this.onTap});
 

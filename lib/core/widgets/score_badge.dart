@@ -4,7 +4,7 @@ import '../domain/score.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
-/// Emoji + Zahl, Hintergrund abhängig von der Bewertung.
+/// Emoji + number, background depends on the rating.
 class ScoreBadge extends StatelessWidget {
   const ScoreBadge({super.key, required this.score, this.vertical = false});
 

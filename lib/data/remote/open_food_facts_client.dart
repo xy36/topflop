@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../core/domain/product_category.dart';
 
-/// Produktdaten, wie sie Open Food Facts (bzw. die Schwesterprojekte) liefert.
+/// Product data as delivered by Open Food Facts (or its sister projects).
 class OffProduct {
   const OffProduct({
     required this.barcode,
@@ -33,8 +33,8 @@ class OffLookupException implements Exception {
   String toString() => 'OffLookupException: $cause';
 }
 
-/// Fragt Barcodes bei Open Food Facts ab. Für Nicht-Lebensmittel wird auf
-/// Open Beauty Facts und Open Products Facts ausgewichen.
+/// Looks up barcodes on Open Food Facts. For non-food products it falls back
+/// to Open Beauty Facts and Open Products Facts.
 class OpenFoodFactsClient {
   OpenFoodFactsClient({http.Client? httpClient}) : _http = httpClient ?? http.Client();
 
@@ -50,11 +50,11 @@ class OpenFoodFactsClient {
       'product_name,generic_name,brands,quantity,image_front_url,image_url,'
       'nutriscore_grade,categories_tags';
 
-  /// OFF bittet um einen aussagekräftigen User-Agent.
+  /// OFF asks for a meaningful User-Agent.
   static const _userAgent = 'TopFlop/1.0 (Flutter; personal product ratings)';
 
-  /// Liefert `null`, wenn der Barcode nirgends bekannt ist.
-  /// Wirft [OffLookupException] bei Netzwerkfehlern.
+  /// Returns `null` if the barcode is not known anywhere.
+  /// Throws [OffLookupException] on network errors.
   Future<OffProduct?> lookup(String barcode, {String languageCode = 'de'}) async {
     for (final (host, fallbackCategory) in _hosts) {
       final product = await _lookupAt(host, barcode, languageCode, fallbackCategory);
@@ -106,9 +106,9 @@ class OpenFoodFactsClient {
     );
   }
 
-  /// Nimmt den ersten brauchbaren Namen. Manche Einträge bei OFF enthalten
-  /// Händlertexte wie „… 1L (1,29 € / 1 l) zzgl. Pfand 0,15 €“ – solche
-  /// werden übersprungen, solange es eine sauberere Alternative gibt.
+  /// Takes the first usable name. Some OFF entries contain retailer texts
+  /// like "… 1L (1,29 € / 1 l) zzgl. Pfand 0,15 €" – those are skipped as
+  /// long as there is a cleaner alternative.
   static String? pickName(List<Object?> candidates) {
     final names = [
       for (final c in candidates)

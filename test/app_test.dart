@@ -17,7 +17,7 @@ import 'package:topflop/data/repositories/store_repository.dart';
 import 'package:topflop/features/home/product_filter.dart';
 
 void main() {
-  // Der Backup-Test öffnet absichtlich zwei In-Memory-Datenbanken.
+  // The backup test intentionally opens two in-memory databases.
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
   group('Sprachen', () {
@@ -118,7 +118,7 @@ void main() {
       const shopText = 'EDEKA Hayunga Getränke Coca-Cola Zero  Mehrweg Pet 1L X11 l (1,29 € / 1 l) zzgl. Pfand 0,15 €';
       expect(OpenFoodFactsClient.pickName([shopText, 'Coca-Cola Zero', null]), 'Coca-Cola Zero');
       expect(OpenFoodFactsClient.pickName(['', '  Salami   Milano ']), 'Salami Milano');
-      // Gibt es nur den unsauberen Namen, wird er trotzdem genommen.
+      // If only the messy name exists, it is used anyway.
       expect(OpenFoodFactsClient.pickName([shopText]), startsWith('EDEKA'));
       expect(OpenFoodFactsClient.pickName([null, '']), isNull);
     });
@@ -225,7 +225,7 @@ void main() {
       await products.saveRating(productId: id, score: 7, wouldBuyAgain: true, storeIds: {lidl, aldi});
       expect(await products.lastUsedStoreIds(), {lidl, aldi});
 
-      // Gelöschte Läden fallen heraus.
+      // Deleted stores drop out.
       await stores.deleteStore(aldi);
       expect(await products.lastUsedStoreIds(), {lidl});
     });
@@ -344,7 +344,7 @@ void main() {
       await products.saveRating(productId: salamiId, score: 9, wouldBuyAgain: true, storeIds: {rewe});
       await products.saveRating(productId: kaeseId, score: 4, wouldBuyAgain: false, storeIds: {edeka, rewe});
       await products.setFavorite(kaeseId, true);
-      // Cola bleibt unbewertet.
+      // Cola stays unrated.
 
       final all = await products.loadSummaries();
       List<String> names(ProductFilter f) => f.apply(all).map((s) => s.product.name).toList();
@@ -366,7 +366,7 @@ void main() {
   });
 
   test('Migration von Schema 1: neueste Bewertung bleibt, alle Läden werden übernommen', () async {
-    // Datenbank im Stand von Version 1 (mehrere Bewertungen, Laden an der Bewertung).
+    // Database at version 1 (several ratings, store on the rating).
     final legacy = NativeDatabase.memory(
       setup: (raw) {
         raw.execute('''
@@ -404,7 +404,7 @@ void main() {
     expect([kaese.score, kaese.stores], [4, isEmpty]);
     expect(await db.select(db.ratings).get(), hasLength(2));
 
-    // Eindeutigkeit gilt nach der Migration.
+    // Uniqueness holds after the migration.
     expect(
       db.into(db.ratings).insert(RatingsCompanion.insert(productId: 1, score: 3, wouldBuyAgain: false)),
       throwsA(anything),

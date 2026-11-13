@@ -5,8 +5,8 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 
-/// Grundgerüst mit unterer Navigation: Übersicht · Scannen · Läden.
-/// Die Einstellungen erreicht man über das Zahnrad im Kopf ([CollapsingTabPage]).
+/// Scaffold with bottom navigation: Overview · Scan · Stores.
+/// Settings are reached via the gear icon in the header ([CollapsingTabPage]).
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
 
@@ -18,13 +18,13 @@ class AppShell extends StatelessWidget {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      // Die Listen laufen bis unter die Leiste; links und rechts vom
-      // Scan-Knopf sieht man den Inhalt, der Knopf steht darüber.
+      // The lists run underneath the bar; content is visible to the left and
+      // right of the scan button, which sits on top.
       extendBody: true,
       body: navigationShell,
-      // Der Scan-Knopf ragt über die Leiste hinaus. Damit er vollständig
-      // antippbar bleibt, liegt er innerhalb der (höheren) Navigationsfläche
-      // und nur die weiße Leiste darunter ist niedriger.
+      // The scan button sticks out above the bar. To keep it fully tappable it
+      // lies inside the (taller) navigation area, and only the white bar below
+      // it is lower.
       bottomNavigationBar: SizedBox(
         height: _barHeight + _scanRaise + bottomInset,
         child: Stack(
@@ -68,15 +68,15 @@ class AppShell extends StatelessWidget {
       icon: icon,
       label: label,
       selected: selected,
-      // Erneutes Tippen auf den aktiven Tab springt an dessen Anfang zurück.
+      // Tapping the active tab again scrolls back to its top.
       onTap: () => navigationShell.goBranch(index, initialLocation: selected),
     );
   }
 
-  /// Höhe der weißen Leiste (ohne System-Inset).
+  /// Height of the white bar (without system inset).
   static const _barHeight = 84.0;
 
-  /// So weit ragt der Bereich für den Scan-Knopf über die Leiste.
+  /// How far the scan button area extends above the bar.
   static const _scanRaise = 22.0;
 }
 
@@ -130,7 +130,7 @@ class _ScanButton extends StatelessWidget {
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
-        // Schrumpft bei sehr großer Systemschrift, statt überzulaufen.
+        // Shrinks with very large system font sizes instead of overflowing.
         child: FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.bottomCenter,

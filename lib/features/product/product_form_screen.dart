@@ -10,8 +10,8 @@ import '../../core/widgets/category_picker.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 
-/// Produkt selbst anlegen – wenn Open Food Facts es nicht kennt oder es
-/// keinen Barcode hat (Frischetheke, Wochenmarkt …).
+/// Create a product manually – when Open Food Facts doesn't know it or it
+/// has no barcode (deli counter, farmers' market …).
 class ProductFormScreen extends ConsumerStatefulWidget {
   const ProductFormScreen({super.key, this.barcode});
 

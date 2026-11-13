@@ -4,15 +4,15 @@ import '../db/database.dart';
 import 'models.dart';
 import 'product_repository.dart';
 
-/// Läden – gemeint sind Ketten wie „Lidl“, ohne einzelne Filialen.
+/// Stores – meaning chains like "Lidl", without individual branches.
 class StoreRepository {
   StoreRepository(this._db, this._products);
 
   final AppDatabase _db;
   final ProductRepository _products;
 
-  /// Vergleichsschlüssel für Kettennamen: erstes Wort, klein, ohne Satzzeichen.
-  /// So landen „ALDI SÜD“, „Aldi“ und „Aldi Bahnhofstraße“ bei derselben Kette.
+  /// Comparison key for chain names: first word, lower case, no punctuation.
+  /// That way "ALDI SÜD", "Aldi" and "Aldi Bahnhofstraße" end up as the same chain.
   static String chainKey(String name) {
     final firstWord = name.trim().toLowerCase().split(RegExp(r'\s+')).first;
     return firstWord.replaceAll(RegExp(r'[^\p{L}\p{N}]', unicode: true), '');
@@ -41,24 +41,24 @@ class StoreRepository {
 
   Future<List<Store>> allStores() => (_db.select(_db.stores)..orderBy([(s) => OrderingTerm.asc(s.name)])).get();
 
-  /// Vorhandene Kette mit passendem Namen (siehe [chainKey]) oder `null`.
+  /// Existing chain with a matching name (see [chainKey]) or `null`.
   Future<Store?> findChain(String name) async {
     final key = chainKey(name);
     if (key.isEmpty) return null;
     return (await allStores()).where((s) => chainKey(s.name) == key).firstOrNull;
   }
 
-  /// Liefert die passende Kette oder legt sie neu an.
+  /// Returns the matching chain or creates a new one.
   Future<int> findOrCreateChain(String name) async =>
       (await findChain(name))?.id ?? await _db.into(_db.stores).insert(StoresCompanion.insert(name: name.trim()));
 
-  /// Legt den Laden an oder liefert die vorhandene Kette gleichen Namens.
+  /// Creates the store or returns the existing chain with the same name.
   Future<int> addStore({required String name}) => findOrCreateChain(name);
 
   Future<void> renameStore(int id, String name) =>
       (_db.update(_db.stores)..where((s) => s.id.equals(id))).write(StoresCompanion(name: Value(name.trim())));
 
-  /// Löscht den Laden. Bewertungen bleiben erhalten; nur die
-  /// Zuordnung zu diesem Laden entfällt.
+  /// Deletes the store. Ratings are kept; only the assignment to this
+  /// store is removed.
   Future<void> deleteStore(int id) => (_db.delete(_db.stores)..where((s) => s.id.equals(id))).go();
 }

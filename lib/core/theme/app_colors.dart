@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-/// Markenfarben, die in hellem und dunklem Modus gleich bleiben.
+/// Brand colours that stay the same in light and dark mode.
 abstract final class AppColors {
   static const lime = Color(0xFFD9F27A);
 
-  /// Text und Symbole auf [lime].
+  /// Text and icons on [lime].
   static const onLime = Color(0xFF15201A);
 
-  /// Der Scanner ist immer dunkel.
+  /// The scanner is always dark.
   static const scannerBackground = Color(0xFF0F1512);
 }
 
-/// Farbpalette für hellen und dunklen Modus; in Widgets über `context.colors`.
+/// Colour palette for light and dark mode; in widgets via `context.colors`.
 @immutable
 class AppPalette extends ThemeExtension<AppPalette> {
   const AppPalette({
@@ -45,21 +45,21 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   final Brightness brightness;
 
-  /// Seitenhintergrund.
+  /// Page background.
   final Color background;
 
-  /// Karten, Leisten, Eingabefelder.
+  /// Cards, bars, input fields.
   final Color surface;
 
-  /// Haupttext.
+  /// Primary text.
   final Color ink;
   final Color inkSoft;
 
-  /// Zweitrangiger Text, kräftiger als [muted].
+  /// Secondary text, stronger than [muted].
   final Color textSecondary;
   final Color muted;
 
-  /// Deaktivierte Zahlen, Pfeile.
+  /// Disabled numbers, arrows.
   final Color faint;
   final Color hint;
 
@@ -67,38 +67,38 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color borderSoft;
   final Color chipBorder;
 
-  /// Gestrichelte Rahmen und leere Zustände.
+  /// Dashed borders and empty states.
   final Color dashed;
   final Color subtle;
 
-  /// Grün für Flächen (Knöpfe) und Akzente.
+  /// Green for surfaces (buttons) and accents.
   final Color primary;
 
-  /// Hellgrün hinterlegte Flächen (z. B. ausgewählter Laden) …
+  /// Light green tinted surfaces (e.g. selected store) …
   final Color primaryTint;
 
-  /// … und Text/Symbole darauf.
+  /// … and text/icons on them.
   final Color onPrimaryTint;
 
   final Color limeSoft;
 
-  /// Kräftige Fläche für Ausgewähltes (hell: fast schwarz, dunkel: Lime) …
+  /// Strong surface for selected items (light: almost black, dark: lime) …
   final Color strong;
 
-  /// … Text darauf …
+  /// … text on it …
   final Color onStrong;
 
-  /// … und ein Akzent darauf (Zähler, Symbole).
+  /// … and an accent on it (counters, icons).
   final Color strongAccent;
 
   final Color scoreHigh;
   final Color scoreMid;
   final Color scoreLow;
 
-  /// Text auf [scoreHigh] und Lime-Flächen.
+  /// Text on [scoreHigh] and lime surfaces.
   final Color onScoreHigh;
 
-  /// Grundfarbe für Schatten.
+  /// Base colour for shadows.
   final Color shadow;
 
   bool get isDark => brightness == Brightness.dark;
@@ -175,6 +175,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
 }
 
 extension AppPaletteContext on BuildContext {
-  /// Aktuelle Farbpalette (hell oder dunkel).
+  /// Current colour palette (light or dark).
   AppPalette get colors => Theme.of(this).extension<AppPalette>() ?? AppPalette.light;
 }

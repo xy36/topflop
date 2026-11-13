@@ -5,14 +5,14 @@ import '../../l10n/app_localizations.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
-/// Seite eines Haupt-Tabs mit einklappendem Kopf.
+/// Page of a main tab with a collapsing header.
 ///
-/// Ausgeklappt: App-Name mit Zahnrad, großer Titel mit [action] und darunter
-/// optional weitere Zeilen ([below], z. B. Suche und Chips). Beim
-/// Runterscrollen schiebt sich alles unter eine schmale Leiste, in die dann
-/// ein kleiner Titel und die [action] einblenden. „Quick Return“: Beim
-/// Hochscrollen fährt der Kopf sofort wieder aus und rastet am Ende ganz ein
-/// oder ganz aus – je nach Gesamtrichtung der Geste.
+/// Expanded: app name with gear icon, large title with [action] and below
+/// that optionally more rows ([below], e.g. search and chips). When
+/// scrolling down everything slides under a slim bar, into which a small
+/// title and the [action] then fade in. "Quick return": when
+/// scrolling up the header comes back immediately and at the end snaps fully
+/// in or fully out – depending on the overall direction of the gesture.
 class CollapsingTabPage extends StatefulWidget {
   const CollapsingTabPage({
     super.key,
@@ -25,10 +25,10 @@ class CollapsingTabPage extends StatefulWidget {
   final String title;
   final Widget action;
 
-  /// Zeilen unter dem Titel mit fester Höhe, z. B. `(Suchfeld, 52)`.
+  /// Rows below the title with a fixed height, e.g. `(searchField, 52)`.
   final List<(Widget, double)> below;
 
-  /// Inhalt der Seite; Abstand zum Kopf und zur Navigation regelt die Seite selbst.
+  /// Page content; the page itself handles spacing to the header and navigation.
   final List<Widget> slivers;
 
   @override
@@ -36,14 +36,14 @@ class CollapsingTabPage extends StatefulWidget {
 }
 
 class _CollapsingTabPageState extends State<CollapsingTabPage> with SingleTickerProviderStateMixin {
-  /// Wie viele Pixel des Kopfbereichs gerade weggeklappt sind.
+  /// How many pixels of the header area are currently collapsed.
   late final _hidden = AnimationController.unbounded(vsync: this);
 
-  /// Maximal wegklappbare Höhe (alles außer der oberen Leiste).
+  /// Maximum collapsible height (everything except the top bar).
   double _range = 0;
   double _gestureStart = 0;
 
-  /// Scrollposition; liegt Inhalt unter dem Kopf, bekommt er einen Schatten.
+  /// Scroll position; when content is under the header, it gets a shadow.
   double _pixels = 0;
 
   @override
@@ -138,7 +138,7 @@ class _Header {
   final Widget action;
   final List<(Widget, double)> below;
 
-  static const _bar = 52.0; // 8 Abstand + 44 Leiste
+  static const _bar = 52.0; // 8 spacing + 44 bar
   static const _titleRow = 56.0;
   static const _gap = 16.0;
   static const _bottom = 8.0;
@@ -150,7 +150,7 @@ class _Header {
   double get minExtent => _bar + _bottom;
 
   Widget build(BuildContext context, double shrinkOffset, {bool scrolledUnder = false}) {
-    // 0 = großer Titel sichtbar, 1 = Titel ist unter der Leiste verschwunden.
+    // 0 = large title visible, 1 = title has disappeared under the bar.
     final t = Curves.easeOut.transform((shrinkOffset / (_titleRow * 0.8)).clamp(0.0, 1.0));
     final collapsed = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
 
@@ -170,7 +170,7 @@ class _Header {
       child: ClipRect(
         child: Stack(
           children: [
-            // Inhalt schiebt sich, unten verankert, unter die Leiste.
+            // Content slides under the bar, anchored at the bottom.
             Positioned(
               left: 0,
               right: 0,
@@ -208,7 +208,7 @@ class _Header {
                 ],
               ),
             ),
-            // Obere Leiste, immer sichtbar.
+            // Top bar, always visible.
             Positioned(
               left: 0,
               right: 0,

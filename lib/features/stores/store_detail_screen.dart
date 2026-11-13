@@ -9,7 +9,7 @@ import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 import 'store_form_sheet.dart';
 
-/// Ein Laden mit den Produkten, die es dort gibt.
+/// A store with the products available there.
 class StoreDetailScreen extends ConsumerWidget {
   const StoreDetailScreen({super.key, required this.storeId});
 

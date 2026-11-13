@@ -6,7 +6,7 @@ import '../../data/repositories/models.dart';
 
 enum ProductSort { recent, bestRated, worstRated, name }
 
-/// Filter und Sortierung der Produktübersicht.
+/// Filtering and sorting of the product overview.
 class ProductFilter {
   const ProductFilter({
     this.minScore = Score.min,
@@ -22,20 +22,20 @@ class ProductFilter {
   final int maxScore;
   final bool favoritesOnly;
 
-  /// `null`: egal, sonst nur Produkte mit diesem letzten Urteil.
+  /// `null`: any, otherwise only products with this last verdict.
   final bool? buyAgain;
 
-  /// Leer: alle Läden. Sonst: mindestens ein Kauf in einem dieser Läden.
+  /// Empty: all stores. Otherwise: at least one purchase in one of these stores.
   final Set<int> storeIds;
 
-  /// Leer: alle Kategorien.
+  /// Empty: all categories.
   final Set<ProductCategory> categories;
 
   final ProductSort sort;
 
   bool get scoreActive => minScore > Score.min || maxScore < Score.max;
 
-  /// Anzahl aktiver Filter (ohne Sortierung) – für das Badge am Filterknopf.
+  /// Number of active filters (excluding sorting) – for the badge on the filter button.
   int get activeCount => [
     scoreActive,
     favoritesOnly,
@@ -67,7 +67,7 @@ class ProductFilter {
       case ProductSort.bestRated:
         result.sort((a, b) => byScore(b, a));
       case ProductSort.worstRated:
-        // Unbewertete Produkte ans Ende, nicht an den Anfang.
+        // Unrated products go to the end, not the beginning.
         result.sort((a, b) => (a.score ?? 99).compareTo(b.score ?? 99));
       case ProductSort.name:
         result.sort((a, b) => a.product.name.toLowerCase().compareTo(b.product.name.toLowerCase()));
@@ -93,7 +93,7 @@ class ProductFilter {
     sort: sort ?? this.sort,
   );
 
-  /// Setzt alle Filter zurück, behält aber die Sortierung.
+  /// Resets all filters but keeps the sorting.
   ProductFilter cleared() => ProductFilter(sort: sort);
 }
 
@@ -106,5 +106,5 @@ class ProductFilterNotifier extends Notifier<ProductFilter> {
   void clear() => state = state.cleared();
 }
 
-/// Bleibt beim Tab-Wechsel erhalten.
+/// Kept when switching tabs.
 final productFilterProvider = NotifierProvider<ProductFilterNotifier, ProductFilter>(ProductFilterNotifier.new);

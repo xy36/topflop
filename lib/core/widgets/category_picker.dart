@@ -6,7 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'product_image.dart';
 
-/// Raster aller Kategorien mit Platzhalter-Kachel.
+/// Grid of all categories with placeholder tile.
 class CategoryGrid extends StatelessWidget {
   const CategoryGrid({super.key, required this.selected, required this.onSelected});
 
@@ -32,7 +32,7 @@ class CategoryGrid extends StatelessWidget {
   }
 }
 
-/// Bottom Sheet zur Auswahl einer Kategorie; liefert `null` bei Abbruch.
+/// Bottom sheet for picking a category; returns `null` when cancelled.
 Future<ProductCategory?> showCategoryPicker(BuildContext context, ProductCategory current) {
   return showModalBottomSheet<ProductCategory>(
     context: context,

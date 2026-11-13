@@ -837,7 +837,7 @@ class Rating extends DataClass implements Insertable<Rating> {
   final int? priceCents;
   final String? note;
 
-  /// Zeitpunkt der letzten Änderung.
+  /// Time of the last change.
   final DateTime ratedAt;
   const Rating({
     required this.id,
