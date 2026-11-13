@@ -5,26 +5,26 @@ import 'package:path_provider/path_provider.dart';
 
 import '../db/database.dart';
 
-/// Manueller Export/Import aller Daten als JSON-Datei.
+/// Manual export/import of all data as a JSON file.
 ///
-/// Ergänzt das automatische System-Backup (Android Auto Backup / iCloud),
-/// das die Datenbankdatei ohnehin sichert.
+/// Complements the automatic system backup (Android Auto Backup / iCloud),
+/// which backs up the database file anyway.
 class BackupService {
   BackupService(this._db);
 
   final AppDatabase _db;
 
-  /// 1: mehrere Bewertungen pro Produkt mit `storeId`.
-  /// 2: eine Bewertung pro Produkt, Läden in `productStores`.
-  /// 3: Läden sind Ketten, Filialen in `storeLocations`.
-  /// 4: keine Filialen/Standorte mehr.
+  /// 1: several ratings per product with `storeId`.
+  /// 2: one rating per product, stores in `productStores`.
+  /// 3: stores are chains, branches in `storeLocations`.
+  /// 4: no more branches/locations.
   static const formatVersion = 4;
   static const _lastExportKey = 'last_export';
 
-  /// Android Auto Backup sichert maximal 25 MB pro App. Ab hier warnen wir.
+  /// Android Auto Backup stores at most 25 MB per app. Above this we warn.
   static const sizeWarningBytes = 20 * 1024 * 1024;
 
-  /// Schreibt die Sicherung in eine temporäre Datei und gibt deren Pfad zurück.
+  /// Writes the backup to a temporary file and returns its path.
   Future<File> exportToFile() async {
     final data = {
       'app': 'topflop',
@@ -54,8 +54,8 @@ class BackupService {
     return row == null ? null : DateTime.tryParse(row.value)?.toLocal();
   }
 
-  /// Ersetzt alle Daten durch den Inhalt der Sicherung.
-  /// Wirft [FormatException], wenn die Datei keine gültige Sicherung ist.
+  /// Replaces all data with the contents of the backup.
+  /// Throws [FormatException] if the file is not a valid backup.
   Future<void> importJson(String content) async {
     final decoded = jsonDecode(content);
     if (decoded is! Map<String, dynamic> || decoded['app'] != 'topflop') {
@@ -73,9 +73,9 @@ class BackupService {
     final rawStores = list('stores');
     final rawRatings = list('ratings');
 
-    // Bis Version 2 war ein Laden eine Filiale: gleiche Namen werden zu
-    // einem Laden zusammengeführt. Koordinaten und Filialen (Version 3)
-    // werden nicht mehr übernommen.
+    // Up to version 2 a store was a branch: stores with the same name are
+    // merged into one store. Coordinates and branches (version 3) are no
+    // longer imported.
     final List<Store> stores;
     final storeIdMap = <int, int>{};
     if (version < 3) {
@@ -93,7 +93,7 @@ class BackupService {
     List<ProductStore> productStores;
     final List<Map<String, dynamic>> ratingRows;
     if (version == 1) {
-      // Alte Sicherung: Läden hingen an den Bewertungen, mehrere pro Produkt.
+      // Old backup: stores were attached to ratings, several per product.
       productStores = {
         for (final r in rawRatings)
           if (r['storeId'] != null) (r['productId'] as int, r['storeId'] as int),
@@ -109,7 +109,7 @@ class BackupService {
       ratingRows = rawRatings;
     }
     final ratings = ratingRows.map(Rating.fromJson).toList();
-    // Zuordnungen auf die zusammengeführten Ketten umbiegen, ohne Duplikate.
+    // Point the assignments to the merged chains, without duplicates.
     productStores = {for (final ps in productStores) (ps.productId, storeIdMap[ps.storeId] ?? ps.storeId)}
         .map((e) => ProductStore(productId: e.$1, storeId: e.$2))
         .toList();
@@ -128,7 +128,7 @@ class BackupService {
     });
   }
 
-  /// Größe der Datenbankdatei in Bytes (0, wenn nicht ermittelbar).
+  /// Size of the database file in bytes (0 if it cannot be determined).
   Future<int> databaseSize() async {
     try {
       final dir = await getApplicationDocumentsDirectory();

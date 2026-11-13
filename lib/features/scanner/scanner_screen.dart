@@ -23,13 +23,13 @@ class _Looking extends _ScanState {
   const _Looking(super.code);
 }
 
-/// Produkt ist schon in der eigenen Datenbank.
+/// Product is already in the local database.
 class _Known extends _ScanState {
   const _Known(super.code, this.summary);
   final ProductSummary summary;
 }
 
-/// Produkt kommt frisch von Open Food Facts.
+/// Product comes fresh from Open Food Facts.
 class _Remote extends _ScanState {
   const _Remote(super.code, this.product);
   final OffProduct product;
@@ -154,7 +154,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> with SingleTicker
                 ),
               ),
             ),
-            // Abdunkelung mit Sucherrahmen.
+            // Dimmed overlay with viewfinder frame.
             AnimatedBuilder(
               animation: _scanLine,
               builder: (context, _) => CustomPaint(
@@ -442,7 +442,7 @@ class _ProductResult extends StatelessWidget {
   }
 }
 
-/// „Schon bewertet“-Hinweis – der eigentliche Mehrwert vorm Regal.
+/// "Already rated" hint – the real value in front of the shelf.
 class _Verdict extends StatelessWidget {
   const _Verdict(this.summary);
 
@@ -537,7 +537,7 @@ class _OutlineButton extends StatelessWidget {
   }
 }
 
-/// Dunkelt alles außer dem Sucher ab und zeichnet Ecken und Scanlinie.
+/// Dims everything except the viewfinder and draws corners and scan line.
 class _ViewfinderPainter extends CustomPainter {
   _ViewfinderPainter({required this.progress, required this.active});
 
@@ -547,7 +547,7 @@ class _ViewfinderPainter extends CustomPainter {
   final double progress;
   final bool active;
 
-  /// Lage des Suchers; Hinweistext und Knöpfe richten sich danach aus.
+  /// Position of the viewfinder; hint text and buttons align to it.
   static Rect frameFor(Size size) {
     final top = (size.height - height) * 0.36;
     return Rect.fromLTWH((size.width - width) / 2, top, width, height);

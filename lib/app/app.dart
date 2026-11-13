@@ -22,7 +22,7 @@ class TopFlopApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: appRouter,
-      // Statusleiste passend zum Modus (die Seiten haben keine AppBar).
+      // Status bar matching the theme mode (the pages have no AppBar).
       builder: (context, child) =>
           AnnotatedRegion<SystemUiOverlayStyle>(value: AppTheme.overlayStyle(context.colors), child: child!),
     );

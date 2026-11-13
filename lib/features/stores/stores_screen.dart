@@ -12,7 +12,7 @@ import '../../data/repositories/models.dart';
 import '../../l10n/app_localizations.dart';
 import 'store_form_sheet.dart';
 
-/// Deine Läden (Ketten), meistgenutzte zuerst.
+/// Your stores (chains), most used first.
 class StoresScreen extends ConsumerWidget {
   const StoresScreen({super.key});
 
@@ -37,7 +37,7 @@ class StoresScreen extends ConsumerWidget {
       ),
       slivers: [
         SliverPadding(
-          // Die Liste läuft unter der Navigation durch; unten Platz dafür lassen.
+          // The list runs underneath the navigation; leave room for it at the bottom.
           padding: EdgeInsets.fromLTRB(20, 8, 20, 16 + MediaQuery.paddingOf(context).bottom),
           sliver: SliverList.list(
             children: [

@@ -35,7 +35,7 @@ final storeSummariesProvider = StreamProvider<List<StoreSummary>>(
   (ref) => ref.watch(storeRepositoryProvider).watchSummaries(),
 );
 
-/// Hell, dunkel oder wie das System; gespeichert in der Einstellungstabelle.
+/// Light, dark or follow the system; stored in the settings table.
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);
 
 class ThemeModeNotifier extends Notifier<ThemeMode> {

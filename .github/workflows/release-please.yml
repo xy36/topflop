@@ -1,6 +1,6 @@
-# Pflegt einen Release-PR mit Changelog und Versionsnummer. Wird der PR
-# gemergt, legt release-please Tag und GitHub-Release an.
-# Voraussetzung: Commits im Format „Conventional Commits“ (feat:, fix:, …).
+# Maintains a release PR with changelog and version number. When the PR
+# is merged, release-please creates the tag and the GitHub release.
+# Requires commits in Conventional Commits format (feat:, fix:, …).
 name: release-please
 
 on:

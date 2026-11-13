@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 abstract final class AppText {
-  /// Überschriften: Bricolage Grotesque. Ohne [color] gilt die Textfarbe des Themes.
+  /// Headings: Bricolage Grotesque. Without [color] the theme's text colour applies.
   static TextStyle display(double size, {FontWeight weight = FontWeight.w700, Color? color}) =>
       GoogleFonts.bricolageGrotesque(
         fontSize: size,
@@ -15,7 +15,7 @@ abstract final class AppText {
         letterSpacing: -0.02 * size,
       );
 
-  /// Abschnittsüberschriften in Versalien.
+  /// Section headings in capitals.
   static TextStyle overline({Color? color}) =>
       GoogleFonts.figtree(fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: color);
 
@@ -50,7 +50,7 @@ abstract final class AppTheme {
       extensions: [c],
     );
 
-    // Muted-Farbe wird überall dort verwendet, wo kein Overline-Stil gesetzt ist.
+    // The muted colour is used wherever no overline style is set.
     TextStyle? withMuted(TextStyle? s) => s?.copyWith(color: c.muted);
 
     return base.copyWith(
@@ -134,7 +134,7 @@ abstract final class AppTheme {
     );
   }
 
-  /// Statusleiste: dunkle Symbole im hellen Modus, helle im dunklen.
+  /// Status bar: dark icons in light mode, light icons in dark mode.
   static SystemUiOverlayStyle overlayStyle(AppPalette c) =>
       (c.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark).copyWith(
         statusBarColor: Colors.transparent,

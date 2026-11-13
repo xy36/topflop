@@ -1,6 +1,6 @@
 import '../../l10n/app_localizations.dart';
 
-/// Bewertungsskala 1–10 mit Emoji und Wort.
+/// Rating scale 1–10 with emoji and word.
 abstract final class Score {
   static const min = 1;
   static const max = 10;

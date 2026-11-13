@@ -1,15 +1,15 @@
 import '../db/database.dart';
 
-/// Ein Produkt mit seiner Bewertung und den Läden, in denen es das gibt.
+/// A product with its rating and the stores that carry it.
 class ProductSummary {
   const ProductSummary({required this.product, required this.rating, required this.stores});
 
   final Product product;
 
-  /// `null`, solange das Produkt noch nicht bewertet ist.
+  /// `null` as long as the product has not been rated.
   final Rating? rating;
 
-  /// Nach Name sortiert.
+  /// Sorted by name.
   final List<Store> stores;
 
   bool get isRated => rating != null;
@@ -18,7 +18,7 @@ class ProductSummary {
 
   bool? get wouldBuyAgain => rating?.wouldBuyAgain;
 
-  /// Für die Anzeige in Listen: erster Laden (alphabetisch).
+  /// For display in lists: the first store (alphabetically).
   String? get storeName => stores.isEmpty ? null : stores.first.name;
 
   DateTime get lastActivity => rating?.ratedAt ?? product.createdAt;
@@ -27,10 +27,10 @@ class ProductSummary {
 class StoreSummary {
   const StoreSummary({required this.store, required this.products});
 
-  /// Die Kette.
+  /// The chain.
   final Store store;
 
-  /// Produkte, die es hier gibt, bestbewertete zuerst.
+  /// Products available here, best rated first.
   final List<ProductSummary> products;
 
   int get ratedCount => products.length;

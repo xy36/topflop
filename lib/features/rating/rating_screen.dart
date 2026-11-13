@@ -20,7 +20,7 @@ class RatingScreen extends ConsumerStatefulWidget {
 
   final int productId;
 
-  /// Kommt man vom Scanner, geht es nach dem Speichern zur Produktseite.
+  /// When coming from the scanner, saving leads to the product page.
   final bool openDetailAfterSave;
 
   @override
@@ -37,10 +37,10 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
 
   List<Store> _stores = const [];
 
-  /// Läden wurden aus der letzten Bewertung übernommen.
+  /// Stores were taken over from the last rating.
   bool _fromLastTime = false;
 
-  /// Es gibt pro Produkt nur eine Bewertung – existiert sie, wird sie geändert.
+  /// There is only one rating per product – if it exists, it is edited.
   bool _editing = false;
 
   @override
@@ -49,8 +49,8 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
     _init();
   }
 
-  /// Vorhandene Bewertung laden; bei einer neuen Bewertung sind die Läden
-  /// der letzten Bewertung vorausgewählt.
+  /// Load an existing rating; for a new rating the stores of the last
+  /// rating are preselected.
   Future<void> _init() async {
     final existing = await ref.read(productRepositoryProvider).loadProduct(widget.productId);
     if (!mounted) return;
@@ -300,8 +300,8 @@ class _RatingScreenState extends ConsumerState<RatingScreen> {
   }
 }
 
-/// Zeigt die (meist von Open Food Facts geratene) Kategorie und lässt sie
-/// direkt nach dem Scannen ändern.
+/// Shows the category (usually guessed by Open Food Facts) and lets you
+/// change it right after scanning.
 class _CategoryRow extends ConsumerWidget {
   const _CategoryRow({required this.product});
 
@@ -354,7 +354,7 @@ class _CategoryRow extends ConsumerWidget {
   }
 }
 
-/// Großes Emoji, Zahl, Wort und ein einrastender Slider (1–10) mit Zahlenleiste.
+/// Large emoji, number, word and a snapping slider (1–10) with a row of numbers.
 class _ScoreCard extends StatelessWidget {
   const _ScoreCard({required this.score, required this.onChanged});
 
@@ -459,7 +459,7 @@ class _ScoreCard extends StatelessWidget {
   }
 }
 
-/// Grüner Daumen mit weißem Ring wie im Entwurf.
+/// Green thumb with a white ring as in the design.
 class _RingThumb extends SliderComponentShape {
   const _RingThumb();
 
@@ -609,7 +609,7 @@ class _DashedButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
-        // Row statt `alignment`, sonst wird der Knopf im Wrap volle Breite.
+        // Row instead of `alignment`, otherwise the button takes full width in the Wrap.
         child: Container(
           height: 40,
           padding: const EdgeInsets.symmetric(horizontal: 12),

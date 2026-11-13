@@ -1,13 +1,13 @@
-// Rendert App-Icon und Splash-Logo als PNG nach assets/brand/ und die
-// Play-Store-Grafiken nach store/play/.
+// Renders the app icon and splash logo as PNG to assets/brand/ and the
+// Play Store graphics to store/play/.
 //
 //   fvm flutter test tool/render_brand_assets.dart
 //   fvm dart run flutter_launcher_icons
 //   fvm dart run flutter_native_splash:create
 //
-// Die Schriften für die Store-Grafik liegen in tool/fonts/ (SIL Open Font License).
+// The fonts for the store graphic live in tool/fonts/ (SIL Open Font License).
 //
-// Motiv: ein Preisschild (Supermarktregal) mit einem Pfeil nach oben – „Top“.
+// Motif: a price tag (supermarket shelf) with an arrow pointing up – "Top".
 
 import 'dart:io';
 import 'dart:math' as math;
@@ -25,25 +25,25 @@ void main() {
   test('Markenassets rendern', () async {
     final dir = Directory('assets/brand')..createSync(recursive: true);
 
-    // iOS / Legacy-Android: vollflächig, ohne Transparenz.
+    // iOS / legacy Android: full bleed, without transparency.
     await _render('${dir.path}/icon.png', 1024, background: AppPalette.light.primary, tagScale: 0.62);
-    // Android Adaptive Icon: flutter_launcher_icons legt 16 % Rand herum,
-    // damit landet das Schild im sicheren Bereich (mittlere 66 %).
+    // Android adaptive icon: flutter_launcher_icons adds a 16 % margin,
+    // which puts the tag inside the safe zone (middle 66 %).
     await _render('${dir.path}/icon_foreground.png', 1024, tagScale: 0.62);
-    // Android 13 „Themed Icons“: einfarbig.
+    // Android 13 themed icons: monochrome.
     await _render('${dir.path}/icon_monochrome.png', 1024, tagScale: 0.62, tagColor: Colors.white);
-    // Splash: Logo mittig, viel Rand (Android 12 schneidet kreisförmig zu).
+    // Splash: logo centred, generous margin (Android 12 crops to a circle).
     await _render('${dir.path}/splash_logo.png', 1152, tagScale: 0.42);
   });
 
   test('Play-Store-Grafiken rendern', () async {
     final dir = Directory('store/play')..createSync(recursive: true);
 
-    // App-Symbol für den Store-Eintrag: 512 × 512, vollflächig; die Rundung
-    // legt Google Play selbst darüber.
+    // App icon for the store listing: 512 × 512, full bleed; Google Play
+    // applies the rounding itself.
     await _render('${dir.path}/icon_512.png', 512, background: AppPalette.light.primary, tagScale: 0.62);
 
-    // Funktionsgrafik: 1024 × 500, Play verlangt sie ohne Alphakanal.
+    // Feature graphic: 1024 × 500, Play requires it without alpha channel.
     await _loadFont('Bricolage', 'tool/fonts/BricolageGrotesque_800.ttf');
     await _loadFont('Figtree', 'tool/fonts/Figtree_600.ttf');
     await _featureGraphic('${dir.path}/feature_graphic.png');
@@ -61,7 +61,7 @@ Future<void> _featureGraphic(String path) async {
   final canvas = Canvas(recorder);
   canvas.drawRect(const Rect.fromLTWH(0, 0, w, h), Paint()..color = AppPalette.light.primary);
 
-  // Großes, angeschnittenes Schild als Hintergrundmotiv rechts.
+  // Large, cropped tag as background motif on the right.
   canvas
     ..save()
     ..translate(w - 170, h / 2 + 20);
@@ -121,15 +121,15 @@ Future<void> _render(
   File(path).writeAsBytesSync(bytes!.buffer.asUint8List());
 }
 
-/// Zeichnet das Preisschild mit Loch und Pfeil, zentriert um den Ursprung;
-/// [width] ist die Breite des ungedrehten Schilds.
+/// Draws the price tag with hole and arrow, centred on the origin;
+/// [width] is the width of the unrotated tag.
 void _paintTag(Canvas canvas, double width, Color tagColor) {
-  // Schild in eigener Ebene, damit Loch und Pfeil ausgestanzt werden können.
+  // Tag on its own layer so that the hole and arrow can be cut out.
   canvas.saveLayer(null, Paint());
   canvas.rotate(-14 * math.pi / 180);
   canvas.scale(width / 520);
-  // Schildkoordinaten: 0..520 x 0..340, Mittelpunkt leicht nach rechts, damit
-  // das optische Gewicht (Körper statt Spitze) zentriert wirkt.
+  // Tag coordinates: 0..520 x 0..340, centre shifted slightly right so
+  // that the visual weight (body rather than tip) looks centred.
   canvas.translate(-275, -170);
 
   final body = Path()
@@ -152,7 +152,7 @@ void _paintTag(Canvas canvas, double width, Color tagColor) {
 
   canvas.drawCircle(const Offset(128, 170), 30, Paint()..blendMode = BlendMode.clear);
 
-  // Pfeil gegen die Schildneigung drehen: zeigt immer senkrecht nach oben.
+  // Rotate the arrow against the tag's tilt: it always points straight up.
   canvas
     ..save()
     ..translate(335, 172)

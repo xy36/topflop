@@ -15,7 +15,7 @@ class ProductRepository {
     yield* _db.tableUpdates(TableUpdateQuery.onAllTables([_db.products, _db.ratings, _db.stores, _db.productStores]));
   }
 
-  /// Alle Produkte, zuletzt bewertete zuerst.
+  /// All products, most recently rated first.
   Stream<List<ProductSummary>> watchSummaries() => _changes.asyncMap((_) => loadSummaries());
 
   Stream<ProductSummary?> watchProduct(int id) => _changes.asyncMap((_) => loadProduct(id));
@@ -56,7 +56,7 @@ class ProductRepository {
     return result;
   }
 
-  /// Legt das Produkt an oder aktualisiert die OFF-Daten eines vorhandenen.
+  /// Creates the product or updates the OFF data of an existing one.
   Future<int> upsertFromOff(OffProduct off) async {
     final existing = await (_db.select(_db.products)..where((p) => p.barcode.equals(off.barcode))).getSingleOrNull();
     final companion = ProductsCompanion(
@@ -102,8 +102,8 @@ class ProductRepository {
   Future<Rating?> findRating(int productId) =>
       (_db.select(_db.ratings)..where((r) => r.productId.equals(productId))).getSingleOrNull();
 
-  /// Speichert die Bewertung eines Produkts (neu oder überschreibend) und
-  /// setzt die Läden, in denen es das Produkt gibt.
+  /// Saves the rating of a product (new or overwriting) and sets the
+  /// stores that carry the product.
   Future<void> saveRating({
     required int productId,
     required int score,
@@ -126,8 +126,8 @@ class ProductRepository {
       await (_db.update(_db.ratings)..where((r) => r.id.equals(existing.id))).write(values);
     }
     await setStores(productId, storeIds);
-    // Merken für die nächste Bewertung: im Laden scannt man meist mehrere
-    // Produkte hintereinander.
+    // Remember for the next rating: in a store you usually scan several
+    // products in a row.
     await _db
         .into(_db.settings)
         .insertOnConflictUpdate(SettingsCompanion.insert(key: _lastStoresKey, value: storeIds.join(',')));
@@ -135,7 +135,7 @@ class ProductRepository {
 
   static const _lastStoresKey = 'last_store_ids';
 
-  /// Läden der zuletzt gespeicherten Bewertung (nur noch vorhandene).
+  /// Stores of the most recently saved rating (only those that still exist).
   Future<Set<int>> lastUsedStoreIds() async {
     final row = await (_db.select(_db.settings)..where((s) => s.key.equals(_lastStoresKey))).getSingleOrNull();
     final ids = (row?.value ?? '').split(',').map(int.tryParse).whereType<int>().toSet();
@@ -153,7 +153,7 @@ class ProductRepository {
     );
   });
 
-  /// Eigene Korrekturen an Name, Marke, Menge und Kategorie.
+  /// User corrections to name, brand, quantity and category.
   Future<void> updateProduct(
     int productId, {
     required String name,

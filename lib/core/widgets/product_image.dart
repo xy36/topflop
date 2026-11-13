@@ -4,8 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../domain/product_category.dart';
 
-/// Produktbild von Open Food Facts oder – falls keins vorhanden – eine
-/// farbige Kategorie-Kachel als bewusst gestalteter Platzhalter.
+/// Product image from Open Food Facts or – if there is none – a coloured
+/// category tile as a deliberately designed placeholder.
 class ProductImage extends StatelessWidget {
   const ProductImage({
     super.key,
